@@ -9,15 +9,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=20">
 </head>
 
 <body>
+    <!-- Premium Sliding Mode Selector -->
+    <div class="mode-selector">
+        <div class="mode-slider"></div>
+        <button class="mode-btn active" data-mode="cylinder">
+            <span class="btn-icon">💿</span> Jukebox
+        </button>
+        <button class="mode-btn" data-mode="coverflow">
+            <span class="btn-icon">🗂️</span> Cover Flow
+        </button>
+        <button class="mode-btn" data-mode="depth">
+            <span class="btn-icon">🚀</span> Depth Cascade
+        </button>
+    </div>
+
     <!-- The fullscreen container for the jukebox scene -->
     <div class="sticky-container">
         <div class="title-overlay">
             <h1>Jukebox</h1>
-            <p>Scroll to browse</p>
+            <p>Scroll to browse or click on any album</p>
         </div>
 
         <div class="scene">
@@ -28,7 +42,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=20"></script>
 </body>
 
 </html>
