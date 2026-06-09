@@ -848,16 +848,23 @@ function updateCarousel() {
     currentRotation = lerp(currentRotation, targetRotation, 0.08);
 
     if (currentMode === 'coverflow') {
-        // Calculate dynamic desaturation based on rotation scroll speed
+        // Calculate dynamic desaturation & darkening based on rotation scroll speed
         const speed = Math.abs(targetRotation - currentRotation);
-        const speedFactor = Math.min(1, speed / 120); // Normalized speed factor
         
-        // Saturation adjustment range:
-        // - 0.92 (rich vibrant color at rest/slow per user request)
-        // - 0.25 (desaturated neutral tone under fast scroll)
-        const maxSat = 0.92;
-        const minSat = 0.25;
-        const currentSat = lerp(maxSat, minSat, speedFactor);
+        // Two-tiered speed mapping:
+        // - Speed <= 80 (Rest to Mid-Speed): Saturation 0.92 -> 0.25, Dark scale 0.96 -> 0.94
+        // - Speed > 80 (Mid-Speed to High-Speed): Saturation 0.25 -> 0.18, Dark scale 0.94 -> 0.86
+        let currentSat;
+        let darkScale;
+        if (speed <= 80) {
+            const factor = speed / 80;
+            currentSat = lerp(0.92, 0.25, factor);
+            darkScale = lerp(0.96, 0.94, factor);
+        } else {
+            const factor = Math.min(1, (speed - 80) / 120);
+            currentSat = lerp(0.25, 0.18, factor); // keep subtle color tint at high speed, not too grey
+            darkScale = lerp(0.94, 0.86, factor);
+        }
 
         // Lerp background color values smoothly to prevent strobe flashing
         const colorLerpSpeed = 0.08; // Matched to rotation lerp responsiveness
@@ -866,8 +873,8 @@ function updateCarousel() {
         currentBgColor[2] = lerp(currentBgColor[2], targetBgColor[2], colorLerpSpeed);
 
         const desaturatedColor = adjustSaturation(currentBgColor, currentSat);
-        // Apply 4% darkness to reduce contrast
-        const darkerColor = desaturatedColor.map(c => Math.max(0, Math.min(255, c * 0.96)));
+        // Apply dynamic speed-based darkening to lower luminance during fast scroll
+        const darkerColor = desaturatedColor.map(c => Math.max(0, Math.min(255, c * darkScale)));
         applyInterpolatedCoverflowBackground(darkerColor);
     }
 
@@ -947,9 +954,9 @@ function updateCarousel() {
         // Reset parent carousel transform
         carousel.style.transform = `translateZ(0px) rotateY(0deg)`;
 
-        // Calculate responsive Cover Flow spacing to sit exactly 5% from screen edges
+        // Calculate responsive Cover Flow spacing to sit exactly at the screen boundaries (0% margins)
         const activeSpread = 128; // Spacing gap next to active card (scaled from 160)
-        const edgeMargin = window.innerWidth * 0.05; // 5% screen width margins
+        const edgeMargin = 0; // 0% screen width margins (container already has internal margins)
         const cardProjectedHalfWidth = 144 * Math.cos(55 * Math.PI / 180); // Scaled half width (288px card) projected at 55deg
         const maxTranslateX = (window.innerWidth / 2) - cardProjectedHalfWidth - edgeMargin;
         
