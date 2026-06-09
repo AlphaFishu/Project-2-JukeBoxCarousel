@@ -17,6 +17,26 @@ html, body {
     transition: background-color 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Hidden host for dynamically generated Liquid Glass SVG filters */
+.glass-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+/* Film grain: tiled SVG turbulence noise, blended over everything for analog depth */
+.grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998; /* above scene and panels, below the mode selector */
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+}
+
 /* Disable transitions only in Cover Flow mode to allow smooth 60fps JS color interpolation */
 html:has(body.body-coverflow),
 body.body-coverflow {
@@ -69,12 +89,32 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
+/* Scroll hint rendered as a small liquid-glass chip */
 .title-overlay p {
-    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: rgba(18, 18, 24, 0.18);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.45),
+        inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.15),
+        0 8px 24px rgba(0, 0, 0, 0.35);
+    color: rgba(255, 255, 255, 0.78);
     font-size: 0.72rem;
+    font-weight: 600;
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.12em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Fade the hint away once the user starts scrolling */
+body.has-scrolled .title-overlay {
+    opacity: 0;
 }
 
 .scene {
@@ -135,7 +175,16 @@ body {
     flex-direction: column;
     justify-content: flex-end;
     /* Push text to bottom */
+    transition: filter 0.35s ease;
+}
 
+.card {
+    cursor: pointer;
+}
+
+/* Subtle hover lift on the artwork itself (card transform is owned by JS) */
+.card:hover .card-content {
+    filter: brightness(1.08);
 }
 
 /* Drop shadow for standard (inactive) cards (increased by 30% from baseline) */
@@ -250,22 +299,43 @@ body {
     }
 }
 
-/* --- Premium Sliding Mode Selector --- */
+/* --- Premium Sliding Mode Selector (Liquid Glass) --- */
+/* Base look = frosted fallback (Safari/Firefox). On Chromium, script.js upgrades
+   backdrop-filter inline with an SVG displacement map for true lens refraction. */
 .mode-selector {
     position: fixed;
     top: 24px;
     left: 50%;
     transform: translateX(-50%);
     display: inline-flex;
-    background: rgba(10, 10, 10, 0.45);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(18, 18, 24, 0.18);
+    backdrop-filter: blur(24px) saturate(1.7);
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 4px;
     border-radius: 32px;
     z-index: 9999; /* make sure it's on top of everything! */
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    /* Specular rim lighting: bright top-left edge, faint bottom-right bounce */
+    box-shadow:
+        inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.50),
+        inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.20),
+        inset 0 0 14px rgba(255, 255, 255, 0.05),
+        0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Soft sheen sweeping across the top of the glass */
+.mode-selector::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.02) 28%,
+            rgba(255, 255, 255, 0) 55%,
+            rgba(255, 255, 255, 0.06) 100%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .mode-slider {
@@ -273,33 +343,41 @@ body {
     top: 4px;
     left: 4px;
     height: calc(100% - 8px);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 28px;
     transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), width 0.45s ease;
     z-index: 0;
     pointer-events: none;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+        0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 .mode-btn {
     position: relative;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.55);
     padding: 8px 19px;
     border-radius: 28px;
     font-family: inherit;
     font-size: 0.68rem;
     font-weight: 700;
     cursor: pointer;
-    transition: color 0.45s ease;
+    transition: color 0.45s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); /* keeps labels legible over bright album backdrops */
     z-index: 1; /* render text above the slider background */
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.mode-btn:active {
+    transform: scale(0.95);
 }
 
 .mode-btn:hover {
@@ -337,6 +415,26 @@ body.body-coverflow .vinyl-wrapper {
     transform: translateX(0);
     /* Static circular shadow (spread reduced by 50%, darkened by 5% per request) */
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.70);
+}
+
+/* Static studio-light reflection: stays fixed while the grooves spin underneath,
+   exactly how light behaves on a real spinning record */
+body.body-coverflow .vinyl-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0) 36%),
+        conic-gradient(from 200deg,
+            rgba(255, 255, 255, 0) 0deg,
+            rgba(255, 255, 255, 0.10) 35deg,
+            rgba(255, 255, 255, 0) 80deg,
+            rgba(255, 255, 255, 0) 185deg,
+            rgba(255, 255, 255, 0.07) 225deg,
+            rgba(255, 255, 255, 0) 270deg);
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* The CD itself - handles the continuous rotation */

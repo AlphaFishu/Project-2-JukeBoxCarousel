@@ -9,10 +9,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=22">
+    <link rel="stylesheet" href="style.css?v=23">
 </head>
 
 <body>
+    <!-- Film grain overlay for a subtle analog texture across the whole app -->
+    <div class="grain-overlay"></div>
+
+    <!-- SVG filter definitions for Liquid Glass refraction (populated dynamically by script.js) -->
+    <svg class="glass-defs" aria-hidden="true" focusable="false"><defs id="liquidGlassDefs"></defs></svg>
+
     <!-- Immersive Frosted Blur Background for Rolling Album mode -->
     <div class="ambient-bg-blurred" id="ambientBgBlurred"></div>
 
@@ -37,7 +43,7 @@
     <!-- The fullscreen container for the jukebox scene -->
     <div class="sticky-container">
         <div class="title-overlay">
-            <p>TRY SCROLLING ON TRACKPAD!</p>
+            <p>Scroll or swipe to explore</p>
         </div>
 
         <div class="scene">
@@ -53,7 +59,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=22"></script>
+    <script src="script.js?v=23"></script>
 </body>
 
 </html>

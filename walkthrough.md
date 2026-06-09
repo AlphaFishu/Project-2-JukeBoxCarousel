@@ -1,45 +1,51 @@
-# Walkthrough: Cover Flow Spacing & Dynamic Scroll-Speed Desaturation (v2.6)
+# Walkthrough: Real Liquid Glass Refraction, Film Grain & Album-Colored Aura (v2.7)
 
-We have updated the Cover Flow layout mode to spread the cards out responsively closer to the **0%** screen width margins on both left and right edges (since the container already provides implicit margins). We have also fine-tuned the dynamic scroll-speed desaturation algorithm for the background gradient in Cover Flow mode: when scrolling fast, the background fades to a neutral, desaturated tone of the passing cards' colors to prevent strobe flashing, and as the scroll slows down, it blooms back into the vibrant, rich accent color (at 92% saturation with a subtle 4% dark blend to control contrast) of the landed card. Emojis in the mode buttons have been replaced with clean inline SVG icons, Cover Flow has been renamed to **Vinyl Records**, and all 3D cartridge thickness experiments have been fully reverted to return to the clean flat-card presentation.
+This release replaces the fake "frosted-only" glass with **true Apple-style Liquid Glass** — the background actually *refracts* (bends) through the rim of the mode selector like curved glass, with subtle chromatic aberration. It also adds a film-grain finish, a static studio-light reflection on the spinning vinyl, a self-dismissing glass scroll hint, and fixes a long-standing bug where the active card's "Apple aura" always glowed grey instead of the album's color.
 
 ---
 
 ## Key Refinements
 
-### 1. Expanded Responsive Spacing (0% Edge Margin)
-* **Divisor Adjustment**: Spacing step divisor is set to `3.2` in [script.js](script.js).
-* **Margin Optimization**: Outer cards align near the **0%** screen width margin, reducing side whitespace to look clean and expansive.
+### 1. True Liquid Glass Refraction (the big one)
+Frosted glass is just `backdrop-filter: blur()`. Real liquid glass needs **light refraction**, which CSS alone cannot do — but Chromium supports referencing an **SVG filter** inside `backdrop-filter`:
 
-### 2. Saturated Rest State & Less Grey Fast Scroll
-* **Vibrant Resting Color**: Capped static saturation (`maxSat`) at `0.92`, bringing back rich, vibrant colors.
-* **Less Grey Fast Scroll**: Increased the high-speed saturation floor from `0.12` to `0.18` so the background keeps a subtle, colorful tint rather than fading into a flat gray.
-* **4% Contrast Darkening**: Multiplied the final Cover Flow background color by `0.96` to scale it down by 4% at rest.
-* **High-Speed Darkening**: Clamp brightness scaling down to `0.86` under rapid scrolling to keep the background dim and low-contrast.
+```css
+backdrop-filter: url(#lens-selector) blur(1.5px) saturate(1.7) brightness(1.06);
+```
 
-### 3. Premium Inline Line SVGs & Renaming
-* **Renamed Mode**: "Cover Flow" has been renamed to **Vinyl Records** in [index.html](index.html).
-* **Emojis to SVGs**: Pill selector buttons are now styled with beautiful, minimal line SVGs (Turntable, Vinyl Disc, and 3D Layers) styled via `.btn-icon-svg` in [style.css](style.css).
+How the lens works (all generated dynamically in [script.js](script.js)):
 
-### 4. Flat-Card Presentation Reversion (v2.6)
-* **Removed 3D Cartridge Casing**: Completely deleted the layered `.card-edge` divs from `script.js` and removed their styling/radius overrides from `style.css`.
-* **Reverted Vinyl Centering**: Reverted the vinyl record's `translateZ(-6px)` transformation to flat 2D `translateX(0)`.
-* **Visual Result**: Card elements render with a clean, lightweight 2D presentation as originally requested.
+1. **Displacement map** — a tiny SVG image sized exactly to the element where the **Red channel encodes horizontal shift** and the **Blue channel encodes vertical shift** (127 = neutral). It is built from a black base + red X-gradient + blue Y-gradient (screen-blended), with a **blurred neutral core** so only the rim band ("bezel") bends light — the profile of a convex lens.
+2. **`<feDisplacementMap>`** uses that map to bend whatever is behind the element. Pixels near the rim sample *outside* the pill, compressing the surrounding scene into the edge — exactly what a real lens does.
+3. **Chromatic aberration** — the displacement runs 3× at slightly different strengths for the R/G/B channels (`feColorMatrix` isolates each, `feBlend mode="screen"` recombines), producing the faint color fringing of Apple's material.
+4. **Specular rim lighting** — layered inset `box-shadow`s fake a bright top-left light edge and a faint bottom-right bounce, plus a diagonal sheen gradient in `::before`.
 
-### 5. Card Shadows & Readability Scrim
-* **Selected Item Shadow & Glow**: Softened active card and active vinyl wrapper drop shadows by 50% and glow opacity by 50% for a clean layout.
-* **Readability Scrim**: Replaced the harsh bottom black overlay with a full-height scrim:
-  ```css
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.75) 100%);
-  ```
+The filter is rebuilt on resize/font-load so the map always matches the pill's measured size. **Safari/Firefox fall back automatically** to a quality frosted look (`blur(24px) saturate(1.7)` + the same specular rims) since only Chromium supports `url()` filters in `backdrop-filter`.
+
+### 2. Album-Colored Active Card Aura (bug fix)
+`.card::before` glowed using `rgba(var(--amb-r), ...)` — but those variables only existed on `:root` as `20,20,20`, so the "Apple aura" was always near-black. Now:
+* `applyColorTheory()` sets `--amb-r/g/b` **on each card element**, so the aura glows in the album's dominant color.
+* When the canvas-based vibrant color extraction resolves, it **upgrades** each card's `dataset.dom*` and CSS vars from the hand-tuned fallback to the real artwork color — so the Jukebox/Rolling Album ambient backgrounds match the actual covers too.
+
+### 3. Film Grain Finish
+A fixed full-screen overlay (`.grain-overlay`) tiles an inline SVG `feTurbulence` noise texture at `opacity: 0.05` with `mix-blend-mode: overlay` — an analog, anti-banding finish over the dynamic gradients (z-index 9998, under the selector).
+
+### 4. Vinyl Studio-Light Reflection
+`body.body-coverflow .vinyl-wrapper::after` adds a **static** radial + conic specular highlight over the record. Because the highlight stays fixed while the grooves spin underneath, it reads like real light on a rotating disc.
+
+### 5. Self-Dismissing Glass Scroll Hint
+"TRY SCROLLING ON TRACKPAD!" became a liquid-glass pill chip ("Scroll or swipe to explore") with the same lens filter. On the first wheel/touch scroll, `body.has-scrolled` fades it out — instructions should leave once they're obeyed.
+
+### 6. Micro-Interactions
+* Mode buttons get a press-down `scale(0.95)` and a text shadow for legibility over bright album backdrops.
+* Cards show `cursor: pointer` and a gentle `brightness(1.08)` lift on hover (safe because JS owns `transform`/`filter` on `.card`, while the hover targets `.card-content`).
 
 ---
 
 ## How to Verify
-1. Open the local site at [http://localhost:8000](http://localhost:8000).
-2. **Flat Card Appearance**: Scroll the carousel and verify all cards are flat and normal again, without any 3D thickness borders or edge elements.
-3. **Vinyl Disc Position**: Verify the vinyl disc slides out naturally from behind the active card jacket without any Z-axis displacement issues.
-4. **Selector**: Verify the mode selector features custom SVGs and displays "Vinyl Records" instead of "Cover Flow".
-5. **Margins**: Verify cards stretch fully to the margins (0% left/right margins).
-6. **Fast Scroll Color**: Flick the trackpad fast. Verify the background desaturates to a subtle, low-luminance tint (18% saturation, not fully grey) and dims down to `0.86` brightness.
-7. **Slow Down**: Stop scrolling and verify that the background color smoothly blooms back into the rich accent color (`92%` saturation, `0.96` brightness) of the active card.
-8. **Shadows & Scrim**: Verify card shadows, vinyl record shadows, and text readability overlay gradients match specs.
+1. Open the local site at [http://localhost:8000](http://localhost:8000) in **Chrome** (refraction) and Safari (frosted fallback).
+2. **Refraction**: In Vinyl Records mode, scroll so colorful covers pass behind the top selector — the background should visibly *bend* through the pill's rim with a hint of color fringing, not just blur.
+3. **Aura**: In Jukebox mode, land on Thriller (red glow), Purple Rain (purple glow), Toxic (green glow) — the halo behind the active card should match each album.
+4. **Vinyl sheen**: Watch the spinning record — the bright highlight stays fixed at the upper-left while grooves rotate beneath it.
+5. **Hint chip**: Reload, see the glass chip below the selector, scroll once, watch it fade away.
+6. **Grain**: Look closely at the gradient background — a fine static grain texture replaces flat color banding.
