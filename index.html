@@ -9,29 +9,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 
 <body>
+    <!-- Immersive Frosted Blur Background for Rolling Album mode -->
+    <div class="ambient-bg-blurred" id="ambientBgBlurred"></div>
+
     <!-- Premium Sliding Mode Selector -->
     <div class="mode-selector">
         <div class="mode-slider"></div>
-        <button class="mode-btn active" data-mode="cylinder">
+        <button class="mode-btn" data-mode="cylinder">
             <span class="btn-icon">💿</span> Jukebox
         </button>
-        <button class="mode-btn" data-mode="coverflow">
+        <button class="mode-btn active" data-mode="coverflow">
             <span class="btn-icon">🗂️</span> Cover Flow
         </button>
         <button class="mode-btn" data-mode="depth">
-            <span class="btn-icon">🚀</span> Depth Cascade
+            <span class="btn-icon">🚀</span> Rolling Album
         </button>
     </div>
 
     <!-- The fullscreen container for the jukebox scene -->
     <div class="sticky-container">
         <div class="title-overlay">
-            <h1>Jukebox</h1>
-            <p>Scroll to browse or click on any album</p>
+            <p>TRY SCROLLING ON TRACKPAD!</p>
         </div>
 
         <div class="scene">
@@ -40,9 +42,14 @@
                 <!-- Cards will be injected by JavaScript -->
             </div>
         </div>
+
+        <!-- Details Panel (Song List & Lyrics) - visible only in Depth Cascade mode -->
+        <div class="details-panel" id="detailsPanel">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
     </div>
 
-    <script src="script.js?v=21"></script>
+    <script src="script.js?v=22"></script>
 </body>
 
 </html>
