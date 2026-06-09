@@ -293,9 +293,12 @@ body.body-coverflow .vinyl-wrapper {
     background-size: cover;
     background-position: center;
     position: relative;
-    /* Continuous spin animation ensures zero delayed responsiveness */
-    animation: spin-vinyl 12s linear infinite;
     will-change: transform; /* Resolves browser child composite rendering bugs to ensure it spins */
+}
+
+/* Force animation initialization only when Cover Flow mode is active to prevent browser caching bugs */
+body.body-coverflow .vinyl-record {
+    animation: spin-vinyl 12s linear infinite;
 }
 
 @keyframes spin-vinyl {
