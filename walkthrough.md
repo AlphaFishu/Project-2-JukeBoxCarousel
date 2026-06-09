@@ -1,38 +1,46 @@
-# Walkthrough: Cover Flow Dynamic Spotify-Style Background (v2.1)
+# Walkthrough: Cover Flow Spacing & Dynamic Scroll-Speed Desaturation (v2.2)
 
-We have added a dynamic, color-extracting Spotify-style gradient background to the **Cover Flow** layout mode. The background extracts the dominant vibrant color from the active album cover art dynamically, clamps its luminance to keep white text readable, and smoothly cross-fades gradients over `450ms`.
-
-All other modes (Jukebox's solid background and Rolling Album's frosted cover blur backdrop) remain independent and completely unaffected.
+We have updated the Cover Flow layout mode to spread the cards out responsively closer to the 5% screen width margins on both left and right edges. We have also implemented a dynamic scroll-speed desaturation algorithm for the background gradient in Cover Flow mode: when scrolling fast, the background fades to a neutral, desaturated tone of the passing cards' colors to prevent strobe flashing, and as the scroll slows down, it blooms back into the vibrant, rich accent color (at 92% saturation with a subtle 4% dark blend to control contrast) of the landed card. Additionally, all album cards have been updated to have drop shadows with a 70% reduction in disperse (blur spread) and opacity, and a balanced scrim overlay gradient for clean, premium text readability.
 
 ---
 
 ## Key Refinements
 
-### 1. Dynamic Canvas Color Extraction
-* **Vibrant Palette Extraction**: Implemented an offscreen canvas sampling algorithm in [script.js](script.js) that reads pixel data from a 30x30 grid of the cover image.
-* **Quantization & Clustering**: Converts pixel RGB channels to HSL to filter and cluster dominant vibrant hue groups (saturation > 35%, lightness 25%-70%). It falls back to muted swatches or the pre-extracted dominant color if the canvas is blocked by CORS or the image fails to load.
-* **CORS Compatibility**: Configured `crossOrigin = "anonymous"` on image loaders to safely fetch album covers from mzstatic.com (iTunes API CDNs).
+### 1. Spacing and Margins (5% Edge Margin)
+* **Divisor Adjustment**: Spacing step divisor is set to `3.2` in [script.js](script.js).
+* **Margin Optimization**: Outer cards align near the **5%** screen width margin, reducing side whitespace to look clean and expansive.
 
-### 2. Double-Layer Gradient Cross-Fading (Spotify Easing)
-* **Smooth Transitions**: Added a double-layer container (`#coverflowBgGradient`) with two absolute layers (`#gradLayer1` and `#gradLayer2`) in [index.html](index.html).
-* **Cross-Fade Effect**: Switching tracks fades in the inactive layer with the new gradient over `0.45s` while fading out the active layer, providing a beautiful cross-fade animation.
-* **Calculated Dark Base**: Computes a near-black dark base by multiplying the accent color's RGB channels by `0.12` and clamping it to a minimum of `rgb(18, 18, 18)` (equivalent to `#121212`).
-* **Gradient Stops**: Built a `linear-gradient(to bottom, accent 0%, accent 30%, darkBase 100%)` so the accent dominates only the top ~30% and fades out into darkness in the bottom half of the viewport.
+### 2. Rich Rest Saturation & Dark Blend
+* **Vibrant Resting Color**: Capped static saturation (`maxSat`) at `0.92` (instead of `0.85`), bringing back rich, vibrant colors.
+* **4% Contrast Darkening**: Multiplied the final Cover Flow background color by `0.96` to scale it down by 4%, creating a slightly darker background shade that decreases harsh visual contrast against the dark base.
+* **Scroll Desaturation**: Dynamic desaturation ranges down to `0.25` saturation on fast scrolls, behaving like the previous resting neutral tone to prevent strobing.
 
-### 3. Contrast Guard / Luminance Clamping
-* **Text Readability**: Calculates relative luminance using the formula `Y = 0.2126*R + 0.7152*G + 0.0722*B`.
-* **Clamping**: If the accent color's luminance is too high (> 0.6), the RGB values are scaled down proportionally to ensure selector pills and white text overlays remain legible.
+### 3. Balanced Inner Scrim Gradient
+* **Soft Readability Layer**: Replaced the harsh bottom black overlay in [style.css](style.css) with a full-height scrim:
+  ```css
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.4) 75%, rgba(0,0,0,0.75) 100%);
+  ```
+* **Visual Result**: The album cover art remains clear and uninterrupted across the top half, while fading smoothly into a soft dark backdrop at the bottom to guarantee high readability of the title and artist text.
 
-### 4. Card Cover Rendering & Stacking Fixes
-* **Applied Fog Opacity**: Restored the missing `if (fog) fog.style.opacity = fogOpacity;` update in Cover Flow mode to ensure the active card's fog overlay has an opacity of `0`, making its album cover image fully visible.
-* **Separation of Background Updates**: Isolated `updateAmbientBackground` to only execute in Jukebox (`cylinder`) and Rolling Album (`depth`) modes. This prevents it from continually overriding `--dynamic-bg` and setting the body background color to a flat olive green on every animation frame in Cover Flow mode.
-* **Z-Index Refinements**: Adjusted `.coverflow-bg-gradient` and `.ambient-bg-blurred` to `z-index: -1` in [style.css](style.css) to prevent negative z-index stacking bugs where elements could render behind the body background color.
+### 4. Split Card Shadows & Glow Softening (v2.2 Additions)
+* **Selected Item Glow Softening**: Reduced the opacity of `.card::before` from `0.8` to `0.4` (50% reduction) to soften the dominant background aura glow behind the active card.
+* **Active (Selected) Card Drop Shadow**: Reduced by 50% from the baseline and added 5% opacity to darken slightly:
+  - Cylinder/Cover Flow: `0 1px 1px rgba(0, 0, 0, 0.27)`
+  - Depth Mode: `0 0.5px 1px rgba(0, 0, 0, 0.18)`
+* **Inactive (Background) Card Drop Shadows**: Increased by 30% to improve visual depth separation:
+  - Cylinder/Cover Flow: `0 3px 3px rgba(0, 0, 0, 0.6)`
+  - Depth Mode: `0 1.5px 3px rgba(0, 0, 0, 0.33)`
+* **Active Vinyl Record Drop Shadow**: Reduced spread by 50% and darkened by 5% to keep it tight and clean behind the card:
+  - Cover Flow Vinyl wrapper shadow: `0 6px 16px rgba(0, 0, 0, 0.70)` (reduced from `0 12px 32px rgba(0, 0, 0, 0.65)`)
 
 ---
 
 ## How to Verify
-1. Open the local Jukebox site (defaults to Cover Flow).
-2. Verify that a vertical gradient background matches the active album (e.g. vibrant red to dark red for Thriller).
-3. Scroll through the albums; verify the background transitions smoothly to new color palettes over `450ms` (e.g. purple to dark purple for Purple Rain, pink to dark pink for Like a Virgin).
-4. Switch to **Jukebox** mode and verify the background becomes the solid ambient color and transitions correctly.
-5. Switch to **Rolling Album** mode and verify the frosted blur cover background overlays correctly.
+1. Open the local site at [http://localhost:8000](http://localhost:8000).
+2. **Spacing**: Verify that cards in Cover Flow mode spread out wider, sitting near the 5% screen margin.
+3. **Vibrant Backdrop**: Verify that when resting on an album, the background color is rich and vibrant (92% saturation) but has a slightly darkened contrast blend.
+4. **Fast Scroll**: Flick or scroll the trackpad/wheel quickly. Verify that the background colors transition instantly as albums pass by, but fade into a neutral, muted tone (25% saturation).
+5. **Selected Item Shadow**: Verify the active card's drop shadow is extremely tight and subtle (1px blur), and the color glow aura behind it is softly blended (40% opacity).
+6. **Active Vinyl Shadow**: Verify the sliding vinyl record shadow is tight and sharp (`16px` blur) and is slightly darker (`0.70` opacity).
+7. **Inactive Cards Shadows**: Verify background cards have slightly more pronounced shadows (3px blur, 60% opacity) that lift them off each other.
+8. **Scrim Gradient**: Confirm the text contrast gradient inside the cards looks smooth, without any harsh black cutoff lines.

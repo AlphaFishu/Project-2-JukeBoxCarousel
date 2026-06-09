@@ -248,7 +248,7 @@ const rotationAngle = 360 / totalCards;
 // The radius of our cylinder. 
 // Calculated using standard polygon math: radius = (width / 2) / tan(PI / num_cards)
 // Card width is 280px + gaps. Let's use 300px for calculation to give spacing.
-const cardWidthApproximation = 340;
+const cardWidthApproximation = 272; // Scaled from 340
 const zTranslate = Math.round((cardWidthApproximation / 2) / Math.tan(Math.PI / totalCards));
 
 // 1. Generate Cards
@@ -259,7 +259,7 @@ tracks.forEach((track, index) => {
     // We start them in the "drowned" state leaning back (rotateX -75)
     // To match DOM element order with rotation sequence cleanly: 
     const rotateY = index * rotationAngle;
-    card.style.transform = `rotateY(${rotateY}deg) translateZ(${zTranslate}px) translateY(150px) rotateX(-75deg)`;
+    card.style.transform = `rotateY(${rotateY}deg) translateZ(${zTranslate}px) translateY(120px) rotateX(-75deg)`; // translateY scaled from 150px to 120px
     card.dataset.baseRotateY = rotateY; // Store base rotation for easy access in loop
 
     // Build internal HTML structure - Apply Color Theory immediately
@@ -278,6 +278,14 @@ tracks.forEach((track, index) => {
             <div class="info">
                 <h2 class="title" title="${track.title}">${track.title}</h2>
                 <p class="artist">${track.artist}</p>
+            </div>
+        </div>
+        <div class="card-reflection">
+            <img src="${track.cover}" alt="" class="reflection-bg">
+            <div class="reflection-overlay"></div>
+            <div class="reflection-info">
+                <h2 class="reflection-title">${track.title}</h2>
+                <p class="reflection-artist">${track.artist}</p>
             </div>
         </div>
     `;
@@ -384,13 +392,21 @@ modeButtons.forEach(btn => {
 let currentRotation = 0;
 let targetRotation = 0;
 
+// Background color interpolation states (reverse engineered from 80% zoom visual weight)
+let currentBgColor = [18, 18, 18];
+let targetBgColor = [18, 18, 18];
+
 // Configurable speed modifier for mouse wheel
 const scrollSensitivity = 0.5;
 
 // Listen for mouse wheel (desktop)
 window.addEventListener('wheel', (e) => {
-    targetRotation += (e.deltaY * scrollSensitivity);
-}, { passive: true });
+    const isScrollable = e.target.closest('.lyrics-container');
+    if (!isScrollable) {
+        e.preventDefault();
+        targetRotation += (e.deltaY * scrollSensitivity);
+    }
+}, { passive: false });
 
 // Listen for touch swipe (mobile)
 let touchStartY = 0;
@@ -399,11 +415,15 @@ window.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 window.addEventListener('touchmove', (e) => {
-    const touchCurrentY = e.touches[0].clientY;
-    const deltaY = touchStartY - touchCurrentY;
-    targetRotation += (deltaY * 0.8); // Slightly different sensitivity for touch
-    touchStartY = touchCurrentY;
-}, { passive: true });
+    const isScrollable = e.target.closest('.lyrics-container');
+    if (!isScrollable) {
+        e.preventDefault();
+        const touchCurrentY = e.touches[0].clientY;
+        const deltaY = touchStartY - touchCurrentY;
+        targetRotation += (deltaY * 0.8); // Slightly different sensitivity for touch
+        touchStartY = touchCurrentY;
+    }
+}, { passive: false });
 
 // Linear interpolation function
 function lerp(start, end, factor) {
@@ -552,9 +572,36 @@ function extractVibrantColor(imgUrl, callback, fallbackColor) {
     };
     img.src = imgUrl;
 }
+
+// Pre-extract colors for all tracks on startup to cache them
+tracks.forEach(track => {
+    extractVibrantColor(track.cover, () => {}, track.color);
+});
+
+// Helper to adjust saturation of an RGB color (interpolates towards its relative luminance grayscale value)
+function adjustSaturation(rgb, saturationFactor) {
+    const [r, g, b] = rgb;
+    const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const rNew = L + (r - L) * saturationFactor;
+    const gNew = L + (g - L) * saturationFactor;
+    const bNew = L + (b - L) * saturationFactor;
+    return [
+        Math.max(0, Math.min(255, rNew)),
+        Math.max(0, Math.min(255, gNew)),
+        Math.max(0, Math.min(255, bNew))
+    ];
+}
+
 let currentGradLayer = 1;
 
-function updateCoverflowBackground(rgbColor) {
+function updateThemeColor(colorStr) {
+    const meta = document.getElementById('themeColorMeta');
+    if (meta) {
+        meta.setAttribute('content', colorStr);
+    }
+}
+
+function applyInterpolatedCoverflowBackground(rgbColor) {
     let [r, g, b] = rgbColor;
     
     // Relative luminance: Y = 0.2126*R + 0.7152*G + 0.0722*B
@@ -568,28 +615,21 @@ function updateCoverflowBackground(rgbColor) {
         b = Math.floor(b * factor);
     }
     
-    const accentColor = `rgb(${r}, ${g}, ${b})`;
-    // darkBase = accent RGB multiplied by ~0.12 (or clamp toward #121212 / rgb(18, 18, 18))
+    const accentColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
     const darkR = Math.max(18, Math.floor(r * 0.12));
     const darkG = Math.max(18, Math.floor(g * 0.12));
     const darkB = Math.max(18, Math.floor(b * 0.12));
-    const darkBase = `rgb(${darkR}, ${darkG}, ${darkB})`;
+    const darkBase = `rgb(${Math.round(darkR)}, ${Math.round(darkG)}, ${Math.round(darkB)})`;
     
-    const nextGradLayer = currentGradLayer === 1 ? 2 : 1;
-    const currentEl = document.getElementById(`gradLayer${currentGradLayer}`);
-    const nextEl = document.getElementById(`gradLayer${nextGradLayer}`);
-    
-    if (currentEl && nextEl) {
-        // Linear gradient: Top = accent, Bottom = near-black darkBase. Accent dominates top 30-40%, lower half is dark.
-        nextEl.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
-        nextEl.style.opacity = '1';
-        currentEl.style.opacity = '0';
-        currentGradLayer = nextGradLayer;
+    const bgContainer = document.getElementById('coverflowBgGradient');
+    if (bgContainer) {
+        bgContainer.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
     }
     
-    // Set body background to accentColor so Safari colors the address bar accentColor, matching the top of the gradient.
-    document.body.style.backgroundColor = accentColor;
+    document.documentElement.style.backgroundColor = accentColor;
+    document.body.style.backgroundColor = darkBase;
     document.documentElement.style.setProperty('--dynamic-bg', darkBase);
+    updateThemeColor(accentColor);
 }
 
 function updateAmbientBackground(card) {
@@ -598,8 +638,10 @@ function updateAmbientBackground(card) {
         const bgG = Math.floor(parseInt(card.dataset.domG) * 0.25);
         const bgB = Math.floor(parseInt(card.dataset.domB) * 0.25);
         const bgStr = `rgb(${bgR}, ${bgG}, ${bgB})`;
+        document.documentElement.style.backgroundColor = bgStr;
         document.body.style.backgroundColor = bgStr;
         document.documentElement.style.setProperty('--dynamic-bg', bgStr);
+        updateThemeColor(bgStr);
     }
 }
 
@@ -805,6 +847,30 @@ function updateCarousel() {
     // Lerp current towards target (0.08 is the smoothness factor)
     currentRotation = lerp(currentRotation, targetRotation, 0.08);
 
+    if (currentMode === 'coverflow') {
+        // Calculate dynamic desaturation based on rotation scroll speed
+        const speed = Math.abs(targetRotation - currentRotation);
+        const speedFactor = Math.min(1, speed / 120); // Normalized speed factor
+        
+        // Saturation adjustment range:
+        // - 0.92 (rich vibrant color at rest/slow per user request)
+        // - 0.25 (desaturated neutral tone under fast scroll)
+        const maxSat = 0.92;
+        const minSat = 0.25;
+        const currentSat = lerp(maxSat, minSat, speedFactor);
+
+        // Lerp background color values smoothly to prevent strobe flashing
+        const colorLerpSpeed = 0.08; // Matched to rotation lerp responsiveness
+        currentBgColor[0] = lerp(currentBgColor[0], targetBgColor[0], colorLerpSpeed);
+        currentBgColor[1] = lerp(currentBgColor[1], targetBgColor[1], colorLerpSpeed);
+        currentBgColor[2] = lerp(currentBgColor[2], targetBgColor[2], colorLerpSpeed);
+
+        const desaturatedColor = adjustSaturation(currentBgColor, currentSat);
+        // Apply 4% darkness to reduce contrast
+        const darkerColor = desaturatedColor.map(c => Math.max(0, Math.min(255, c * 0.96)));
+        applyInterpolatedCoverflowBackground(darkerColor);
+    }
+
     // Calculate active index
     let normalizedRotation = currentRotation % 360;
     if (normalizedRotation < 0) normalizedRotation += 360;
@@ -833,6 +899,7 @@ function updateCarousel() {
             const fog = card.querySelector('.fog-overlay');
             card.style.visibility = 'visible';
 
+            // Scaled all translateY/translateZ parameters to 80% to reverse engineer zoom proportion
             if (distance === 0) {
                 card.classList.add('active');
                 updateAmbientBackground(card);
@@ -841,34 +908,34 @@ function updateCarousel() {
                 card.style.filter = 'brightness(1) saturate(1.2)';
                 if (fog) fog.style.opacity = '0';
                 
-                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 80}px) translateY(-50px) scale(1.30)`;
+                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 64}px) translateY(-40px) scale(1.30)`;
             } else if (distance === 1) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
                 card.style.filter = 'brightness(0.9) saturate(1.0)';
                 if (fog) fog.style.opacity = '0.35';
                 
-                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 40}px) translateY(20px) rotateY(45deg) scale(1.15)`;
+                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 32}px) translateY(16px) rotateY(45deg) scale(1.15)`;
             } else if (distance === 2) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
                 card.style.filter = 'brightness(0.8) saturate(0.9)';
                 if (fog) fog.style.opacity = '0.65';
                 
-                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 10}px) translateY(70px) rotateY(65deg) scale(1.05)`;
+                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 8}px) translateY(56px) rotateY(65deg) scale(1.05)`;
             } else if (distance === 3) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
                 card.style.filter = 'brightness(0.7) saturate(0.8)';
                 if (fog) fog.style.opacity = '0.85';
                 
-                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(120px) rotateY(80deg) scale(1)`;
+                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             } else {
                 card.classList.remove('active');
                 card.style.opacity = '0';
                 card.style.visibility = 'hidden';
                 if (fog) fog.style.opacity = '1';
-                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(120px) rotateY(80deg) scale(1)`;
+                card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             }
 
             // Dynamic z-index prevents 3D overlap bugs
@@ -880,15 +947,15 @@ function updateCarousel() {
         // Reset parent carousel transform
         carousel.style.transform = `translateZ(0px) rotateY(0deg)`;
 
-        // Calculate responsive Cover Flow spacing to sit exactly 20px from screen edges
-        const activeSpread = 160; // Spacing gap next to active card
-        const edgeMargin = 20; // 20px border from screen end
-        const cardProjectedHalfWidth = 103; // 180px * cos(55deg) = ~103px
+        // Calculate responsive Cover Flow spacing to sit exactly 5% from screen edges
+        const activeSpread = 128; // Spacing gap next to active card (scaled from 160)
+        const edgeMargin = window.innerWidth * 0.05; // 5% screen width margins
+        const cardProjectedHalfWidth = 144 * Math.cos(55 * Math.PI / 180); // Scaled half width (288px card) projected at 55deg
         const maxTranslateX = (window.innerWidth / 2) - cardProjectedHalfWidth - edgeMargin;
         
-        // stepSpacing is calculated so that offset = 5 lands exactly at maxTranslateX
-        // Minimum step of 30px protects narrow screens
-        const stepSpacing = Math.max(30, (maxTranslateX - activeSpread) / 5);
+        // stepSpacing is calculated so that offset = 3.2 lands exactly at maxTranslateX
+        // Minimum step of 24px protects narrow screens (scaled from 30)
+        const stepSpacing = Math.max(24, (maxTranslateX - activeSpread) / 3.2);
 
         cards.forEach((card, index) => {
             let offset = index - activeIndexFloat;
@@ -920,8 +987,8 @@ function updateCarousel() {
                 const t = absOffset;
                 rotateY = lerp(0, offset > 0 ? -55 : 55, t); // 55deg tilt prevents card edges cutting through each other
                 translateX = lerp(0, offset * stepSpacing + (offset > 0 ? activeSpread : -activeSpread), t);
-                translateZ = lerp(150, -50, t);
-                translateY = lerp(-30, 30, t);
+                translateZ = lerp(120, -40, t); // Scaled from 150, -50
+                translateY = lerp(-24, 24, t); // Scaled from -30, 30
                 scale = lerp(1.25, 1.0, t);
                 opacity = 1;
                 filter = `brightness(${lerp(1, 0.85, t)})`;
@@ -930,8 +997,8 @@ function updateCarousel() {
                 // Side cards tilted inwards (Fog of War: submerged in background color via fog-overlay)
                 rotateY = offset > 0 ? -55 : 55;
                 translateX = offset * stepSpacing + (offset > 0 ? activeSpread : -activeSpread); // stretch responsive to screen edges
-                translateZ = -50 - (absOffset - 1) * 120; // 120px step-back prevents physical 3D card clipping
-                translateY = 30;
+                translateZ = -40 - (absOffset - 1) * 96; // Scaled from -50, 120
+                translateY = 24; // Scaled from 30
                 scale = 0.95 - (absOffset - 1) * 0.04;
                 
                 // Smooth ease-out opacity only for the outermost edge items (between 4 and 5)
@@ -955,7 +1022,7 @@ function updateCarousel() {
             if (vinylWrapper) {
                 let discX = 0;
                 if (absOffset < 1) {
-                    discX = lerp(180, 0, absOffset); // slide out smoothly as active card reaches center
+                    discX = lerp(144, 0, absOffset); // slide out smoothly (scaled from 180)
                 } else {
                     discX = 0; // completely inside sleeve
                 }
@@ -977,9 +1044,17 @@ function updateCarousel() {
         if (activeIndex !== lastCoverflowIndex && activeCard) {
             lastCoverflowIndex = activeIndex;
             const track = tracks[activeIndex];
-            extractVibrantColor(track.cover, (color) => {
-                updateCoverflowBackground(color);
-            }, track.color);
+            // Instantly resolve color from cache if present, else trigger async extraction
+            if (extractedColorCache[track.cover]) {
+                targetBgColor = extractedColorCache[track.cover];
+            } else {
+                targetBgColor = track.color;
+                extractVibrantColor(track.cover, (color) => {
+                    if (activeIndex === lastCoverflowIndex) {
+                        targetBgColor = color;
+                    }
+                }, track.color);
+            }
         }
 
     } else if (currentMode === 'depth') {
@@ -1014,8 +1089,8 @@ function updateCarousel() {
 
             if (offset === 0) {
                 // Perfect center active card
-                translateZ = 200;
-                translateY = -15; // Lifted slightly for alignment with details panel
+                translateZ = 160; // Scaled from 200
+                translateY = -12; // Lifted slightly (scaled from -15)
                 translateX = 0;
                 scale = 1.40;
                 opacity = 1;
@@ -1023,8 +1098,8 @@ function updateCarousel() {
                 fogOpacity = 0;
             } else if (offset > 0) {
                 // Receding cards (tunnel going deeper)
-                translateZ = 200 - offset * 250;
-                translateY = -15 - offset * 25; // Stacked upwards slightly
+                translateZ = 160 - offset * 200; // Scaled from 200 - offset * 250
+                translateY = -12 - offset * 20; // Scaled from -15 - offset * 25
                 translateX = 0;
                 scale = Math.max(0.4, 1.40 - offset * 0.15);
                 opacity = 1;
@@ -1033,10 +1108,10 @@ function updateCarousel() {
             } else {
                 // offset < 0: Cards that have already been scrolled past
                 // They fly forward past the camera and fade out
-                translateZ = 200 - offset * 350; // closer/past camera
-                translateY = -15 - offset * 120; // flies down
-                translateX = offset * 220; // flies left
-                rotateY = offset * 45; // rotates slightly
+                translateZ = 160 - offset * 280; // Scaled from 200 - offset * 350
+                translateY = -12 - offset * 96; // Scaled from -15 - offset * 120
+                translateX = offset * 176; // Scaled from offset * 220
+                rotateY = offset * 45;
                 scale = 1.40 - offset * 0.20;
                 opacity = Math.max(0, 1 + offset * 1.5);
                 filter = 'none';
