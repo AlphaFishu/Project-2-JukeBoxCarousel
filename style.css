@@ -702,3 +702,32 @@ body.body-depth .details-panel {
     margin-right: 10px;
     opacity: 1;
 }
+
+/* --- Cover Flow Mode Dynamic Spotify Gradient Background --- */
+.coverflow-bg-gradient {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -3; /* Behind cards, but above default base body background */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body.body-coverflow .coverflow-bg-gradient {
+    opacity: 1;
+}
+
+.gradient-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.45s ease-in-out; /* ~400ms cross-fade transition */
+}
+
+.gradient-layer.active-init {
+    opacity: 1;
+}

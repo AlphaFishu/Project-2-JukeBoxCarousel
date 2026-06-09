@@ -236,6 +236,7 @@ document.body.classList.add('body-coverflow');
 // Details Panel State
 let lastActiveIndex = -1;
 let lastActiveCardIndex = -1;
+let lastCoverflowIndex = -1;
 const detailsPanel = document.getElementById('detailsPanel');
 let lyricsInterval = null;
 let lyricsTimeout = null;
@@ -351,6 +352,7 @@ modeButtons.forEach(btn => {
         // Reset active index states when switching layouts to force visual re-render on the same card
         lastActiveIndex = -1;
         lastActiveCardIndex = -1;
+        lastCoverflowIndex = -1;
 
         // Clean up lyrics animations and intervals when changing modes
         if (lyricsInterval) {
@@ -426,6 +428,168 @@ function applyColorTheory(trackData, cardElement) {
     title.style.color = '#ffffff';
     title.style.textShadow = '0 2px 4px rgba(0,0,0,0.8)';
     artist.style.color = 'rgba(255,255,255,0.7)';
+}
+
+// RGB to HSL conversion helper for dynamic color analysis
+function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h * 360, s * 100, l * 100];
+}
+
+// Global cache to prevent re-extracting for same cover image
+const extractedColorCache = {};
+
+function extractVibrantColor(imgUrl, callback, fallbackColor) {
+    if (extractedColorCache[imgUrl]) {
+        callback(extractedColorCache[imgUrl]);
+        return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 30;
+            canvas.height = 30;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 30, 30);
+            
+            const imgData = ctx.getImageData(0, 0, 30, 30).data;
+            const length = imgData.length;
+            
+            const vibrantColors = [];
+            const mutedColors = [];
+            
+            for (let i = 0; i < length; i += 4) {
+                const r = imgData[i];
+                const g = imgData[i + 1];
+                const b = imgData[i + 2];
+                const a = imgData[i + 3];
+                
+                if (a < 200) continue;
+                
+                const [h, s, l] = rgbToHsl(r, g, b);
+                
+                if (s > 35 && l > 25 && l < 70) {
+                    vibrantColors.push({ r, g, b, s, l, h });
+                } else if (l > 15 && l < 80) {
+                    mutedColors.push({ r, g, b, s, l, h });
+                }
+            }
+            
+            let finalColor;
+            if (vibrantColors.length > 0) {
+                const hueBuckets = Array(12).fill(0).map(() => []);
+                vibrantColors.forEach(c => {
+                    const bucketIdx = Math.floor(c.h / 30) % 12;
+                    hueBuckets[bucketIdx].push(c);
+                });
+                
+                let maxIdx = 0;
+                let maxCount = 0;
+                hueBuckets.forEach((bucket, idx) => {
+                    if (bucket.length > maxCount) {
+                        maxCount = bucket.length;
+                        maxIdx = idx;
+                    }
+                });
+                
+                const dominantGroup = hueBuckets[maxIdx];
+                let sumR = 0, sumG = 0, sumB = 0;
+                dominantGroup.forEach(c => {
+                    sumR += c.r;
+                    sumG += c.g;
+                    sumB += c.b;
+                });
+                finalColor = [
+                    Math.round(sumR / dominantGroup.length),
+                    Math.round(sumG / dominantGroup.length),
+                    Math.round(sumB / dominantGroup.length)
+                ];
+            } else if (mutedColors.length > 0) {
+                let sumR = 0, sumG = 0, sumB = 0;
+                mutedColors.forEach(c => {
+                    sumR += c.r;
+                    sumG += c.g;
+                    sumB += c.b;
+                });
+                finalColor = [
+                    Math.round(sumR / mutedColors.length),
+                    Math.round(sumG / mutedColors.length),
+                    Math.round(sumB / mutedColors.length)
+                ];
+            } else {
+                finalColor = [120, 120, 120];
+            }
+            
+            extractedColorCache[imgUrl] = finalColor;
+            callback(finalColor);
+        } catch (err) {
+            console.error("Canvas read failed:", err);
+            callback(fallbackColor);
+        }
+    };
+    
+    img.onerror = () => {
+        console.warn("Cover image failed to load via CORS, using fallback color");
+        callback(fallbackColor);
+    };
+    img.src = imgUrl;
+}
+let currentGradLayer = 1;
+
+function updateCoverflowBackground(rgbColor) {
+    let [r, g, b] = rgbColor;
+    
+    // Relative luminance: Y = 0.2126*R + 0.7152*G + 0.0722*B
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    
+    // Clamp/darken if it exceeds readability limits for white text / selectors
+    if (luminance > 0.6) {
+        const factor = 0.6 / luminance;
+        r = Math.floor(r * factor);
+        g = Math.floor(g * factor);
+        b = Math.floor(b * factor);
+    }
+    
+    const accentColor = `rgb(${r}, ${g}, ${b})`;
+    // darkBase = accent RGB multiplied by ~0.12 (or clamp toward #121212 / rgb(18, 18, 18))
+    const darkR = Math.max(18, Math.floor(r * 0.12));
+    const darkG = Math.max(18, Math.floor(g * 0.12));
+    const darkB = Math.max(18, Math.floor(b * 0.12));
+    const darkBase = `rgb(${darkR}, ${darkG}, ${darkB})`;
+    
+    const nextGradLayer = currentGradLayer === 1 ? 2 : 1;
+    const currentEl = document.getElementById(`gradLayer${currentGradLayer}`);
+    const nextEl = document.getElementById(`gradLayer${nextGradLayer}`);
+    
+    if (currentEl && nextEl) {
+        // Linear gradient: Top = accent, Bottom = near-black darkBase. Accent dominates top 30-40%, lower half is dark.
+        nextEl.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
+        nextEl.style.opacity = '1';
+        currentEl.style.opacity = '0';
+        currentGradLayer = nextGradLayer;
+    }
+    
+    // Set body background to accentColor so Safari colors the address bar accentColor, matching the top of the gradient.
+    document.body.style.backgroundColor = accentColor;
+    document.documentElement.style.setProperty('--dynamic-bg', darkBase);
 }
 
 function updateAmbientBackground(card) {
@@ -747,7 +911,6 @@ function updateCarousel() {
             // Active coloring update
             if (Math.round(absOffset) === 0 || absOffset < 0.5) {
                 card.classList.add('active');
-                updateAmbientBackground(card);
             } else {
                 card.classList.remove('active');
             }
@@ -808,6 +971,16 @@ function updateCarousel() {
             card.style.filter = filter;
             if (fog) fog.style.opacity = fogOpacity;
         });
+
+        // Trigger dynamic color extraction and background updates on active coverflow item changes
+        const activeCard = cards[activeIndex];
+        if (activeIndex !== lastCoverflowIndex && activeCard) {
+            lastCoverflowIndex = activeIndex;
+            const track = tracks[activeIndex];
+            extractVibrantColor(track.cover, (color) => {
+                updateCoverflowBackground(color);
+            }, track.color);
+        }
 
     } else if (currentMode === 'depth') {
         // Reset parent carousel transform
