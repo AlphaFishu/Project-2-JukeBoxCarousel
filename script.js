@@ -549,6 +549,75 @@ modeButtons.forEach(btn => {
     });
 });
 
+// 1.6 Card Shuffle camera presets — each one is pure data: plane tilt, lane
+// x-slots (asymmetric allowed), per-lane scale and flow speed/direction, and
+// the frozen plate's position/size. laneX length decides the lane count.
+const shufflePresets = [
+    { // Close-Up: the user's drawing — 5 lanes, dramatic near camera, asymmetric
+        name: 'Close-Up',
+        transform: 'translateZ(40px) rotateX(15deg) rotateZ(-10deg) rotateY(-13deg)',
+        unitVw: 0.155, unitMax: 250,
+        laneX: [-2.35, -1.2, -0.08, 1.05, 2.25],
+        laneScale: [0.5, 0.66, 1.0, 0.66, 0.5],
+        laneFlow: [-185, 235, 305, -215, 165],
+        lockX: -16, lockY: -110, lockScale: 1.3, lockZ: 140
+    },
+    { // Reverse: same energy, tilted to the opposite side
+        name: 'Reverse',
+        transform: 'translateZ(-20px) rotateX(16deg) rotateZ(12deg) rotateY(15deg)',
+        unitVw: 0.20, unitMax: 290,
+        laneX: [-1.05, 0, 1.05],
+        laneScale: [0.66, 0.98, 0.66],
+        laneFlow: [250, -340, 285],
+        lockY: -110, lockScale: 1.24, lockZ: 150
+    },
+    { // Overhead: looking down a table of rolling reels
+        name: 'Overhead',
+        transform: 'translateZ(-40px) rotateX(40deg) rotateZ(-5deg)',
+        unitVw: 0.19, unitMax: 280,
+        laneX: [-1.1, 0, 1.1],
+        laneScale: [0.7, 0.95, 0.7],
+        laneFlow: [-300, 380, -330],
+        lockY: -60, lockScale: 1.3, lockZ: 180
+    },
+    { // Dutch: hard cinematic roll, nearly flat plane
+        name: 'Dutch',
+        transform: 'translateZ(-10px) rotateZ(-24deg) rotateX(6deg)',
+        unitVw: 0.21, unitMax: 310,
+        laneX: [-1.1, 0, 1.1],
+        laneScale: [0.6, 0.95, 0.6],
+        laneFlow: [-280, 330, -300],
+        lockY: -90, lockScale: 1.26, lockZ: 150
+    },
+    { // Front: straight-on slot machine, no tilt at all
+        name: 'Front',
+        transform: 'translateZ(-60px)',
+        unitVw: 0.185, unitMax: 270,
+        laneX: [-1.05, 0, 1.05],
+        laneScale: [0.62, 0.95, 0.62],
+        laneFlow: [-260, 330, -290],
+        lockY: -100, lockScale: 1.22, lockZ: 120
+    },
+    { // Wide: pulled-back gallery overview, 5 gentle lanes
+        name: 'Wide',
+        transform: 'translateZ(-300px) rotateX(10deg) rotateY(9deg)',
+        unitVw: 0.16, unitMax: 240,
+        laneX: [-2.2, -1.1, 0, 1.1, 2.2],
+        laneScale: [0.5, 0.62, 0.85, 0.62, 0.5],
+        laneFlow: [-200, 250, 300, -230, 180],
+        lockY: -80, lockScale: 1.08, lockZ: 100
+    }
+];
+
+let shuffleAngle = 0;
+document.querySelectorAll('.angle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.angle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        shuffleAngle = parseInt(btn.dataset.angle, 10) || 0;
+    });
+});
+
 // 2. Infinite Virtual Scroll Logic
 let currentRotation = 0;
 let targetRotation = 0;
@@ -1389,26 +1458,25 @@ function updateCarousel() {
         }
 
     } else if (currentMode === 'shuffle') {
-        // Card Shuffle: a close-up product-shot of three film reels.
-        //  - Hard Netflix-style tilt, pushed further for drama
-        //  - Middle lane dominates (Pinterest-style), side lanes smaller/behind
-        //  - Lanes roll in opposite directions at different speeds, loose like film
-        //  - The highlighted card is captured and FROZEN at the center plate
-        //    while everything else rolls past it
-        carousel.style.transform = `translateZ(-30px) rotateX(18deg) rotateZ(-14deg) rotateY(-16deg)`;
+        // Card Shuffle: film reels on a tilted product-shot plane, fully driven
+        // by the selected camera preset (see shufflePresets). The highlighted
+        // card is captured and FROZEN at the plate while the reels roll past it.
+        const p = shufflePresets[shuffleAngle];
+        carousel.style.transform = p.transform;
 
-        const laneLen = totalCards / 3;
-        const laneSpacing = Math.min(280, Math.max(220, window.innerWidth * 0.19));
-        const laneScale = [0.66, 0.98, 0.66]; // dominant middle, smaller sides
-        const laneFlow = [-250, 340, -285];   // px per album step; sign = direction
-        const yLock = -60;                    // the frozen plate position
+        const laneCount = p.laneX.length;
+        const midLane = Math.floor(laneCount / 2);
+        const laneLen = totalCards / laneCount;
+        const unit = Math.min(p.unitMax, window.innerWidth * p.unitVw);
         const yLimit = window.innerHeight * 0.8;
+        const lockX = p.lockX || 0;
 
         cards.forEach((card, index) => {
-            // Serpentine loop coordinate: lane 1 -> middle -> lane 3 -> wraps
+            // Serpentine loop coordinate: leftmost lane -> ... -> rightmost -> wraps.
+            // The active card always lands mid-way through the middle lane.
             let s = (activeIndexFloat - index + totalCards / 2) % totalCards;
             if (s < 0) s += totalCards;
-            const lane = Math.min(2, Math.floor(s / laneLen));
+            const lane = Math.min(laneCount - 1, Math.floor(s / laneLen));
             const local = s - lane * laneLen;
 
             let offset = index - activeIndexFloat;
@@ -1417,20 +1485,21 @@ function updateCarousel() {
             const absOffset = Math.abs(offset);
             const isActive = absOffset < 0.5;
 
-            // Film-reel flow position: each lane has its own speed and direction
-            const flowX = (lane - 1) * laneSpacing;
-            const flowY = (local - laneLen / 2) * laneFlow[lane] + yLock;
+            // Film-reel flow: each lane has its own x slot, speed, and direction
+            const flowX = p.laneX[lane] * unit;
+            const flowY = (local - laneLen / 2) * p.laneFlow[lane] + p.lockY;
 
             // Capture: smoothstep-blend into the frozen plate as a card nears the
             // highlight, and release it back into the reel as it leaves — so the
             // center stays locked while the reels stay loose
             const tRaw = Math.min(1, absOffset);
             const t = tRaw * tRaw * (3 - 2 * tRaw);
-            const x = lerp(0, flowX, t);
-            const y = lerp(yLock, flowY, t);
-            const z = lerp(150, lane === 1 ? 20 : -110, t);
-            const scale = lerp(1.08, laneScale[lane], t);
-            const bright = lerp(1, lane === 1 ? 0.72 : 0.48, t);
+            const laneDist = Math.abs(lane - midLane);
+            const x = lerp(lockX, flowX, t);
+            const y = lerp(p.lockY, flowY, t);
+            const z = lerp(p.lockZ, lane === midLane ? 20 : -80 - laneDist * 40, t);
+            const scale = lerp(p.lockScale, p.laneScale[lane], t);
+            const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
             const fog = card.querySelector('.fog-overlay');
             if (Math.abs(y) > yLimit + 340) {
@@ -1446,7 +1515,7 @@ function updateCarousel() {
             card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px) scale(${scale})`;
             card.style.opacity = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})`;
-            card.style.zIndex = isActive ? 40 : Math.round((lane === 1 ? 25 : 12) - absOffset);
+            card.style.zIndex = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
             if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
         });
 

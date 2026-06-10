@@ -538,6 +538,66 @@ body.has-scrolled .title-overlay {
     flex-shrink: 0;
 }
 
+/* --- Card Shuffle camera-angle presets (drops down under the mode selector) --- */
+.shuffle-angles {
+    position: fixed;
+    top: 78px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+    background: rgba(18, 18, 24, 0.18);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.40),
+        inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.14),
+        0 6px 16px rgba(0, 0, 0, 0.22);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.body-shuffle .shuffle-angles {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* The scroll hint would collide with the dropdown — hide it in Card Shuffle */
+body.body-shuffle .title-overlay {
+    opacity: 0;
+}
+
+.angle-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: inherit;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.angle-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.angle-btn.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
 /* --- Now Playing Dock (Liquid Glass console) --- */
 .now-playing-dock {
     position: fixed;

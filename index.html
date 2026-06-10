@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=28">
+    <link rel="stylesheet" href="style.css?v=29">
 </head>
 
 <body>
@@ -61,6 +61,16 @@
         </button>
     </div>
 
+    <!-- Camera angle presets for Card Shuffle: drops down below the mode selector -->
+    <div class="shuffle-angles" id="shuffleAngles">
+        <button class="angle-btn active" data-angle="0">Close-Up</button>
+        <button class="angle-btn" data-angle="1">Reverse</button>
+        <button class="angle-btn" data-angle="2">Overhead</button>
+        <button class="angle-btn" data-angle="3">Dutch</button>
+        <button class="angle-btn" data-angle="4">Front</button>
+        <button class="angle-btn" data-angle="5">Wide</button>
+    </div>
+
     <!-- Now Playing dock: liquid glass console with controls, counter, and position bar -->
     <div class="now-playing-dock" id="nowPlayingDock">
         <button class="dock-btn" id="dockPrev" aria-label="Previous album">
@@ -95,7 +105,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=28"></script>
+    <script src="script.js?v=29"></script>
 </body>
 
 </html>

@@ -1,4 +1,18 @@
-# Walkthrough: Card Shuffle Rework + Artwork-True Accent Colors (v2.94)
+# Walkthrough: Card Shuffle Camera Presets (v2.95)
+
+1. **Bigger, higher plate** — the frozen highlight card scales up to ~1.3 (was 1.08) and the plate moved up from −60 to −110, fixing "too small / too low".
+2. **Parameterized renderer** — the Card Shuffle branch is now fully data-driven: each camera preset defines the plane tilt, lane x-slots (asymmetry allowed), per-lane scale + flow speed/direction, and plate position/size. Lane count comes from the array length.
+3. **Six camera presets** in a glass dropdown that slides out under the mode selector (Card Shuffle only):
+   - **Close-Up** — the user's drawing: 5 asymmetric lanes, near camera, dominant center, edge-to-edge density
+   - **Reverse** — 3 lanes, tilted to the opposite side
+   - **Overhead** — 40° look-down at a table of rolling reels
+   - **Dutch** — hard −24° cinematic roll on a nearly flat plane
+   - **Front** — straight-on slot machine, zero tilt
+   - **Wide** — pulled-back 5-lane gallery overview
+
+---
+
+# Previous: Card Shuffle Rework + Artwork-True Accent Colors (v2.94)
 
 1. **Accent algorithm corrected** — the secondary accent is no longer an arbitrary 150° hue rotation (the source of the theme-breaking teal). The canvas extractor now pulls the **second dominant hue from the cover art itself** (biggest hue bucket ≥60° away from the primary, ≥6 vibrant pixels). Verified: Enemy = red + `rgb(37,25,121)` purple-blue (the Arcane glow); Purple Rain = orange + `rgb(50,76,119)` blue-purple. Monochrome covers fall back to an analogous shade 50° away — never a complementary.
 2. **Card Shuffle (renamed from Shuffle), film-reel mechanics**:
