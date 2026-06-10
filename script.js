@@ -1,5 +1,16 @@
-// Authentic Pop Showcase with true 600x600 iTunes API covers
 const tracks = [
+    {
+        title: "Enemy (From Arcane: League of Legends) - Single",
+        artist: "Imagine Dragons & JID",
+        color: [110, 30, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/76/77/08/767708a7-ec93-3b3d-3bac-40086e5a265c/21UM1IM29634.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Enemy (with J.I.D)", artist: "Imagine Dragons & JID", plays: "1.2B plays", duration: "2:53", explicit: false },
+            { title: "Enemy (Opening Title Version)", artist: "Imagine Dragons, JID & League of Legends", plays: "450M plays", duration: "3:06", explicit: false },
+            { title: "Enemy (Solo Version)", artist: "Imagine Dragons", plays: "185M plays", duration: "2:53", explicit: false }
+        ],
+        lyrics: "I wake up to the sounds of the silence that allows\nFor my mind to run around, with my ear up to the ground\nI'm searching to behold the stories that are told\nWhen my back is to the world that was smiling when I turned\n\nTell you you're the greatest\nBut once you turn they hate us\n\nOh, the misery\nEverybody wants to be my enemy\nSpare the sympathy\nEverybody wants to be my enemy-y-y-y\nLook out for yourself\nMy enemy-y-y-y\nLook out for yourself\nBut I'm ready"
+    },
     {
         title: "Thriller",
         artist: "Michael Jackson",
@@ -13,6 +24,20 @@ const tracks = [
             { title: "Human Nature", artist: "Michael Jackson", plays: "180M plays", duration: "4:07", explicit: false }
         ],
         lyrics: "It's close to midnight\nAnd something evil's lurking in the dark\nUnder the moonlight\nYou see a sight that almost stops your heart\nYou try to scream\nBut terror takes the sound before you make it\nYou start to freeze\nAs horror looks you right between the eyes\nYou're paralyzed\n\n'Cause this is thriller, thriller night\nAnd no one's gonna save you from the beast about to strike\nYou know it's thriller, thriller night\nYou're fighting for your life inside a killer, thriller tonight"
+    },
+    {
+        title: "GUTS",
+        artist: "Olivia Rodrigo",
+        color: [120, 60, 180],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9b/d8/9c/9bd89c9e-b44d-ad25-1516-b9b30f64fd2a/23UMGIM71510.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "vampire", artist: "Olivia Rodrigo", plays: "850M plays", duration: "3:39", explicit: true },
+            { title: "bad idea right?", artist: "Olivia Rodrigo", plays: "420M plays", duration: "3:04", explicit: true },
+            { title: "get him back!", artist: "Olivia Rodrigo", plays: "290M plays", duration: "3:30", explicit: true },
+            { title: "all-american bitch", artist: "Olivia Rodrigo", plays: "180M plays", duration: "2:45", explicit: true },
+            { title: "logical", artist: "Olivia Rodrigo", plays: "120M plays", duration: "3:51", explicit: false }
+        ],
+        lyrics: "Hate to give you satisfaction but you sunk your teeth in babe\nOh, bloodsucker, fame fucker, bleeding me dry like a goddamn vampire\n\nI went to bed in a good mood\nAnd I woke up in a bad one\nI went to bed in a good mood\nAnd I woke up in a bad one"
     },
     {
         title: "Like a Virgin",
@@ -29,6 +54,20 @@ const tracks = [
         lyrics: "I made it through the wilderness\nSomehow I made it through\nDidn't know how lost I was\nUntil I found you\n\nI was beat, incomplete\nI'd been had, I was sad and blue\nBut you made me feel\nYeah, you made me feel shiny and new\n\nLike a virgin\nTouched for the very first time\nLike a virgin\nWhen your heart beats next to mine"
     },
     {
+        title: "BRAT",
+        artist: "Charli xcx",
+        color: [142, 201, 58],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/63/884e6321-ad41-aab1-f6f0-20efcafcfd55/075679666130.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Apple", artist: "Charli xcx", plays: "395M plays", duration: "2:31", explicit: false },
+            { title: "Guess featuring billie eilish", artist: "Charli xcx & Billie Eilish", plays: "570M plays", duration: "2:23", explicit: false },
+            { title: "360", artist: "Charli xcx", plays: "410M plays", duration: "2:26", explicit: true },
+            { title: "Von dutch", artist: "Charli xcx", plays: "280M plays", duration: "2:44", explicit: true },
+            { title: "Girl, so confusing", artist: "Charli xcx", plays: "360M plays", duration: "2:54", explicit: false }
+        ],
+        lyrics: "I think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\n\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time"
+    },
+    {
         title: "Purple Rain",
         artist: "Prince",
         color: [130, 40, 200],
@@ -41,6 +80,20 @@ const tracks = [
             { title: "The Beautiful Ones", artist: "Prince", plays: "60M plays", duration: "5:13", explicit: false }
         ],
         lyrics: "I never meant to cause you any sorrow\nI never meant to cause you any pain\nI only wanted to one time to see you laughing\nI only wanted to see you\nLaughing in the purple rain\n\nPurple rain, purple rain\nPurple rain, purple rain\nPurple rain, purple rain\nI only wanted to see you\nBathing in the purple rain"
+    },
+    {
+        title: "SOS",
+        artist: "SZA",
+        color: [30, 80, 160],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/bd/3b/a9/bd3ba9fb-9609-144f-bcfe-ead67b5f6ab3/196589564931.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Kill Bill", artist: "SZA", plays: "1.4B plays", duration: "2:33", explicit: true },
+            { title: "Snooze", artist: "SZA", plays: "820M plays", duration: "3:21", explicit: true },
+            { title: "Good Days", artist: "SZA", plays: "950M plays", duration: "4:39", explicit: false },
+            { title: "Shirt", artist: "SZA", plays: "340M plays", duration: "3:01", explicit: true },
+            { title: "Low", artist: "SZA", plays: "420M plays", duration: "3:01", explicit: true }
+        ],
+        lyrics: "I might kill my ex, not the best idea\nHis new girlfriend's next, how'd I get here?\nI might kill my ex, I still love him though\nRather be in jail than alone\n\nI get the sense that it's a lost cause\nI get the sense that you might really love her\nI get the sense that you might really love her"
     },
     {
         title: "I Wanna Dance",
@@ -57,6 +110,20 @@ const tracks = [
         lyrics: "Clock strikes upon the hour\nAnd the sun begins to fade\nStill enough time to figure out\nHow to chase my blues away\n\nI've done all right up to now\nIt's the light of day that shows me how\nAnd when the night falls, loneliness calls\n\nOh, I wanna dance with somebody\nI wanna feel the heat with somebody\nYeah, I wanna dance with somebody\nWith somebody who loves me"
     },
     {
+        title: "Lover",
+        artist: "Taylor Swift",
+        color: [240, 160, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/49/3d/ab/493dab54-f920-9043-6181-80993b8116c9/19UMGIM53909.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Cruel Summer", artist: "Taylor Swift", plays: "2.1B plays", duration: "2:58", explicit: false },
+            { title: "Lover", artist: "Taylor Swift", plays: "1.2B plays", duration: "3:41", explicit: false },
+            { title: "The Archer", artist: "Taylor Swift", plays: "290M plays", duration: "3:31", explicit: false },
+            { title: "You Need To Calm Down", artist: "Taylor Swift", plays: "850M plays", duration: "2:51", explicit: false },
+            { title: "ME! (feat. Brendon Urie)", artist: "Taylor Swift", plays: "780M plays", duration: "3:13", explicit: false }
+        ],
+        lyrics: "We could leave the Christmas lights up 'til January\nAnd this is our place, we make the rules\nAnd there's a dazzling haze, a mysterious way about you dear\nHave I known you 20 seconds or 20 years?\n\nCan I go where you go?\nCan we always be this close forever and ever?\nAnd ah, take me out, and take me home\nYou're my, my, my, my... lover"
+    },
+    {
         title: "Toxic",
         artist: "Britney Spears",
         color: [160, 220, 50],
@@ -69,6 +136,20 @@ const tracks = [
             { title: "Showdown", artist: "Britney Spears", plays: "25M plays", duration: "3:17", explicit: false }
         ],
         lyrics: "Baby, can't you see I'm calling?\nA guy like you should wear a warning\nIt's dangerous, I'm falling\n\nThere's no escape, I can't wait\nI need a hit, baby, give me it\nYou're dangerous, I'm loving it\n\nToo high, can't come down\nLosing my head, spinning 'round and 'round\nDo you feel me now?\n\nWith a taste of your lips, I'm on a ride\nYou're toxic, I'm slipping under\nWith a taste of a poison paradise\nI'm addicted to you\nDon't you know that you're toxic?"
+    },
+    {
+        title: "Starboy",
+        artist: "The Weeknd",
+        color: [220, 20, 50],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b5/92/bb/b592bb72-52e3-e756-9b26-9f56d08f47ab/16UMGIM67864.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Starboy (feat. Daft Punk)", artist: "The Weeknd", plays: "3.2B plays", duration: "3:50", explicit: true },
+            { title: "I Feel It Coming (feat. Daft Punk)", artist: "The Weeknd", plays: "1.9B plays", duration: "4:29", explicit: false },
+            { title: "Party Monster", artist: "The Weeknd", plays: "650M plays", duration: "4:09", explicit: true },
+            { title: "Reminder", artist: "The Weeknd", plays: "820M plays", duration: "3:33", explicit: true },
+            { title: "Die For You", artist: "The Weeknd", plays: "2.1B plays", duration: "4:20", explicit: false }
+        ],
+        lyrics: "I'm tryna put you in the worst mood, ah\nP1 cleaner than your church shoes, ah\nMilli point two just to hurt you, ah\nHouse so empty, need a centerpiece\n\nLook what you've done\nI'm a motherfuckin' starboy\nLook what you've done\nI'm a motherfuckin' starboy"
     },
     {
         title: "Bye Bye Bye",
@@ -85,6 +166,20 @@ const tracks = [
         lyrics: "Hey, hey\nBye, bye, bye\nBye, bye\n\nI'm doing this tonight\nYou're probably gonna start a fight\nI know this can't be right\nHey baby, come on\n\nI loved you endless, yes, it's true\nI don't wanna be a fool for you\nJust another player in your game for two\nYou may hate me but it ain't no lie\n\nBaby bye bye bye"
     },
     {
+        title: "Endless Summer Vacation",
+        artist: "Miley Cyrus",
+        color: [180, 210, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/8c/67/ff/8c67ff91-31c3-3fef-1884-ce3ec89f3af4/196589946874.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Flowers", artist: "Miley Cyrus", plays: "1.8B plays", duration: "3:20", explicit: false },
+            { title: "River", artist: "Miley Cyrus", plays: "120M plays", duration: "2:42", explicit: false },
+            { title: "Jaded", artist: "Miley Cyrus", plays: "180M plays", duration: "3:03", explicit: false },
+            { title: "You", artist: "Miley Cyrus", plays: "65M plays", duration: "3:07", explicit: false },
+            { title: "Handstand", artist: "Miley Cyrus", plays: "45M plays", duration: "3:25", explicit: true }
+        ],
+        lyrics: "We were good, we were gold, kinda dream that can't be sold\nWe were right 'til we weren't, built a home and watched it burn\n\nI can buy myself flowers\nWrite my name in the sand\nTalk to myself for hours\nSay things you don't understand\nI can take myself dancing\nAnd I can hold my own hand\nYeah, I can love me better than you can"
+    },
+    {
         title: "FutureSex/LoveSounds",
         artist: "Justin Timberlake",
         color: [240, 240, 240],
@@ -97,6 +192,19 @@ const tracks = [
             { title: "Summer Love", artist: "Justin Timberlake", plays: "150M plays", duration: "4:12", explicit: false }
         ],
         lyrics: "I'm bringin' sexy back\nThem other boys don't know how to act\nI think it's special, what's behind your back\nSo turn around and I'll pick up the slack\n\nDirty babe\nYou see these shackles, baby, I'm your slave\nI'll let you whip me if I misbehave\nIt's just that no one makes me feel this way\n\nTake 'em to the bridge"
+    },
+    {
+        title: "Not Like Us - Single",
+        artist: "Kendrick Lamar",
+        color: [210, 180, 40],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/31/3a/3f/313a3fbc-bb8f-80c7-b5a2-e226869a38cd/24UMGIM51924.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Not Like Us", artist: "Kendrick Lamar", plays: "850M plays", duration: "4:34", explicit: true },
+            { title: "Euphoria", artist: "Kendrick Lamar", plays: "320M plays", duration: "6:24", explicit: true },
+            { title: "Meet the Grahams", artist: "Kendrick Lamar", plays: "150M plays", duration: "6:13", explicit: true },
+            { title: "6:16 in LA", artist: "Kendrick Lamar", plays: "95M plays", duration: "3:40", explicit: true }
+        ],
+        lyrics: "Psst, I see dead people\n\nMustard on the beat, hoe\n\nDe opposition, dey not like us\nDey not like us, dey not like us\nDey not like us, dey not like us\nDey not like us\n\nStep this way, step that way\nStep this way, step that way"
     },
     {
         title: "The Fame Monster",
@@ -113,6 +221,18 @@ const tracks = [
         lyrics: "Oh-oh-oh-oh-oh, oh-oh-oh-oh, oh-oh-oh\nCaught in a bad romance\nOh-oh-oh-oh-oh, oh-oh-oh-oh, oh-oh-oh\nCaught in a bad romance\n\nRah, rah, ah-ah-ah\nRoma, roma-ma\nGaga, ooh-la-la\nWant your bad romance\n\nI want your ugly, I want your disease\nI want your everything as long as it's free\nI want your love\nLove, love, love, I want your love"
     },
     {
+        title: "TEXAS HOLD 'EM - Single",
+        artist: "Beyoncé",
+        color: [150, 110, 80],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/c2/30/40/c2304010-949a-ee6b-cb7f-d526f5e91eff/196871862509.jpg/600x600bb.jpg",
+        songs: [
+            { title: "TEXAS HOLD 'EM", artist: "Beyoncé", plays: "480M plays", duration: "3:53", explicit: true },
+            { title: "TEXAS HOLD 'EM (Acapella)", artist: "Beyoncé", plays: "45M plays", duration: "3:48", explicit: false },
+            { title: "TEXAS HOLD 'EM (Instrumental)", artist: "Beyoncé", plays: "25M plays", duration: "3:55", explicit: false }
+        ],
+        lyrics: "This ain't Texas (woo), ain't no hold 'em (hey)\nSo lay your cards down, down, down, down\nSo lay your cards down, down, down, down\n\nHard liquor, quick clip, catch a vibe\nLet's get it, get it"
+    },
+    {
         title: "Teenage Dream",
         artist: "Katy Perry",
         color: [255, 140, 180],
@@ -125,6 +245,20 @@ const tracks = [
             { title: "The One That Got Away", artist: "Katy Perry", plays: "710M plays", duration: "3:47", explicit: false }
         ],
         lyrics: "You think I'm pretty without any makeup on\nYou think I'm funny when I tell the punchline wrong\nI know you get me, so I let my walls come down, down\n\nBefore you met me, I was alright but things were kinda heavy\nYou brought me to life, now every February\nYou'll be my Valentine, Valentine\n\nLet's go all the way tonight\nNo regrets, just love\nWe can dance, until we die\nYou and I, we'll be young forever\n\nYou make me feel like I'm livin' a teenage dream"
+    },
+    {
+        title: "THINK LATER",
+        artist: "Tate McRae",
+        color: [60, 60, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/21/4a/c2/214ac20c-a66c-84a1-e357-f7e60b1932ca/196871542661.jpg/600x600bb.jpg",
+        songs: [
+            { title: "greedy", artist: "Tate McRae", plays: "920M plays", duration: "2:11", explicit: true },
+            { title: "exes", artist: "Tate McRae", plays: "280M plays", duration: "2:39", explicit: true },
+            { title: "run for the hills", artist: "Tate McRae", plays: "150M plays", duration: "2:23", explicit: true },
+            { title: "hurt my feelings", artist: "Tate McRae", plays: "95M plays", duration: "2:02", explicit: false },
+            { title: "grave", artist: "Tate McRae", plays: "45M plays", duration: "3:14", explicit: false }
+        ],
+        lyrics: "He said, \"I would like to get to know you\"\nI said, \"Take a number, baby, write your name\"\nI'm so greedy, baby, I'm so greedy\n\nI'm so greedy for love\nI'm so greedy for love\nI'm so greedy for love"
     },
     {
         title: "24K Magic",
@@ -141,6 +275,19 @@ const tracks = [
         lyrics: "Tonight\nI just want to take you higher\nThrow your hands up in the sky\nLet's set this party off right\n\nPlayers, put yo' pinky rings up to the moon\nGirls, what y'all trying to do?\n24 karat magic in the air\nHead to toe so soul player\nLook out!\n\nPop pop, it's show time (show time)\nShow time (show time)\nGuess who's back again?"
     },
     {
+        title: "Unheard - EP",
+        artist: "Hozier",
+        color: [110, 90, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/98/80/95/98809581-4a0e-68a6-04de-b72492e35939/196871908191.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Too Sweet", artist: "Hozier", plays: "640M plays", duration: "4:11", explicit: false },
+            { title: "Empire Now", artist: "Hozier", plays: "85M plays", duration: "3:41", explicit: false },
+            { title: "Fare Well", artist: "Hozier", plays: "60M plays", duration: "3:43", explicit: false },
+            { title: "Wildflower and Barley (feat. Allison Russell)", artist: "Hozier", plays: "95M plays", duration: "3:42", explicit: false }
+        ],
+        lyrics: "I take my whiskey neat, my coffee black and my bed at three\nYou're too sweet for me, you're too sweet for me\n\nI aim low, I aim true, and the world is blue\nI take my whiskey neat, my coffee black and my bed at three\nYou're too sweet for me, you're too sweet for me"
+    },
+    {
         title: "1989",
         artist: "Taylor Swift",
         color: [170, 210, 240],
@@ -153,6 +300,18 @@ const tracks = [
             { title: "Wildest Dreams", artist: "Taylor Swift", plays: "790M plays", duration: "3:40", explicit: false }
         ],
         lyrics: "Nice to meet you, where you been?\nI could show you incredible things\nMagic, madness, heaven, sin\nSaw you there and I thought\n\"Oh, my God, look at that face\"\nYou look like my next mistake\nLove's a game, wanna play?\n\nNew money, suit and tie\nI can read you like a magazine\nAin't it funny, rumors fly\nAnd I know you heard about me\nSo hey, let's be friends\nI'm dying to see how this one ends"
+    },
+    {
+        title: "Die With A Smile - Single",
+        artist: "Lady Gaga & Bruno Mars",
+        color: [50, 120, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/11/ae/f2/11aef294-f57c-bab9-c9fc-529162984e62/24UMGIM85348.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Die With A Smile", artist: "Lady Gaga & Bruno Mars", plays: "820M plays", duration: "4:11", explicit: false },
+            { title: "Die With A Smile (Live)", artist: "Lady Gaga & Bruno Mars", plays: "45M plays", duration: "4:20", explicit: false },
+            { title: "Die With A Smile (Acoustic)", artist: "Lady Gaga & Bruno Mars", plays: "95M plays", duration: "4:11", explicit: false }
+        ],
+        lyrics: "If the world was ending, I'd wanna be next to you\nIf the party was over and our time on Earth was through\nI'd wanna hold you just for a while and die with a smile\n\nIf the world was ending, I'd wanna be next to you\nIf the party was over and our time on Earth was through\nI'd wanna hold you just for a while and die with a smile"
     },
     {
         title: "After Hours",
