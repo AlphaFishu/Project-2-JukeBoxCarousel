@@ -476,8 +476,10 @@ const modeButtons = document.querySelectorAll('.mode-btn');
 function updateSliderPosition(btn) {
     const slider = document.querySelector('.mode-slider');
     if (slider && btn) {
-        // Offset by 5px to align with the selector's padding: 5px
-        slider.style.transform = `translateX(${btn.offsetLeft - 5}px)`;
+        // slider has left: 0, so offsetLeft (same reference frame as the buttons)
+        // lands it exactly under the button — no magic constants to drift out of sync.
+        // translateY(-50%) keeps it vertically centered within the pill.
+        slider.style.transform = `translateY(-50%) translateX(${btn.offsetLeft}px)`;
         slider.style.width = `${btn.offsetWidth}px`;
     }
 }
@@ -510,7 +512,7 @@ modeButtons.forEach(btn => {
         updateSliderPosition(btn);
 
         // Remove previous body mode classes
-        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth');
+        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-wall', 'body-helix');
 
         // Update mode state
         currentMode = btn.dataset.mode;
@@ -986,40 +988,50 @@ function updateDetailsPanel(index) {
     }
 }
 
+// YouTube-Music-style seamless loop for overflowing text: duplicate the text into
+// two segments that scroll translateX(-100%) in a continuous conveyor. Restores
+// plain ellipsis text when the element fits or loses focus.
+function resetLoopingText(el) {
+    if (el && el.dataset.loopText !== undefined) {
+        el.textContent = el.dataset.loopText;
+        delete el.dataset.loopText;
+        el.classList.remove('loop-marquee');
+        el.style.removeProperty('--loop-duration');
+    }
+}
+
+function applyLoopingText(el) {
+    if (!el) return;
+    resetLoopingText(el);
+    if (el.scrollWidth - el.clientWidth <= 1) return; // fits — no loop needed
+
+    const text = el.textContent;
+    el.dataset.loopText = text;
+    const safe = text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    el.innerHTML = `<span class="loop-seg">${safe}</span><span class="loop-seg" aria-hidden="true">${safe}</span>`;
+    el.classList.add('loop-marquee');
+
+    // Constant scroll speed regardless of text length: duration scales with width
+    const seg = el.querySelector('.loop-seg');
+    const duration = Math.max(6, seg.offsetWidth / 36);
+    el.style.setProperty('--loop-duration', `${duration.toFixed(2)}s`);
+}
+
 function updateActiveCardMarquees(activeIndex) {
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, idx) => {
         const titleEl = card.querySelector('.title');
         const artistEl = card.querySelector('.artist');
-        
-        // Reset marquee on all cards
-        if (titleEl) {
-            titleEl.classList.remove('animate-marquee');
-            titleEl.style.removeProperty('--scroll-dist');
-        }
-        if (artistEl) {
-            artistEl.classList.remove('animate-marquee');
-            artistEl.style.removeProperty('--scroll-dist');
-        }
-        
-        // If this is the newly active card, calculate scrollWidth and clientWidth to trigger marquee
+
         if (idx === activeIndex) {
+            // Measure after this frame's layout settles
             requestAnimationFrame(() => {
-                if (titleEl) {
-                    const diff = titleEl.scrollWidth - titleEl.clientWidth;
-                    if (diff > 0) {
-                        titleEl.style.setProperty('--scroll-dist', `-${diff + 12}px`);
-                        titleEl.classList.add('animate-marquee');
-                    }
-                }
-                if (artistEl) {
-                    const diff = artistEl.scrollWidth - artistEl.clientWidth;
-                    if (diff > 0) {
-                        artistEl.style.setProperty('--scroll-dist', `-${diff + 12}px`);
-                        artistEl.classList.add('animate-marquee');
-                    }
-                }
+                applyLoopingText(titleEl);
+                applyLoopingText(artistEl);
             });
+        } else {
+            resetLoopingText(titleEl);
+            resetLoopingText(artistEl);
         }
     });
 }
@@ -1352,6 +1364,84 @@ function updateCarousel() {
             lastActiveIndex = activeIndex;
             updateDetailsPanel(activeIndex);
         }
+
+    } else if (currentMode === 'wall') {
+        // Gallery Wall: every cover on screen at once in a flat grid; scrolling
+        // skips the spotlight from cell to cell, and the active cover pops forward
+        carousel.style.transform = `translateZ(0px) rotateY(0deg)`;
+
+        const cols = Math.ceil(totalCards / 4);
+        const rows = Math.ceil(totalCards / cols);
+        const cellW = (window.innerWidth * 0.90) / cols;
+        const cellH = (window.innerHeight * 0.70) / rows;
+        const cardScale = Math.min(cellW / 240, cellH / 340); // 224x320 card + breathing room
+
+        cards.forEach((card, index) => {
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            const x = (col - (cols - 1) / 2) * cellW;
+            // -96 cancels the scene's downward shift so the grid centers in the
+            // viewport, clearing both the top selector and the bottom dock
+            const y = (row - (rows - 1) / 2) * cellH - 96;
+            const isActive = index === activeIndex;
+            const fog = card.querySelector('.fog-overlay');
+
+            card.style.visibility = 'visible';
+            card.classList.toggle('active', isActive);
+            if (isActive) updateAmbientBackground(card);
+
+            // Pure scale pop (no translateZ): perspective would displace edge cells
+            // off-screen since they sit far from the perspective origin
+            const s = isActive ? cardScale * 1.2 : cardScale;
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(0px) scale(${s})`;
+            card.style.opacity = 1;
+            card.style.filter = isActive ? 'brightness(1) saturate(1.15)' : 'brightness(0.55) saturate(0.8)';
+            card.style.zIndex = isActive ? 20 : 10;
+            if (fog) fog.style.opacity = isActive ? 0 : 0.28;
+        });
+
+    } else if (currentMode === 'helix') {
+        // Helix Tower: covers spiral up around a 3D axis. Each card sits on a
+        // circle (billboarded to face the viewer) and rises with its offset, so
+        // scrolling rides the camera along the spiral.
+        const R = Math.min(470, window.innerWidth * 0.38);
+        carousel.style.transform = `translateZ(${-R}px) rotateY(0deg)`;
+
+        const stepDeg = 24; // angular spacing per album
+        const stepY = 52;   // vertical rise per album
+
+        cards.forEach((card, index) => {
+            let offset = index - activeIndexFloat;
+            while (offset > totalCards / 2) offset -= totalCards;
+            while (offset < -totalCards / 2) offset += totalCards;
+
+            const absOffset = Math.abs(offset);
+            const fog = card.querySelector('.fog-overlay');
+
+            if (absOffset > 6.5) {
+                card.style.visibility = 'hidden';
+                card.style.opacity = 0;
+                return;
+            }
+
+            card.style.visibility = 'visible';
+            const isActive = absOffset < 0.5;
+            card.classList.toggle('active', isActive);
+            if (isActive) updateAmbientBackground(card);
+
+            const theta = offset * stepDeg;
+            const scale = absOffset < 1 ? lerp(1.18, 0.96, absOffset) : 0.96;
+            // rotateY(theta) translateZ(R) places the card on the circle;
+            // rotateY(-theta) billboards it back to face the viewer
+            card.style.transform =
+                `rotateY(${theta}deg) translateZ(${R}px) rotateY(${-theta}deg) ` +
+                `translateY(${offset * stepY - 30}px) scale(${scale})`;
+
+            card.style.opacity = absOffset > 5.5 ? 1 - (absOffset - 5.5) : 1;
+            card.style.filter = `brightness(${Math.max(0.45, 1 - absOffset * 0.13)}) saturate(${isActive ? 1.15 : 0.9})`;
+            card.style.zIndex = Math.round(20 - absOffset * 2);
+            if (fog) fog.style.opacity = Math.min(0.6, absOffset * 0.11);
+        });
     }
 
     // Cursor parallax: ease the perspective origin toward the mouse so the whole
@@ -1374,16 +1464,34 @@ function updateCarousel() {
 // ============================================================================
 const dockTitleEl = document.getElementById('dockTitle');
 const dockArtistEl = document.getElementById('dockArtist');
-const dockIndexEl = document.getElementById('dockIndex');
-const dockTotalEl = document.getElementById('dockTotal');
-const dockProgressFillEl = document.getElementById('dockProgressFill');
+const dockStepsEl = document.getElementById('dockSteps');
 const backdropMarqueeEl = document.getElementById('backdropMarquee');
 const marqueeTextEl = document.getElementById('marqueeText');
 const sceneEl = document.querySelector('.scene');
 let marqueeSwapTimer = null;
 let lastDockIndex = -1;
 
-if (dockTotalEl) dockTotalEl.textContent = String(totalCards).padStart(2, '0');
+// Shortest-path jump to an album index (same wrap math as clicking a card)
+function jumpToIndex(index) {
+    const currentActiveFloat = targetRotation / rotationAngle;
+    let activeFloat = currentActiveFloat % totalCards;
+    if (activeFloat < 0) activeFloat += totalCards;
+    let diff = index - activeFloat;
+    if (diff > totalCards / 2) diff -= totalCards;
+    if (diff < -totalCards / 2) diff += totalCards;
+    targetRotation += diff * rotationAngle;
+}
+
+// Build one clickable step per album for the dock's segmented indicator
+if (dockStepsEl) {
+    for (let i = 0; i < totalCards; i++) {
+        const step = document.createElement('div');
+        step.className = 'dock-step';
+        step.title = `${tracks[i].title} — ${tracks[i].artist}`;
+        step.addEventListener('click', () => jumpToIndex(i));
+        dockStepsEl.appendChild(step);
+    }
+}
 
 // HSL -> RGB helper (h: 0-360, s/l: 0-100) — companion to rgbToHsl above
 function hslToRgb(h, s, l) {
@@ -1403,6 +1511,11 @@ function setAccentPalette(rgb) {
     const accent = hslToRgb(h, Math.min(85, Math.max(45, s)), 62);
     root.setProperty('--accent-rgb', accent.join(', '));
 
+    // Secondary accent: hue rotated 150° so the marquee text contrasts with the
+    // album-accent background instead of dissolving into it
+    const accent2 = hslToRgb((h + 150) % 360, Math.min(80, Math.max(40, s)), 64);
+    root.setProperty('--accent2-rgb', accent2.join(', '));
+
     // Stage lights: base hue plus two companions rotated around the color wheel,
     // kept dim so they read as atmosphere rather than flat color fill
     const c1 = hslToRgb(h, Math.min(80, s + 10), 30);
@@ -1418,10 +1531,20 @@ function updateNowPlaying(index) {
     if (!track || index === lastDockIndex) return;
     lastDockIndex = index;
 
-    if (dockTitleEl) dockTitleEl.textContent = track.title;
+    if (dockTitleEl) {
+        resetLoopingText(dockTitleEl);
+        dockTitleEl.textContent = track.title;
+        requestAnimationFrame(() => applyLoopingText(dockTitleEl));
+    }
     if (dockArtistEl) dockArtistEl.textContent = track.artist;
-    if (dockIndexEl) dockIndexEl.textContent = String(index + 1).padStart(2, '0');
-    if (dockProgressFillEl) dockProgressFillEl.style.width = `${((index + 1) / totalCards) * 100}%`;
+
+    // Skip the highlight along the segmented steps
+    if (dockStepsEl) {
+        const steps = dockStepsEl.children;
+        for (let i = 0; i < steps.length; i++) {
+            steps[i].classList.toggle('active', i === index);
+        }
+    }
 
     setAccentPalette(extractedColorCache[track.cover] || track.color);
 

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=24">
+    <link rel="stylesheet" href="style.css?v=26">
 </head>
 
 <body>
@@ -53,6 +53,12 @@
         <button class="mode-btn" data-mode="depth">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-8 4 8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></svg> Rolling Album
         </button>
+        <button class="mode-btn" data-mode="wall">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg> Wall
+        </button>
+        <button class="mode-btn" data-mode="helix">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3"/><path d="M18 8H6"/><path d="M19 12H9"/><path d="M16 16h-6"/><path d="M11 20H9"/></svg> Helix
+        </button>
     </div>
 
     <!-- Now Playing dock: liquid glass console with controls, counter, and position bar -->
@@ -63,9 +69,8 @@
         <div class="dock-info">
             <div class="dock-title" id="dockTitle">—</div>
             <div class="dock-artist" id="dockArtist">—</div>
-            <div class="dock-progress"><div class="dock-progress-fill" id="dockProgressFill"></div></div>
+            <div class="dock-steps" id="dockSteps"></div>
         </div>
-        <div class="dock-counter"><span id="dockIndex">01</span><span class="dock-counter-sep">/</span><span id="dockTotal">29</span></div>
         <button class="dock-btn" id="dockNext" aria-label="Next album">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
@@ -90,7 +95,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=24"></script>
+    <script src="script.js?v=26"></script>
 </body>
 
 </html>

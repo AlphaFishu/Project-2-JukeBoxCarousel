@@ -10,6 +10,7 @@
     --amb-b: 20;
     /* Active-album palette injected via JS: UI accent + three aurora stage lights */
     --accent-rgb: 235, 235, 235;
+    --accent2-rgb: 200, 200, 215; /* secondary accent (hue-rotated) for the marquee */
     --aurora-c1: rgb(60, 40, 60);
     --aurora-c2: rgb(30, 40, 70);
     --aurora-c3: rgb(60, 50, 30);
@@ -132,9 +133,16 @@ body {
     font-size: clamp(7rem, 24vh, 15rem);
     line-height: 1;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.06);
-    -webkit-text-stroke: 1px rgba(var(--accent-rgb), 0.10);
+    /* Secondary accent (hue-rotated from the album color) so the giant text stays
+       visible against the album-accent background instead of blending into it */
+    color: rgba(var(--accent2-rgb), 0.13);
+    -webkit-text-stroke: 1px rgba(var(--accent2-rgb), 0.20);
     transition: opacity 0.45s ease;
+}
+
+/* The Wall fills the screen with covers — clear the marquee out of the way */
+body.body-wall .backdrop-marquee {
+    opacity: 0;
 }
 
 .backdrop-marquee.swapping {
@@ -382,24 +390,25 @@ body.has-scrolled .title-overlay {
     margin: 0;
 }
 
-.card-content .title.animate-marquee,
-.card-content .artist.animate-marquee {
-    max-width: none;
-    text-overflow: clip;
-    animation: text-marquee 7s ease-in-out infinite;
-    animation-delay: 250ms; /* Delay marquee animation by 250ms after landing */
+/* --- Looping text (YouTube Music style) --- */
+/* Overflowing titles scroll continuously in one direction: the text is duplicated
+   into two segments, each animating translateX(-100%), so as the first copy exits
+   left the second is already in place — a seamless conveyor loop with a brief
+   hold at the start of every cycle. */
+.loop-marquee {
+    max-width: none !important;
+    text-overflow: clip !important;
+    display: inline-flex;
 }
 
-@keyframes text-marquee {
-    0%, 20% {
-        transform: translateX(0);
-    }
-    50%, 75% {
-        transform: translateX(var(--scroll-dist, 0px));
-    }
-    95%, 100% {
-        transform: translateX(0);
-    }
+.loop-marquee .loop-seg {
+    padding-right: 48px; /* breathing room between the two copies */
+    animation: loop-scroll var(--loop-duration, 9s) linear infinite;
+}
+
+@keyframes loop-scroll {
+    0%, 12% { transform: translateX(0); }   /* hold, like YT Music */
+    100%    { transform: translateX(-100%); }
 }
 
 /* --- Premium Sliding Mode Selector (Liquid Glass) --- */
@@ -417,13 +426,15 @@ body.has-scrolled .title-overlay {
     border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 4px;
     border-radius: 32px;
+    max-width: calc(100vw - 24px);
     z-index: 9999; /* make sure it's on top of everything! */
-    /* Specular rim lighting: bright top-left edge, faint bottom-right bounce */
+    /* Specular rim lighting: bright top-left edge, faint bottom-right bounce.
+       Outer drop shadow softened per user request. */
     box-shadow:
         inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.50),
         inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.20),
         inset 0 0 14px rgba(255, 255, 255, 0.05),
-        0 12px 32px rgba(0, 0, 0, 0.45);
+        0 6px 16px rgba(0, 0, 0, 0.22);
 }
 
 /* Soft sheen sweeping across the top of the glass */
@@ -443,19 +454,24 @@ body.has-scrolled .title-overlay {
 
 .mode-slider {
     position: absolute;
-    top: 4px;
-    left: 4px;
+    /* Vertically centered regardless of border/padding math, so the gap between
+       the inner pill and the outer outline is identical top and bottom */
+    top: 50%;
+    left: 0;
     height: calc(100% - 8px);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.06) 100%);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 28px;
+    box-sizing: border-box;
+    /* Concentric corners: outer radius (32) minus the 4px gap + 1px border */
+    border-radius: 27px;
+    transform: translateY(-50%);
     transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), width 0.45s ease;
     z-index: 0;
     pointer-events: none;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.35),
         inset 0 -1px 0 rgba(255, 255, 255, 0.08),
-        0 3px 10px rgba(0, 0, 0, 0.35);
+        0 2px 6px rgba(0, 0, 0, 0.22);
 }
 
 .mode-btn {
@@ -476,7 +492,16 @@ body.has-scrolled .title-overlay {
     z-index: 1; /* render text above the slider background */
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    white-space: nowrap; /* hug one line; wrapping is reserved for tiny screens */
+}
+
+@media (max-width: 700px) {
+    .mode-btn {
+        white-space: normal;
+        padding: 8px 10px;
+    }
 }
 
 .mode-btn:active {
@@ -601,37 +626,31 @@ body.body-depth .now-playing-dock {
     text-overflow: ellipsis;
 }
 
-.dock-progress {
-    height: 3px;
-    margin-top: 7px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.14);
-    overflow: hidden;
+/* Segmented step indicator: one rounded-rectangle step per album. The highlight
+   skips from step to step as you scroll (carousel-style), and steps are clickable. */
+.dock-steps {
+    display: flex;
+    gap: 3px;
+    margin-top: 8px;
 }
 
-.dock-progress-fill {
-    height: 100%;
-    width: 0%;
+.dock-step {
+    flex: 1 1 0;
+    height: 4px;
     border-radius: 2px;
+    background: rgba(255, 255, 255, 0.16);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dock-step:hover {
+    background: rgba(255, 255, 255, 0.40);
+}
+
+.dock-step.active {
     background: rgb(var(--accent-rgb));
-    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.9);
-    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.8s ease;
-}
-
-.dock-counter {
-    flex-shrink: 0;
-    min-width: 56px;
-    text-align: center;
-    font-family: 'Bebas Neue', 'Outfit', sans-serif;
-    font-size: 1.35rem;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-
-.dock-counter-sep {
-    margin: 0 3px;
-    color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8);
+    transform: scaleY(1.7);
 }
 
 /* --- CD-R Styling (Cover Flow Mode Only) --- */
@@ -730,9 +749,17 @@ body.body-coverflow .vinyl-record {
 
 /* --- Cover Flow Mode Specific Layout --- */
 body.body-coverflow .card,
-body.body-depth .card {
+body.body-depth .card,
+body.body-wall .card,
+body.body-helix .card {
     /* Disable transitions to prevent interpolation lag in requestAnimationFrame loops */
     transition: none !important;
+}
+
+/* Wall & Helix scale cards from their center so grid/spiral math stays exact */
+body.body-wall .card,
+body.body-helix .card {
+    transform-origin: center center;
 }
 
 /* Custom depth mode card corner and shadow per user request */
@@ -924,7 +951,7 @@ body.body-depth .details-panel {
 .track-item {
     display: flex;
     align-items: center;
-    padding: 8px 11px; /* Scaled from 10px 14px */
+    padding: 8px 0; /* No horizontal padding: covers align flush with section labels */
     border-radius: 8px; /* Scaled from 10px */
     cursor: pointer;
     background: transparent;

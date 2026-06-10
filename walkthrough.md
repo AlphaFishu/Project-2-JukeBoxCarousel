@@ -1,4 +1,20 @@
-# Walkthrough: "On Stage" Visual Redesign (v2.9)
+# Walkthrough: Precision Pass + Wall & Helix Modes (v2.92)
+
+Seven user-curated refinements:
+
+1. **Pill geometry fixed** — the slider is now vertically centered via `top: 50% / translateY(-50%)` and horizontally positioned by `offsetLeft` in the same reference frame (no magic `-5px`), with concentric corner radii (outer 32 − gap 5 = inner 27).
+2. **Marquee contrast color** — the giant backdrop text uses a secondary accent (`--accent2-rgb`, album hue rotated 150°) so it stays visible against the album-accent background instead of dissolving into it.
+3. **YouTube-Music-style looping titles** — overflowing text (card titles/artists, dock title) duplicates into two segments scrolling `translateX(-100%)` in a seamless conveyor with a 12% hold each cycle; speed is constant (~36px/s) regardless of length. Replaces the old back-and-forth marquee.
+4. **Dock: segmented steps** — the X/X counter and progress bar are gone; a row of 28 rounded-rect steps (one per album) shows loop position. The highlight skips step-to-step while scrolling, and every step is clickable (shortest-path jump) with a hover state and tooltip.
+5. **Track list alignment** — removed horizontal padding on `.track-item` so covers align flush with the section labels.
+6. **Hugged selector** — labels are `white-space: nowrap` (one line always), wrapping only below 700px; outer shadow softened from 0.45 to 0.22 alpha.
+7. **Two new modes**:
+   - **Wall** — all 28 covers in a centered 7×4 grid; scrolling skips the spotlight cell-to-cell (active pops via pure scale + glow; translateZ is avoided since perspective would throw edge cells off-screen).
+   - **Helix** — covers spiral up a 3D tower: each card is placed by `rotateY(θ) translateZ(R) rotateY(-θ)` (position on the circle, then billboarded back to face the viewer) and rises 52px per step; scrolling rides the camera along the spiral.
+
+---
+
+# Previous: "On Stage" Visual Redesign (v2.9)
 
 > Note: kept on the 2.x line intentionally — the major version (v3) is reserved for a larger leap once the redesign direction is curated and locked in.
 
