@@ -1,37 +1,58 @@
-# Walkthrough: Cover Flow Spacing, Dynamic Desaturation & Modern Albums (v2.7)
+# Walkthrough: Expanded Library + Real Liquid Glass Refraction, Film Grain & Album-Colored Aura (v2.8)
 
-We have updated the jukebox library from 16 to 28 albums by adding 12 modern tracks (including Kendrick Lamar, Charli xcx, SZA, Olivia Rodrigo, Taylor Swift, Miley Cyrus, Tate McRae, Hozier, Beyoncé, and Lady Gaga & Bruno Mars). The single "Enemy" by Imagine Dragons & JID (from the Arcane series) has been placed as the first item in the list (index 0) so that it serves as the landing song when the website is opened. The remaining albums are shuffled and interleaved throughout the list. All existing 16 tracks remain preserved in the Jukebox.
+This release combines two streams of work: the **library expansion to 29 albums** (with "Enemy" as the landing track) and a **visual overhaul** that replaces the fake "frosted-only" glass with **true Apple-style Liquid Glass** — the background actually *refracts* (bends) through the rim of the mode selector like curved glass, with subtle chromatic aberration. It also adds a film-grain finish, a static studio-light reflection on the spinning vinyl, a self-dismissing glass scroll hint, and fixes a long-standing bug where the active card's "Apple aura" always glowed grey instead of the album's color.
 
 ---
 
 ## Key Refinements
 
-### 1. Expanded Library & Interleaved/Shuffled Order (v2.7)
-* **28 Total Albums**: Added 12 modern entries to the existing 16 albums, increasing the scrolling range.
-* **Landing Track**: "Enemy" by Imagine Dragons & JID is placed at index 0, ensuring it is the active, centered card on load.
-* **Shuffled Interleaving**: The rest of the new tracks (e.g. BRAT, Not Like Us, GUTS, Lover, Too Sweet) are shuffled and interleaved with the classics to provide a diverse selection.
+### 1. Expanded Library & Interleaved/Shuffled Order
+* **29 Total Albums**: Added modern entries (Kendrick Lamar, Charli xcx, SZA, Olivia Rodrigo, Taylor Swift, Miley Cyrus, Tate McRae, Hozier, Beyoncé, Lady Gaga & Bruno Mars, and more) to the existing classics.
+* **Landing Track**: "Enemy" by Imagine Dragons & JID (from the Arcane series) is placed at index 0, ensuring it is the active, centered card on load.
+* **Shuffled Interleaving**: New tracks (e.g. BRAT, Not Like Us, GUTS, Lover) are interleaved with the classics for a diverse scroll.
 * **Premium Asset Retrieval**: All new covers use real high-resolution CORS-friendly `mzstatic.com` CDN images, allowing automatic, real-time background color extraction via Canvas.
 
-### 2. Expanded Responsive Spacing (0% Edge Margin)
-* **Divisor Adjustment**: Spacing step divisor is set to `3.2` in [script.js](script.js).
-* **Margin Optimization**: Outer cards align near the **0%** screen width margin, reducing side whitespace to look clean and expansive.
+### 2. True Liquid Glass Refraction (the big one)
+Frosted glass is just `backdrop-filter: blur()`. Real liquid glass needs **light refraction**, which CSS alone cannot do — but Chromium supports referencing an **SVG filter** inside `backdrop-filter`:
 
-### 3. Saturated Rest State & Less Grey Fast Scroll
-* **Vibrant Resting Color**: Capped static saturation (`maxSat`) at `0.92`, bringing back rich, vibrant colors.
-* **Less Grey Fast Scroll**: Increased the high-speed saturation floor from `0.12` to `0.18` so the background keeps a subtle, colorful tint rather than fading into a flat gray.
-* **4% Contrast Darkening**: Multiplied the final Cover Flow background color by `0.96` to scale it down by 4% at rest.
-* **High-Speed Darkening**: Clamp brightness scaling down to `0.86` under rapid scrolling to keep the background dim and low-contrast.
+```css
+backdrop-filter: url(#lens-selector) blur(1.5px) saturate(1.7) brightness(1.06);
+```
 
-### 4. Premium Inline Line SVGs & Renaming
-* **Renamed Mode**: "Cover Flow" has been renamed to **Vinyl Records** in [index.html](index.html).
-* **Emojis to SVGs**: Pill selector buttons are now styled with beautiful, minimal line SVGs (Turntable, Vinyl Disc, and 3D Layers) styled via `.btn-icon-svg` in [style.css](style.css).
+How the lens works (all generated dynamically in [script.js](script.js)):
+
+1. **Displacement map** — a tiny SVG image sized exactly to the element: the **Red channel encodes horizontal shift** and the **Blue channel encodes vertical shift** (127 = neutral). It is built from a black base + red X-gradient + blue Y-gradient (screen-blended), with a **blurred neutral core** so only the rim band ("bezel") bends light — the profile of a convex lens.
+2. **`<feDisplacementMap>`** uses that map to bend whatever is behind the element. Pixels near the rim sample *outside* the pill, compressing the surrounding scene into the edge — exactly what a real lens does.
+3. **Chromatic aberration** — the displacement runs 3× at slightly different strengths for the R/G/B channels (`feColorMatrix` isolates each, `feBlend mode="screen"` recombines), producing the faint color fringing of Apple's material.
+4. **Specular rim lighting** — layered inset `box-shadow`s fake a bright top-left light edge and a faint bottom-right bounce, plus a diagonal sheen gradient in `::before`.
+
+The filter is rebuilt on resize/font-load so the map always matches the pill's measured size. **Safari/Firefox fall back automatically** to a quality frosted look (`blur(24px) saturate(1.7)` + the same specular rims) since only Chromium supports `url()` filters in `backdrop-filter`.
+
+### 3. Album-Colored Active Card Aura (bug fix)
+`.card::before` glowed using `rgba(var(--amb-r), ...)` — but those variables only existed on `:root` as `20,20,20`, so the "Apple aura" was always near-black. Now:
+* `applyColorTheory()` sets `--amb-r/g/b` **on each card element**, so the aura glows in the album's dominant color.
+* When the canvas-based vibrant color extraction resolves, it **upgrades** each card's `dataset.dom*` and CSS vars from the hand-tuned fallback to the real artwork color — so the Jukebox/Rolling Album ambient backgrounds match the actual covers too.
+
+### 4. Film Grain Finish
+A fixed full-screen overlay (`.grain-overlay`) tiles an inline SVG `feTurbulence` noise texture at `opacity: 0.05` with `mix-blend-mode: overlay` — an analog, anti-banding finish over the dynamic gradients (z-index 9998, under the selector).
+
+### 5. Vinyl Studio-Light Reflection
+`body.body-coverflow .vinyl-wrapper::after` adds a **static** radial + conic specular highlight over the record. Because the highlight stays fixed while the grooves spin underneath, it reads like real light on a rotating disc.
+
+### 6. Self-Dismissing Glass Scroll Hint
+"TRY SCROLLING ON TRACKPAD!" became a liquid-glass pill chip ("Scroll or swipe to explore") with the same lens filter. On the first wheel/touch scroll, `body.has-scrolled` fades it out — instructions should leave once they're obeyed.
+
+### 7. Micro-Interactions
+* Mode buttons get a press-down `scale(0.95)` and a text shadow for legibility over bright album backdrops.
+* Cards show `cursor: pointer` and a gentle `brightness(1.08)` lift on hover (safe because JS owns `transform`/`filter` on `.card`, while the hover targets `.card-content`).
 
 ---
 
 ## How to Verify
-1. Open the local site at [http://localhost:8000](http://localhost:8000).
-2. **Landing Album**: Verify that "Enemy" (from Arcane) by Imagine Dragons & JID is the active, centered landing card when the page is loaded.
-3. **Library Scale**: Scroll left/right and verify that there are 28 unique albums in the rotation.
-4. **Layout Calculations**: Verify that in Jukebox (Cylinder) mode, the cylinder diameter auto-scales (larger `zTranslate` of ~1206px) to place all 28 cards along the boundary without overlapping.
-5. **Vibrant Ambient Colors**: Stop on any of the new modern albums (like the neon-green *BRAT* cover). Verify that the ambient background updates instantly to the correct dominant hue.
-6. **Live Lyrics**: Choose a track and check that the song listings and live lyrics display properly.
+1. Open the local site at [http://localhost:8000](http://localhost:8000) in **Chrome** (refraction) and Safari (frosted fallback). Hard-refresh (Cmd+Shift+R) to bust caches.
+2. **Library**: Confirm "Enemy" is the landing card and the carousel contains all 29 albums.
+3. **Refraction**: In Vinyl Records mode, scroll so colorful covers pass behind the top selector — the background should visibly *bend* through the pill's rim with a hint of color fringing, not just blur.
+4. **Aura**: In Jukebox mode, land on Thriller (red glow), Purple Rain (purple glow), Toxic (green glow) — the halo behind the active card should match each album.
+5. **Vinyl sheen**: Watch the spinning record — the bright highlight stays fixed at the upper-left while grooves rotate beneath it.
+6. **Hint chip**: Reload, see the glass chip below the selector, scroll once, watch it fade away.
+7. **Grain**: Look closely at the gradient background — a fine static grain texture replaces flat color banding.

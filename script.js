@@ -564,6 +564,7 @@ window.addEventListener('wheel', (e) => {
     if (!isScrollable) {
         e.preventDefault();
         targetRotation += (e.deltaY * scrollSensitivity);
+        document.body.classList.add('has-scrolled'); // dismiss the scroll hint chip
     }
 }, { passive: false });
 
@@ -581,6 +582,7 @@ window.addEventListener('touchmove', (e) => {
         const deltaY = touchStartY - touchCurrentY;
         targetRotation += (deltaY * 0.8); // Slightly different sensitivity for touch
         touchStartY = touchCurrentY;
+        document.body.classList.add('has-scrolled'); // dismiss the scroll hint chip
     }
 }, { passive: false });
 
@@ -599,6 +601,13 @@ function applyColorTheory(trackData, cardElement) {
     cardElement.dataset.domR = r;
     cardElement.dataset.domG = g;
     cardElement.dataset.domB = b;
+
+    // Expose the dominant color as element-scoped CSS vars so the active-card
+    // aura (.card::before) actually glows in the album's color instead of the
+    // grey :root fallback values
+    cardElement.style.setProperty('--amb-r', r);
+    cardElement.style.setProperty('--amb-g', g);
+    cardElement.style.setProperty('--amb-b', b);
 
     const title = cardElement.querySelector('.title');
     const artist = cardElement.querySelector('.artist');
@@ -732,9 +741,20 @@ function extractVibrantColor(imgUrl, callback, fallbackColor) {
     img.src = imgUrl;
 }
 
-// Pre-extract colors for all tracks on startup to cache them
-tracks.forEach(track => {
-    extractVibrantColor(track.cover, () => {}, track.color);
+// Pre-extract colors for all tracks on startup to cache them.
+// When the real vibrant color arrives, upgrade the card's hand-tuned fallback color
+// so the ambient background and active-card aura match the actual artwork.
+tracks.forEach((track, index) => {
+    extractVibrantColor(track.cover, (color) => {
+        const card = carousel.children[index];
+        if (!card) return;
+        card.dataset.domR = color[0];
+        card.dataset.domG = color[1];
+        card.dataset.domB = color[2];
+        card.style.setProperty('--amb-r', color[0]);
+        card.style.setProperty('--amb-g', color[1]);
+        card.style.setProperty('--amb-b', color[2]);
+    }, track.color);
 });
 
 // Helper to adjust saturation of an RGB color (interpolates towards its relative luminance grayscale value)
@@ -1312,3 +1332,118 @@ function updateCarousel() {
 
 // Start the animation loop
 updateCarousel();
+
+// ============================================================================
+// Liquid Glass: TRUE light refraction (not just frosted blur)
+// ----------------------------------------------------------------------------
+// How it works:
+//   1. We generate a "displacement map" image sized exactly to the element:
+//      the Red channel encodes horizontal shift, the Blue channel encodes
+//      vertical shift (127 = no shift). The map is neutral grey in the middle
+//      and ramps to full shift at the edges — the profile of a convex lens.
+//   2. An SVG <feDisplacementMap> uses that map to bend whatever is BEHIND the
+//      element (via backdrop-filter: url(#filter)), so the background visually
+//      refracts through the rim like real curved glass.
+//   3. We run the displacement 3 times at slightly different strengths for the
+//      R / G / B channels and screen-blend them back together — that produces
+//      the faint chromatic aberration (color fringing) Apple's material has.
+// Only Chromium supports SVG filters inside backdrop-filter, so Safari and
+// Firefox keep the frosted-blur fallback declared in style.css.
+// ============================================================================
+const lensDefs = document.getElementById('liquidGlassDefs');
+const supportsLensRefraction = !!window.chrome &&
+    typeof CSS !== 'undefined' &&
+    CSS.supports('backdrop-filter', 'url(#lens)');
+
+function buildLensFilter(id, width, height, radius, bezel, strength, aberration) {
+    const w = Math.round(width);
+    const h = Math.round(height);
+    const coreRadius = Math.max(0, radius - bezel);
+
+    // The displacement map: black base + red X-gradient + blue Y-gradient,
+    // with a blurred neutral core so only the rim (the "bezel") refracts
+    const mapSvg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">` +
+        `<defs>` +
+        `<linearGradient id="gx" x1="0" y1="0" x2="1" y2="0">` +
+        `<stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#f00"/>` +
+        `</linearGradient>` +
+        `<linearGradient id="gy" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#00f"/>` +
+        `</linearGradient>` +
+        `<filter id="soften" x="-50%" y="-50%" width="200%" height="200%">` +
+        `<feGaussianBlur stdDeviation="${(bezel / 2).toFixed(1)}"/>` +
+        `</filter>` +
+        `</defs>` +
+        `<rect width="${w}" height="${h}" fill="#000"/>` +
+        `<rect width="${w}" height="${h}" fill="url(#gx)" style="mix-blend-mode:screen"/>` +
+        `<rect width="${w}" height="${h}" fill="url(#gy)" style="mix-blend-mode:screen"/>` +
+        `<rect x="${bezel}" y="${bezel}" width="${w - bezel * 2}" height="${h - bezel * 2}" ` +
+        `rx="${coreRadius}" fill="rgb(127,0,127)" filter="url(#soften)"/>` +
+        `</svg>`;
+    const mapHref = `data:image/svg+xml,${encodeURIComponent(mapSvg)}`;
+
+    let filter = document.getElementById(id);
+    if (!filter) {
+        filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+        filter.setAttribute('id', id);
+        lensDefs.appendChild(filter);
+    }
+    filter.setAttribute('filterUnits', 'userSpaceOnUse');
+    filter.setAttribute('color-interpolation-filters', 'sRGB');
+    filter.setAttribute('x', '0');
+    filter.setAttribute('y', '0');
+    filter.setAttribute('width', w);
+    filter.setAttribute('height', h);
+
+    // Refract each color channel at a slightly different strength, then
+    // screen-blend them back together for chromatic aberration on the rim
+    filter.innerHTML =
+        `<feImage href="${mapHref}" x="0" y="0" width="${w}" height="${h}" result="map"/>` +
+        `<feDisplacementMap in="SourceGraphic" in2="map" scale="${strength + aberration}" xChannelSelector="R" yChannelSelector="B" result="dispR"/>` +
+        `<feColorMatrix in="dispR" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="chanR"/>` +
+        `<feDisplacementMap in="SourceGraphic" in2="map" scale="${strength}" xChannelSelector="R" yChannelSelector="B" result="dispG"/>` +
+        `<feColorMatrix in="dispG" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="chanG"/>` +
+        `<feDisplacementMap in="SourceGraphic" in2="map" scale="${strength - aberration}" xChannelSelector="R" yChannelSelector="B" result="dispB"/>` +
+        `<feColorMatrix in="dispB" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="chanB"/>` +
+        `<feBlend in="chanR" in2="chanG" mode="screen" result="blendRG"/>` +
+        `<feBlend in="blendRG" in2="chanB" mode="screen"/>`;
+}
+
+function applyLiquidGlass(el, id, options = {}) {
+    if (!el || !lensDefs) return;
+    const rect = el.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const radius = options.radius ?? rect.height / 2; // both glass elements are pills
+    const bezel = options.bezel ?? Math.min(15, rect.height * 0.34);
+    const strength = options.strength ?? 64;
+    const aberration = options.aberration ?? 10;
+
+    buildLensFilter(id, rect.width, rect.height, radius, bezel, strength, aberration);
+
+    // url() refraction first, then a whisper of blur to soften the bent edges,
+    // then saturate/brighten so the glass "lifts" colors like Apple's material
+    el.style.backdropFilter = `url(#${id}) blur(1.5px) saturate(1.7) brightness(1.06)`;
+}
+
+function refreshLiquidGlass() {
+    if (!supportsLensRefraction) return;
+    applyLiquidGlass(document.querySelector('.mode-selector'), 'lens-selector');
+    applyLiquidGlass(document.querySelector('.title-overlay p'), 'lens-hint', { strength: 48, aberration: 8 });
+}
+
+if (supportsLensRefraction) {
+    window.addEventListener('load', refreshLiquidGlass);
+
+    let lensResizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(lensResizeTimer);
+        lensResizeTimer = setTimeout(refreshLiquidGlass, 150);
+    });
+
+    if (document.fonts) {
+        document.fonts.ready.then(refreshLiquidGlass);
+    }
+    refreshLiquidGlass();
+}
