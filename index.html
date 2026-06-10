@@ -9,10 +9,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=24">
+    <link rel="stylesheet" href="style.css?v=25">
 </head>
 
 <body>
+    <!-- Cinematic intro curtain: lifts to reveal the stage (click to skip) -->
+    <div class="intro-curtain" id="introCurtain">
+        <div class="intro-logo">JUKEBOX</div>
+        <div class="intro-sub">28 Albums &middot; 3 Stages &middot; One Spotlight</div>
+    </div>
+
     <!-- Film grain overlay for a subtle analog texture across the whole app -->
     <div class="grain-overlay"></div>
 
@@ -39,6 +45,27 @@
     <div class="backdrop-marquee" id="backdropMarquee" aria-hidden="true">
         <span id="marqueeText"></span>
     </div>
+
+    <!-- Volumetric spotlight beams sweeping over the stage -->
+    <div class="stage-beams" aria-hidden="true">
+        <div class="stage-beam beam-left"></div>
+        <div class="stage-beam beam-right"></div>
+    </div>
+
+    <!-- Stage floor: accent-colored light pool under the performer -->
+    <div class="stage-floor" aria-hidden="true"></div>
+
+    <!-- Editorial stage number (bottom-left) -->
+    <div class="stage-side" aria-hidden="true">
+        <div class="stage-side-label">On Stage</div>
+        <div class="stage-side-number" id="stageSideNumber">01</div>
+    </div>
+
+    <!-- Floating dust motes drifting through the light (canvas) -->
+    <canvas class="dust-canvas" id="dustCanvas" aria-hidden="true"></canvas>
+
+    <!-- Cursor spotlight: a soft light pool that follows the mouse -->
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
     <!-- Cinematic corner vignette -->
     <div class="vignette-overlay" aria-hidden="true"></div>
@@ -90,7 +117,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=24"></script>
+    <script src="script.js?v=25"></script>
 </body>
 
 </html>

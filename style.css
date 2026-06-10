@@ -154,6 +154,214 @@ body.body-depth .backdrop-marquee {
     background: radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.42) 100%);
 }
 
+/* --- Intro Curtain --- */
+.intro-curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: #0a0a0e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: transform 0.95s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.intro-curtain.lifted {
+    transform: translateY(-100%);
+}
+
+/* Bottom edge of the curtain glows in the accent like stage light leaking out */
+.intro-curtain::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.9), transparent);
+    box-shadow: 0 0 24px 4px rgba(var(--accent-rgb), 0.5);
+}
+
+.intro-logo {
+    font-family: 'Bebas Neue', 'Outfit', sans-serif;
+    font-size: clamp(4.5rem, 17vw, 13rem);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    /* Light sweep: a bright band travels across the lettering */
+    background: linear-gradient(100deg,
+            rgba(255, 255, 255, 0.16) 25%,
+            #ffffff 40%,
+            #d8d8e2 46%,
+            rgba(255, 255, 255, 0.16) 62%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: logo-sheen 2.2s ease-in-out infinite;
+}
+
+@keyframes logo-sheen {
+    0%   { background-position: 130% 0; }
+    100% { background-position: -130% 0; }
+}
+
+.intro-sub {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+/* --- Volumetric Spotlight Beams --- */
+.stage-beams {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    transition: opacity 0.6s ease;
+}
+
+.stage-beam {
+    position: absolute;
+    top: -12vh;
+    width: 26vw;
+    height: 132vh;
+    background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.22), rgba(var(--accent-rgb), 0) 72%);
+    clip-path: polygon(43% 0, 57% 0, 100% 100%, 0% 100%);
+    filter: blur(10px);
+    mix-blend-mode: screen;
+    transform-origin: 50% 0;
+    will-change: transform;
+}
+
+.stage-beam.beam-left {
+    left: 10vw;
+    animation: beam-sway-left 11s ease-in-out infinite alternate;
+}
+
+.stage-beam.beam-right {
+    right: 10vw;
+    animation: beam-sway-right 14s ease-in-out infinite alternate;
+}
+
+@keyframes beam-sway-left {
+    from { transform: rotate(9deg);  opacity: 0.7; }
+    to   { transform: rotate(20deg); opacity: 1; }
+}
+
+@keyframes beam-sway-right {
+    from { transform: rotate(-9deg);  opacity: 1; }
+    to   { transform: rotate(-20deg); opacity: 0.65; }
+}
+
+body.body-depth .stage-beams {
+    opacity: 0;
+}
+
+/* --- Stage Floor Light Pool --- */
+.stage-floor {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 32vh;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 60% 95% at 50% 106%,
+            rgba(var(--accent-rgb), 0.26),
+            rgba(var(--accent-rgb), 0.06) 55%,
+            rgba(var(--accent-rgb), 0) 78%);
+    transition: opacity 0.6s ease;
+}
+
+body.body-depth .stage-floor {
+    opacity: 0.35;
+}
+
+/* --- Editorial Stage Number (bottom-left) --- */
+.stage-side {
+    position: fixed;
+    left: 30px;
+    bottom: 30px;
+    z-index: 1;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.5s ease;
+}
+
+.stage-side-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0 0 4px 4px;
+}
+
+.stage-side-number {
+    font-family: 'Bebas Neue', 'Outfit', sans-serif;
+    font-size: 8rem;
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(var(--accent-rgb), 0.55);
+}
+
+body.body-depth .stage-side,
+body.body-depth .cursor-glow {
+    opacity: 0;
+}
+
+@media (max-width: 980px) {
+    .stage-side { display: none; }
+}
+
+/* --- Floating Dust Motes --- */
+.dust-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 3; /* just in front of the 3D stage, behind the UI chrome */
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+/* --- Cursor Spotlight --- */
+.cursor-glow {
+    position: fixed;
+    top: -170px;
+    left: -170px;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    z-index: 9995;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-rgb), 0) 65%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    will-change: transform;
+}
+
+body.cursor-active .cursor-glow {
+    opacity: 1;
+}
+
+/* --- Landing Pop: the album takes the stage with a tiny bounce --- */
+.card-content.landed {
+    animation: card-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes card-pop {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    35%  { transform: translate3d(0, 0, 0) scale(1.035); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
 
 
 .sticky-container {

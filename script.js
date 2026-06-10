@@ -1366,6 +1366,13 @@ function updateCarousel() {
         backdropMarqueeEl.style.transform = `translateX(calc(-50% + ${drift.toFixed(1)}px))`;
     }
 
+    // Cursor spotlight trails the mouse with a soft lag
+    if (cursorGlowEl) {
+        glowX = lerp(glowX, mouseCX, 0.16);
+        glowY = lerp(glowY, mouseCY, 0.16);
+        cursorGlowEl.style.transform = `translate(${glowX.toFixed(1)}px, ${glowY.toFixed(1)}px)`;
+    }
+
     requestAnimationFrame(updateCarousel);
 }
 
@@ -1423,7 +1430,21 @@ function updateNowPlaying(index) {
     if (dockIndexEl) dockIndexEl.textContent = String(index + 1).padStart(2, '0');
     if (dockProgressFillEl) dockProgressFillEl.style.width = `${((index + 1) / totalCards) * 100}%`;
 
+    const stageSideNumberEl = document.getElementById('stageSideNumber');
+    if (stageSideNumberEl) stageSideNumberEl.textContent = String(index + 1).padStart(2, '0');
+
     setAccentPalette(extractedColorCache[track.cover] || track.color);
+
+    // Landing pop: only when the scroll is settling, so fast flicks stay smooth
+    if (Math.abs(targetRotation - currentRotation) < 40) {
+        const activeCardEl = carousel.children[index];
+        const content = activeCardEl && activeCardEl.querySelector('.card-content');
+        if (content) {
+            content.classList.remove('landed');
+            void content.offsetWidth; // restart the animation
+            content.classList.add('landed');
+        }
+    }
 
     // Crossfade the giant marquee to the new artist
     if (backdropMarqueeEl && marqueeTextEl) {
@@ -1444,10 +1465,74 @@ if (dockNextBtn) dockNextBtn.addEventListener('click', () => { targetRotation +=
 
 // Cursor parallax: the 3D camera gently follows the mouse (lerped in the rAF loop)
 let mouseNX = 0, mouseNY = 0, povX = 50, povY = 50;
+let mouseCX = window.innerWidth / 2, mouseCY = window.innerHeight / 2;
+let glowX = mouseCX, glowY = mouseCY;
+const cursorGlowEl = document.getElementById('cursorGlow');
 window.addEventListener('mousemove', (e) => {
     mouseNX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
+    mouseCX = e.clientX;
+    mouseCY = e.clientY;
+    document.body.classList.add('cursor-active');
 });
+
+// --- Intro curtain: lifts after a beat, or instantly on click ---
+const introEl = document.getElementById('introCurtain');
+function dismissIntro() {
+    if (!introEl || introEl.classList.contains('lifted')) return;
+    introEl.classList.add('lifted');
+    setTimeout(() => introEl.remove(), 1100);
+}
+if (introEl) {
+    introEl.addEventListener('click', dismissIntro);
+    setTimeout(dismissIntro, 2300);
+}
+
+// --- Floating dust motes: tiny particles drifting up through the stage light ---
+const dustCanvas = document.getElementById('dustCanvas');
+if (dustCanvas) {
+    const dctx = dustCanvas.getContext('2d');
+    let DW = 0, DH = 0;
+
+    function resizeDust() {
+        DW = dustCanvas.width = window.innerWidth;
+        DH = dustCanvas.height = window.innerHeight;
+    }
+    resizeDust();
+    window.addEventListener('resize', resizeDust);
+
+    function newMote(randomY) {
+        return {
+            x: Math.random(),
+            y: randomY ? Math.random() : 1.04,
+            r: 0.6 + Math.random() * 1.7,
+            rise: 0.00012 + Math.random() * 0.00033,
+            sway: Math.random() * Math.PI * 2,
+            swaySpeed: 0.002 + Math.random() * 0.004,
+            alpha: 0.05 + Math.random() * 0.28,
+            depth: 0.3 + Math.random() * 0.7 // parallax strength vs the mouse
+        };
+    }
+
+    const motes = Array.from({ length: 55 }, () => newMote(true));
+
+    (function drawDust() {
+        dctx.clearRect(0, 0, DW, DH);
+        dctx.fillStyle = '#ffffff';
+        for (const m of motes) {
+            m.y -= m.rise;
+            m.sway += m.swaySpeed;
+            if (m.y < -0.04) Object.assign(m, newMote(false));
+            const px = (m.x + Math.sin(m.sway) * 0.012) * DW - mouseNX * 18 * m.depth;
+            const py = m.y * DH - mouseNY * 12 * m.depth;
+            dctx.globalAlpha = m.alpha;
+            dctx.beginPath();
+            dctx.arc(px, py, m.r, 0, 6.2832);
+            dctx.fill();
+        }
+        requestAnimationFrame(drawDust);
+    })();
+}
 
 // Start the animation loop
 updateCarousel();

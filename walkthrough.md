@@ -1,4 +1,19 @@
-# Walkthrough: "On Stage" Visual Redesign (v2.9)
+# Walkthrough: "Spotlight" (v2.91)
+
+v2.91 makes the stage literal. New since v2.9:
+
+1. **Intro curtain** — black curtain with a light-sweep "JUKEBOX" logotype (Bebas Neue) and an accent glow line at its hem; lifts automatically after ~2.3s or instantly on click, like a theater curtain.
+2. **Volumetric spotlight beams** — two blurred, clip-path light cones sway slowly over the stage in the album's accent color (`mix-blend-mode: screen` so they add light).
+3. **Stage floor light pool** — an accent-colored elliptical glow rises from the bottom edge, grounding the cards on a "floor".
+4. **Floating dust motes** — a lightweight canvas particle system (55 motes) drifting upward through the light, with per-particle mouse parallax by depth.
+5. **Cursor spotlight** — a soft accent light pool trails the cursor (lerped), like an usher's flashlight.
+6. **Editorial stage number** — a giant outlined Bebas number bottom-left ("ON STAGE / 06"), stroked in the accent color.
+7. **Landing pop** — when scrolling settles on an album, its artwork does a tiny spring scale bounce (suppressed during fast flicks).
+8. All of it is mode-aware: beams, floor, side number, cursor glow and dock fade out in Rolling Album mode.
+
+---
+
+# Previous: "On Stage" Visual Redesign (v2.9)
 
 > Note: kept on the 2.x line intentionally — the major version (v3) is reserved for a larger leap once the redesign direction is curated and locked in.
 
