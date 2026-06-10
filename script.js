@@ -754,6 +754,8 @@ tracks.forEach((track, index) => {
         card.style.setProperty('--amb-r', color[0]);
         card.style.setProperty('--amb-g', color[1]);
         card.style.setProperty('--amb-b', color[2]);
+        // If this album is currently on stage, upgrade the live accent/aurora palette too
+        if (index === lastDockIndex) setAccentPalette(color);
     }, track.color);
 });
 
@@ -1067,6 +1069,7 @@ function updateCarousel() {
     if (activeIndex !== lastActiveCardIndex) {
         lastActiveCardIndex = activeIndex;
         updateActiveCardMarquees(activeIndex);
+        updateNowPlaying(activeIndex);
     }
 
     const cards = document.querySelectorAll('.card');
@@ -1351,8 +1354,100 @@ function updateCarousel() {
         }
     }
 
+    // Cursor parallax: ease the perspective origin toward the mouse so the whole
+    // 3D stage subtly re-angles itself toward the viewer
+    povX = lerp(povX, 50 + mouseNX * 5, 0.06);
+    povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
+    if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
+
+    // Kinetic marquee: drifts opposite to scroll plus a slight mouse offset
+    if (backdropMarqueeEl) {
+        const drift = -normalizedRotation * 0.8 - mouseNX * 14;
+        backdropMarqueeEl.style.transform = `translateX(calc(-50% + ${drift.toFixed(1)}px))`;
+    }
+
     requestAnimationFrame(updateCarousel);
 }
+
+// ============================================================================
+// Stage system: Now Playing dock, aurora palette, kinetic marquee, parallax
+// ============================================================================
+const dockTitleEl = document.getElementById('dockTitle');
+const dockArtistEl = document.getElementById('dockArtist');
+const dockIndexEl = document.getElementById('dockIndex');
+const dockTotalEl = document.getElementById('dockTotal');
+const dockProgressFillEl = document.getElementById('dockProgressFill');
+const backdropMarqueeEl = document.getElementById('backdropMarquee');
+const marqueeTextEl = document.getElementById('marqueeText');
+const sceneEl = document.querySelector('.scene');
+let marqueeSwapTimer = null;
+let lastDockIndex = -1;
+
+if (dockTotalEl) dockTotalEl.textContent = String(totalCards).padStart(2, '0');
+
+// HSL -> RGB helper (h: 0-360, s/l: 0-100) — companion to rgbToHsl above
+function hslToRgb(h, s, l) {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+}
+
+// Derive the UI accent + three aurora stage-light colors from one album color
+function setAccentPalette(rgb) {
+    const [h, s] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+    const root = document.documentElement.style;
+
+    // Accent stays bright and readable regardless of how dark the album art is
+    const accent = hslToRgb(h, Math.min(85, Math.max(45, s)), 62);
+    root.setProperty('--accent-rgb', accent.join(', '));
+
+    // Stage lights: base hue plus two companions rotated around the color wheel,
+    // kept dim so they read as atmosphere rather than flat color fill
+    const c1 = hslToRgb(h, Math.min(80, s + 10), 30);
+    const c2 = hslToRgb((h + 50) % 360, Math.min(75, s + 5), 24);
+    const c3 = hslToRgb((h + 310) % 360, Math.min(70, s), 26);
+    root.setProperty('--aurora-c1', `rgb(${c1.join(',')})`);
+    root.setProperty('--aurora-c2', `rgb(${c2.join(',')})`);
+    root.setProperty('--aurora-c3', `rgb(${c3.join(',')})`);
+}
+
+function updateNowPlaying(index) {
+    const track = tracks[index];
+    if (!track || index === lastDockIndex) return;
+    lastDockIndex = index;
+
+    if (dockTitleEl) dockTitleEl.textContent = track.title;
+    if (dockArtistEl) dockArtistEl.textContent = track.artist;
+    if (dockIndexEl) dockIndexEl.textContent = String(index + 1).padStart(2, '0');
+    if (dockProgressFillEl) dockProgressFillEl.style.width = `${((index + 1) / totalCards) * 100}%`;
+
+    setAccentPalette(extractedColorCache[track.cover] || track.color);
+
+    // Crossfade the giant marquee to the new artist
+    if (backdropMarqueeEl && marqueeTextEl) {
+        backdropMarqueeEl.classList.add('swapping');
+        clearTimeout(marqueeSwapTimer);
+        marqueeSwapTimer = setTimeout(() => {
+            marqueeTextEl.textContent = track.artist.toUpperCase();
+            backdropMarqueeEl.classList.remove('swapping');
+        }, 380);
+    }
+}
+
+// Dock prev/next rotate the carousel by exactly one card
+const dockPrevBtn = document.getElementById('dockPrev');
+const dockNextBtn = document.getElementById('dockNext');
+if (dockPrevBtn) dockPrevBtn.addEventListener('click', () => { targetRotation -= rotationAngle; });
+if (dockNextBtn) dockNextBtn.addEventListener('click', () => { targetRotation += rotationAngle; });
+
+// Cursor parallax: the 3D camera gently follows the mouse (lerped in the rAF loop)
+let mouseNX = 0, mouseNY = 0, povX = 50, povY = 50;
+window.addEventListener('mousemove', (e) => {
+    mouseNX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
 
 // Start the animation loop
 updateCarousel();
@@ -1455,6 +1550,7 @@ function refreshLiquidGlass() {
     if (!supportsLensRefraction) return;
     applyLiquidGlass(document.querySelector('.mode-selector'), 'lens-selector');
     applyLiquidGlass(document.querySelector('.title-overlay p'), 'lens-hint', { strength: 48, aberration: 8 });
+    applyLiquidGlass(document.querySelector('.now-playing-dock'), 'lens-dock', { radius: 26, strength: 56, aberration: 9 });
 }
 
 if (supportsLensRefraction) {

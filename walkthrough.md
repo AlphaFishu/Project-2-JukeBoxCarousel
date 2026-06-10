@@ -1,4 +1,21 @@
-# Walkthrough: Expanded Library + Real Liquid Glass Refraction, Film Grain & Album-Colored Aura (v2.8)
+# Walkthrough: "On Stage" Visual Redesign (v2.9)
+
+> Note: kept on the 2.x line intentionally — the major version (v3) is reserved for a larger leap once the redesign direction is curated and locked in.
+
+v2.9 reimagines the app as a concert stage where the active album is the performer. Rollback point: `git reset --hard claude-v2.8`.
+
+## v2.9 Key Features
+1. **Aurora stage lighting** — three huge blurred light blobs (`.aurora-blob`) drift slowly on 28–42s keyframe loops. Their colors are derived per album in `setAccentPalette()`: the album's dominant hue plus two companions rotated ±50° around the color wheel, kept dim (L≈24–30%) so they read as atmosphere. `mix-blend-mode: screen` makes them add light like real lamps.
+2. **Giant kinetic marquee** — the artist's name in Bebas Neue at up to 15rem, projected at 6% opacity behind the stage. It drifts horizontally with scroll, shifts with the mouse, and crossfades on album change.
+3. **Now Playing dock** — a liquid-glass console (same refraction lens as the selector): prev/next buttons that rotate the carousel by exactly one card, album title/artist, a `07/28` Bebas counter, and a collection-position progress bar glowing in the album's accent color.
+4. **Cursor parallax** — the scene's `perspective-origin` eases toward the mouse each frame, so the entire 3D stage re-angles toward the viewer. Done via perspective-origin instead of transforms so it never fights the JS-owned card transforms.
+5. **Cinematic vignette** — radial corner darkening (z-index under the grain) for depth.
+6. **Typography overhaul** — Outfit replaces Inter app-wide; Bebas Neue for display moments (marquee, counter).
+7. **Mode awareness** — dock and marquee fade out in Rolling Album mode, where the details panel owns the layout.
+
+---
+
+# Previous: Expanded Library + Real Liquid Glass Refraction, Film Grain & Album-Colored Aura (v2.8)
 
 This release combines two streams of work: the **library expansion to 29 albums** (with "Enemy" as the landing track) and a **visual overhaul** that replaces the fake "frosted-only" glass with **true Apple-style Liquid Glass** — the background actually *refracts* (bends) through the rim of the mode selector like curved glass, with subtle chromatic aberration. It also adds a film-grain finish, a static studio-light reflection on the spinning vinyl, a self-dismissing glass scroll hint, and fixes a long-standing bug where the active card's "Apple aura" always glowed grey instead of the album's color.
 

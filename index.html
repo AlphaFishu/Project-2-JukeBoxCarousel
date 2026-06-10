@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" id="themeColorMeta" content="#121212">
     <title>3D Vintage Jukebox Carousel</title>
-    <!-- Modern Font for Spotify-like aesthetic -->
+    <!-- Outfit for UI, Bebas Neue for the giant stage marquee -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=23">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=24">
 </head>
 
 <body>
@@ -27,6 +27,21 @@
         <div class="gradient-layer active-init" id="gradLayer1"></div>
         <div class="gradient-layer" id="gradLayer2"></div>
     </div>
+
+    <!-- Aurora stage lighting: drifting blobs tinted by the active album's palette -->
+    <div class="aurora-bg" aria-hidden="true">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
+
+    <!-- Giant kinetic marquee: the artist's name projected behind the stage -->
+    <div class="backdrop-marquee" id="backdropMarquee" aria-hidden="true">
+        <span id="marqueeText"></span>
+    </div>
+
+    <!-- Cinematic corner vignette -->
+    <div class="vignette-overlay" aria-hidden="true"></div>
     <div class="mode-selector">
         <div class="mode-slider"></div>
         <button class="mode-btn" data-mode="cylinder">
@@ -37,6 +52,22 @@
         </button>
         <button class="mode-btn" data-mode="depth">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-8 4 8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></svg> Rolling Album
+        </button>
+    </div>
+
+    <!-- Now Playing dock: liquid glass console with controls, counter, and position bar -->
+    <div class="now-playing-dock" id="nowPlayingDock">
+        <button class="dock-btn" id="dockPrev" aria-label="Previous album">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="dock-info">
+            <div class="dock-title" id="dockTitle">—</div>
+            <div class="dock-artist" id="dockArtist">—</div>
+            <div class="dock-progress"><div class="dock-progress-fill" id="dockProgressFill"></div></div>
+        </div>
+        <div class="dock-counter"><span id="dockIndex">01</span><span class="dock-counter-sep">/</span><span id="dockTotal">29</span></div>
+        <button class="dock-btn" id="dockNext" aria-label="Next album">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
         </button>
     </div>
 
@@ -59,7 +90,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=23"></script>
+    <script src="script.js?v=24"></script>
 </body>
 
 </html>
