@@ -140,8 +140,15 @@ body {
     transition: opacity 0.45s ease;
 }
 
-/* The Wall fills the screen with covers — clear the marquee out of the way */
-body.body-wall .backdrop-marquee {
+/* Vinyl Records sits on a flat accent background, so the marquee gets a strong,
+   solid second-accent fill there; other modes keep the faint glassy treatment */
+body.body-coverflow .backdrop-marquee {
+    color: rgba(var(--accent2-rgb), 0.72);
+    -webkit-text-stroke: 1px rgba(var(--accent2-rgb), 0.85);
+}
+
+/* Shuffle fills the screen with covers — clear the marquee out of the way */
+body.body-shuffle .backdrop-marquee {
     opacity: 0;
 }
 
@@ -314,8 +321,14 @@ body.has-scrolled .title-overlay {
     position: absolute;
     inset: -6px; /* Glow spread reduced by 30% per user request */
     border-radius: 17px;
-    /* Use the dominant color explicitly from CSS vars for the glow (reduced by 50% per user request) */
-    background: rgba(var(--amb-r), var(--amb-g), var(--amb-b), 0.4);
+    /* Premium tri-color halo: the album's dominant color blended around the rim
+       with the primary and secondary accents. Static conic gradient + one blur =
+       composited once on the GPU, so it stays cheap. */
+    background: conic-gradient(from 210deg,
+            rgba(var(--amb-r), var(--amb-g), var(--amb-b), 0.55),
+            rgba(var(--accent2-rgb), 0.30) 30%,
+            rgba(var(--accent-rgb), 0.50) 58%,
+            rgba(var(--amb-r), var(--amb-g), var(--amb-b), 0.55) 100%);
     filter: blur(11px); /* Reduced by 30% from 16px */
     z-index: -1;
     opacity: 0;
@@ -425,7 +438,7 @@ body.has-scrolled .title-overlay {
     -webkit-backdrop-filter: blur(24px) saturate(1.7);
     border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 4px;
-    border-radius: 32px;
+    border-radius: 16px; /* rounded square, matching the dock below */
     max-width: calc(100vw - 24px);
     z-index: 9999; /* make sure it's on top of everything! */
     /* Specular rim lighting: bright top-left edge, faint bottom-right bounce.
@@ -462,8 +475,8 @@ body.has-scrolled .title-overlay {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.06) 100%);
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-sizing: border-box;
-    /* Concentric corners: outer radius (32) minus the 4px gap + 1px border */
-    border-radius: 27px;
+    /* Concentric corners: outer radius (16) minus the 4px gap + 1px border */
+    border-radius: 11px;
     transform: translateY(-50%);
     transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), width 0.45s ease;
     z-index: 0;
@@ -480,7 +493,7 @@ body.has-scrolled .title-overlay {
     border: none;
     color: rgba(255, 255, 255, 0.55);
     padding: 8px 19px;
-    border-radius: 28px;
+    border-radius: 11px;
     font-family: inherit;
     font-size: 0.68rem;
     font-weight: 700;
@@ -537,7 +550,7 @@ body.has-scrolled .title-overlay {
     align-items: center;
     gap: 14px;
     padding: 10px 14px;
-    border-radius: 26px;
+    border-radius: 16px; /* rounded square, matching the top selector */
     background: rgba(18, 18, 24, 0.18);
     backdrop-filter: blur(24px) saturate(1.7);
     -webkit-backdrop-filter: blur(24px) saturate(1.7);
@@ -750,14 +763,14 @@ body.body-coverflow .vinyl-record {
 /* --- Cover Flow Mode Specific Layout --- */
 body.body-coverflow .card,
 body.body-depth .card,
-body.body-wall .card,
+body.body-shuffle .card,
 body.body-helix .card {
     /* Disable transitions to prevent interpolation lag in requestAnimationFrame loops */
     transition: none !important;
 }
 
-/* Wall & Helix scale cards from their center so grid/spiral math stays exact */
-body.body-wall .card,
+/* Shuffle & Helix scale cards from their center so lane/spiral math stays exact */
+body.body-shuffle .card,
 body.body-helix .card {
     transform-origin: center center;
 }

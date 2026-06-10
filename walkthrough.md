@@ -1,4 +1,13 @@
-# Walkthrough: Precision Pass + Wall & Helix Modes (v2.92)
+# Walkthrough: Shuffle Mode + Solid Marquee + Rounded-Square Chrome (v2.93)
+
+1. **Vinyl Records marquee, solid** — in coverflow only, the backdrop text fills with the secondary accent at 72% opacity (stroke 85%) for strong, solid contrast against the album-accent background. Other modes keep the faint glassy fill. (Also fixed: a duplicate `accent2` declaration that briefly broke the script.)
+2. **Rounded-square chrome** — the top selector switches from full pill (radius 32) to rounded square (radius 16); the slider stays concentric at 11, buttons at 11, and the bottom dock matches at 16. Liquid-glass lens maps regenerated for the new corner geometry.
+3. **Shuffle mode (replaces Wall)** — Pinterest-waterfall × Netflix-tilt × slot machine: three vertical lanes on a plane tilted `rotateX(12°) rotateZ(-8°) rotateY(-14°)`. Cards ride one serpentine loop — lane 1 (left, background) → off-screen → lane 2 (middle) → the center highlight slot → lane 3 (right) → endlessly back to lane 1. The math: each card's loop coordinate `s = mod(activeFloat − index + N/2, N)` picks its lane (`s/laneLen`) and its vertical position within the lane; lane hand-offs happen off-screen so the loop reads as endless.
+4. **Premium tri-color halo** — the active card's glow is now a conic gradient blending the album's dominant color with both accents around the rim. Static gradient + one 11px blur = composited once on the GPU; no per-frame cost, Vercel-safe.
+
+---
+
+# Previous: Precision Pass + Wall & Helix Modes (v2.92)
 
 Seven user-curated refinements:
 

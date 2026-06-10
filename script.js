@@ -512,7 +512,7 @@ modeButtons.forEach(btn => {
         updateSliderPosition(btn);
 
         // Remove previous body mode classes
-        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-wall', 'body-helix');
+        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-shuffle', 'body-helix');
 
         // Update mode state
         currentMode = btn.dataset.mode;
@@ -1365,39 +1365,58 @@ function updateCarousel() {
             updateDetailsPanel(activeIndex);
         }
 
-    } else if (currentMode === 'wall') {
-        // Gallery Wall: every cover on screen at once in a flat grid; scrolling
-        // skips the spotlight from cell to cell, and the active cover pops forward
-        carousel.style.transform = `translateZ(0px) rotateY(0deg)`;
+    } else if (currentMode === 'shuffle') {
+        // Shuffle: three slot-machine lanes on a tilted, product-shot plane
+        // (Netflix-style diagonal). Cards ride one serpentine loop: lane 1
+        // (left/background) -> lane 2 (middle, where the highlight slot lives)
+        // -> lane 3 (right/background) -> wraps endlessly back to lane 1.
+        carousel.style.transform = `translateZ(-140px) rotateX(12deg) rotateZ(-8deg) rotateY(-14deg)`;
 
-        const cols = Math.ceil(totalCards / 4);
-        const rows = Math.ceil(totalCards / cols);
-        const cellW = (window.innerWidth * 0.90) / cols;
-        const cellH = (window.innerHeight * 0.70) / rows;
-        const cardScale = Math.min(cellW / 240, cellH / 340); // 224x320 card + breathing room
+        const laneLen = totalCards / 3;
+        const laneSpacing = Math.min(380, window.innerWidth * 0.28);
+        const spacingY = 215;
+        const baseScale = 0.66;
+        const yLimit = window.innerHeight * 0.62;
 
         cards.forEach((card, index) => {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-            const x = (col - (cols - 1) / 2) * cellW;
-            // -96 cancels the scene's downward shift so the grid centers in the
-            // viewport, clearing both the top selector and the bottom dock
-            const y = (row - (rows - 1) / 2) * cellH - 96;
-            const isActive = index === activeIndex;
+            // Serpentine coordinate: scrolling forward advances s, so a card
+            // travels lane 1 -> off-screen -> lane 2 -> highlight -> lane 3 -> loop
+            let s = (activeIndexFloat - index + totalCards / 2) % totalCards;
+            if (s < 0) s += totalCards;
+            const lane = Math.min(2, Math.floor(s / laneLen));
+            const local = s - lane * laneLen;
+
+            const x = (lane - 1) * laneSpacing;
+            const y = (local - laneLen / 2) * spacingY - 40;
             const fog = card.querySelector('.fog-overlay');
+
+            let offset = index - activeIndexFloat;
+            while (offset > totalCards / 2) offset -= totalCards;
+            while (offset < -totalCards / 2) offset += totalCards;
+            const absOffset = Math.abs(offset);
+            const isActive = absOffset < 0.5;
+
+            if (Math.abs(y) > yLimit + 280) {
+                card.style.visibility = 'hidden';
+                card.style.opacity = 0;
+                return;
+            }
 
             card.style.visibility = 'visible';
             card.classList.toggle('active', isActive);
             if (isActive) updateAmbientBackground(card);
 
-            // Pure scale pop (no translateZ): perspective would displace edge cells
-            // off-screen since they sit far from the perspective origin
-            const s = isActive ? cardScale * 1.2 : cardScale;
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(0px) scale(${s})`;
-            card.style.opacity = 1;
-            card.style.filter = isActive ? 'brightness(1) saturate(1.15)' : 'brightness(0.55) saturate(0.8)';
-            card.style.zIndex = isActive ? 20 : 10;
-            if (fog) fog.style.opacity = isActive ? 0 : 0.28;
+            // Blend toward the highlight slot: bigger, closer, brighter
+            const t = Math.min(1, absOffset);
+            const z = lerp(150, lane === 1 ? 40 : -70, t);
+            const scale = lerp(baseScale * 1.32, baseScale, t);
+            const bright = lerp(1, lane === 1 ? 0.8 : 0.58, t);
+
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px) scale(${scale})`;
+            card.style.opacity = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 280) : 1;
+            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})`;
+            card.style.zIndex = Math.round(30 - absOffset);
+            if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.5, 0.15 + t * 0.25);
         });
 
     } else if (currentMode === 'helix') {
@@ -1511,9 +1530,9 @@ function setAccentPalette(rgb) {
     const accent = hslToRgb(h, Math.min(85, Math.max(45, s)), 62);
     root.setProperty('--accent-rgb', accent.join(', '));
 
-    // Secondary accent: hue rotated 150° so the marquee text contrasts with the
-    // album-accent background instead of dissolving into it
-    const accent2 = hslToRgb((h + 150) % 360, Math.min(80, Math.max(40, s)), 64);
+    // Secondary accent: hue rotated 150° for guaranteed contrast against the
+    // primary — used by the marquee fill and the card halo
+    const accent2 = hslToRgb((h + 150) % 360, Math.min(85, Math.max(55, s + 10)), 60);
     root.setProperty('--accent2-rgb', accent2.join(', '));
 
     // Stage lights: base hue plus two companions rotated around the color wheel,
@@ -1671,9 +1690,9 @@ function applyLiquidGlass(el, id, options = {}) {
 
 function refreshLiquidGlass() {
     if (!supportsLensRefraction) return;
-    applyLiquidGlass(document.querySelector('.mode-selector'), 'lens-selector');
+    applyLiquidGlass(document.querySelector('.mode-selector'), 'lens-selector', { radius: 16 });
     applyLiquidGlass(document.querySelector('.title-overlay p'), 'lens-hint', { strength: 48, aberration: 8 });
-    applyLiquidGlass(document.querySelector('.now-playing-dock'), 'lens-dock', { radius: 26, strength: 56, aberration: 9 });
+    applyLiquidGlass(document.querySelector('.now-playing-dock'), 'lens-dock', { radius: 16, strength: 56, aberration: 9 });
 }
 
 if (supportsLensRefraction) {
