@@ -201,11 +201,11 @@ body.has-scrolled .title-overlay {
 .card::before {
     content: '';
     position: absolute;
-    inset: -8px;
-    border-radius: 19px;
+    inset: -6px; /* Glow spread reduced by 30% per user request */
+    border-radius: 17px;
     /* Use the dominant color explicitly from CSS vars for the glow (reduced by 50% per user request) */
     background: rgba(var(--amb-r), var(--amb-g), var(--amb-b), 0.4);
-    filter: blur(16px);
+    filter: blur(11px); /* Reduced by 30% from 16px */
     z-index: -1;
     opacity: 0;
     /* Hidden on unselected */

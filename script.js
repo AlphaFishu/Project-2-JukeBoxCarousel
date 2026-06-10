@@ -1133,15 +1133,34 @@ function updateCarousel() {
         // Reset parent carousel transform
         carousel.style.transform = `translateZ(0px) rotateY(0deg)`;
 
-        // Calculate responsive Cover Flow spacing to sit exactly at the screen boundaries (0% margins)
-        const activeSpread = 128; // Spacing gap next to active card (scaled from 160)
-        const edgeMargin = 0; // 0% screen width margins (container already has internal margins)
-        const cardProjectedHalfWidth = 144 * Math.cos(55 * Math.PI / 180); // Scaled half width (288px card) projected at 55deg
-        const maxTranslateX = (window.innerWidth / 2) - cardProjectedHalfWidth - edgeMargin;
-        
-        // stepSpacing is calculated so that offset = 3.2 lands exactly at maxTranslateX
-        // Minimum step of 24px protects narrow screens (scaled from 30)
-        const stepSpacing = Math.max(24, (maxTranslateX - activeSpread) / 3.2);
+        // Responsive Cover Flow spacing: outermost visible cards land on the 5% screen margins.
+        // Side cards recede in Z (translateZ < 0), and perspective shrinks their on-screen
+        // position by P/(P - z) — that was the "invisible wall" keeping edge cards away from
+        // the margin. So we lay cards out in apparent (on-screen) space first, then divide
+        // out the perspective factor per card to get the real translateX for the transform.
+        const activeSpread = 128; // Apparent gap next to the active card
+        const scenePerspective = 960; // Must match .scene { perspective } in style.css
+        const edgeMargin = window.innerWidth * 0.05; // 5% screen-width margin on each side
+
+        // Geometry of the outermost fully-visible card (offset 4): after the 55° tilt its
+        // outer edge leans toward the viewer, so perspective projects it wider than a flat
+        // cos(55°) estimate. Solve the exact translateX that puts that projected outer edge
+        // on the 5% margin line, then derive the per-step spacing from it.
+        const tilt = 55 * Math.PI / 180;
+        const edgeScale = 0.95 - 3 * 0.04; // scale at offset 4
+        const edgeZ = -40 - 3 * 96; // translateZ at offset 4
+        const edgeHalfW = 144 * edgeScale; // half width of the scaled card
+        const edgeDX = edgeHalfW * Math.cos(tilt); // outer-edge x offset from card center
+        const edgeDZ = edgeHalfW * Math.sin(tilt); // outer edge leans toward the viewer
+        const targetEdgeX = (window.innerWidth / 2) - edgeMargin;
+        const tx4 = targetEdgeX * (scenePerspective - (edgeZ + edgeDZ)) / scenePerspective - edgeDX;
+        const apparentX4 = tx4 * scenePerspective / (scenePerspective - edgeZ);
+        const apparentStep = Math.max(24, (apparentX4 - activeSpread) / 4);
+
+        // Cards are anchored at left:0 of the 224px-wide carousel but are 288px wide in this
+        // mode, so every card's center sits 32px right of the scene center. Cancel that
+        // pre-projection so the layout is truly symmetric around the screen center.
+        const centerCorrection = (288 - 224) / 2;
 
         cards.forEach((card, index) => {
             let offset = index - activeIndexFloat;
@@ -1151,6 +1170,7 @@ function updateCarousel() {
             const absOffset = Math.abs(offset);
             const fog = card.querySelector('.fog-overlay');
             let rotateY = 0;
+            let apparentX = 0; // Desired on-screen X; converted to translateX once Z is known
             let translateX = 0;
             let translateZ = 0;
             let translateY = 0;
@@ -1158,7 +1178,7 @@ function updateCarousel() {
             let opacity = 1;
             let filter = 'none';
             let fogOpacity = 0;
-            
+
             card.style.visibility = 'visible';
 
             // Active coloring update
@@ -1172,7 +1192,7 @@ function updateCarousel() {
                 // Smooth transition through the center
                 const t = absOffset;
                 rotateY = lerp(0, offset > 0 ? -55 : 55, t); // 55deg tilt prevents card edges cutting through each other
-                translateX = lerp(0, offset * stepSpacing + (offset > 0 ? activeSpread : -activeSpread), t);
+                apparentX = lerp(0, offset * apparentStep + (offset > 0 ? activeSpread : -activeSpread), t);
                 translateZ = lerp(120, -40, t); // Scaled from 150, -50
                 translateY = lerp(-24, 24, t); // Scaled from -30, 30
                 scale = lerp(1.25, 1.0, t);
@@ -1182,7 +1202,7 @@ function updateCarousel() {
             } else if (absOffset <= 5) {
                 // Side cards tilted inwards (Fog of War: submerged in background color via fog-overlay)
                 rotateY = offset > 0 ? -55 : 55;
-                translateX = offset * stepSpacing + (offset > 0 ? activeSpread : -activeSpread); // stretch responsive to screen edges
+                apparentX = offset * apparentStep + (offset > 0 ? activeSpread : -activeSpread); // stretch responsive to screen edges
                 translateZ = -40 - (absOffset - 1) * 96; // Scaled from -50, 120
                 translateY = 24; // Scaled from 30
                 scale = 0.95 - (absOffset - 1) * 0.04;
@@ -1214,6 +1234,10 @@ function updateCarousel() {
                 }
                 vinylWrapper.style.transform = `translateX(${discX}px)`;
             }
+
+            // Convert apparent (on-screen) X into the real translateX by dividing out the
+            // perspective shrink factor P/(P - z) at this card's depth
+            translateX = apparentX * (scenePerspective - translateZ) / scenePerspective - centerCorrection;
 
             // High-precision stacking order sorting
             const zIndex = Math.round(20 - absOffset * 3);
