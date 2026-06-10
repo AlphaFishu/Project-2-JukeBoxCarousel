@@ -1,4 +1,17 @@
-# Walkthrough: Shuffle Mode + Solid Marquee + Rounded-Square Chrome (v2.93)
+# Walkthrough: Card Shuffle Rework + Artwork-True Accent Colors (v2.94)
+
+1. **Accent algorithm corrected** — the secondary accent is no longer an arbitrary 150° hue rotation (the source of the theme-breaking teal). The canvas extractor now pulls the **second dominant hue from the cover art itself** (biggest hue bucket ≥60° away from the primary, ≥6 vibrant pixels). Verified: Enemy = red + `rgb(37,25,121)` purple-blue (the Arcane glow); Purple Rain = orange + `rgb(50,76,119)` blue-purple. Monochrome covers fall back to an analogous shade 50° away — never a complementary.
+2. **Card Shuffle (renamed from Shuffle), film-reel mechanics**:
+   - Tilt pushed past Netflix: `rotateX(18°) rotateZ(-14°) rotateY(-16°)`, close-up `translateZ(-30)`.
+   - **Dominant middle lane** (Pinterest-style): middle cards at 0.98 scale, side lanes at 0.66 and pushed back in Z.
+   - **Lanes roll in opposite directions at different speeds**: −250 / +340 / −285 px per album step.
+   - **Frozen center plate**: the highlighted card is captured via smoothstep blend and held motionless at center while the reels roll past — and released back into its lane as the next card takes the plate. Only the middle position effectively snaps; the reels stay loose.
+   - Density up (lane spacing ~0.19vw, near-touching cards in the middle lane) to read as a premium product close-up.
+3. **Faster landing text** — marquee crossfade cut from 380ms+450ms to 160ms+220ms; album text now pops in almost immediately on landing.
+
+---
+
+# Previous: Shuffle Mode + Solid Marquee + Rounded-Square Chrome (v2.93)
 
 1. **Vinyl Records marquee, solid** — in coverflow only, the backdrop text fills with the secondary accent at 72% opacity (stroke 85%) for strong, solid contrast against the album-accent background. Other modes keep the faint glassy fill. (Also fixed: a duplicate `accent2` declaration that briefly broke the script.)
 2. **Rounded-square chrome** — the top selector switches from full pill (radius 32) to rounded square (radius 16); the slider stays concentric at 11, buttons at 11, and the bottom dock matches at 16. Liquid-glass lens maps regenerated for the new corner geometry.

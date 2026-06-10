@@ -643,6 +643,9 @@ function rgbToHsl(r, g, b) {
 
 // Global cache to prevent re-extracting for same cover image
 const extractedColorCache = {};
+// Second dominant hue of each cover (e.g. Enemy = red primary + purple-blue
+// secondary) — drives the marquee/halo so they always match the artwork
+const extractedSecondaryCache = {};
 
 function extractVibrantColor(imgUrl, callback, fallbackColor) {
     if (extractedColorCache[imgUrl]) {
@@ -712,6 +715,26 @@ function extractVibrantColor(imgUrl, callback, fallbackColor) {
                     Math.round(sumG / dominantGroup.length),
                     Math.round(sumB / dominantGroup.length)
                 ];
+
+                // Second dominant hue: the biggest bucket at least 60° away from
+                // the primary — the artwork's own companion color
+                let secondIdx = -1, secondCount = 0;
+                hueBuckets.forEach((bucket, idx) => {
+                    const dist = Math.min(Math.abs(idx - maxIdx), 12 - Math.abs(idx - maxIdx));
+                    if (dist >= 2 && bucket.length > secondCount) {
+                        secondCount = bucket.length;
+                        secondIdx = idx;
+                    }
+                });
+                if (secondIdx >= 0 && secondCount >= 6) {
+                    let s2R = 0, s2G = 0, s2B = 0;
+                    hueBuckets[secondIdx].forEach(c => { s2R += c.r; s2G += c.g; s2B += c.b; });
+                    extractedSecondaryCache[imgUrl] = [
+                        Math.round(s2R / secondCount),
+                        Math.round(s2G / secondCount),
+                        Math.round(s2B / secondCount)
+                    ];
+                }
             } else if (mutedColors.length > 0) {
                 let sumR = 0, sumG = 0, sumB = 0;
                 mutedColors.forEach(c => {
@@ -757,7 +780,7 @@ tracks.forEach((track, index) => {
         card.style.setProperty('--amb-g', color[1]);
         card.style.setProperty('--amb-b', color[2]);
         // If this album is currently on stage, upgrade the live accent/aurora palette too
-        if (index === lastDockIndex) setAccentPalette(color);
+        if (index === lastDockIndex) setAccentPalette(color, extractedSecondaryCache[track.cover] || null);
     }, track.color);
 });
 
@@ -1366,29 +1389,27 @@ function updateCarousel() {
         }
 
     } else if (currentMode === 'shuffle') {
-        // Shuffle: three slot-machine lanes on a tilted, product-shot plane
-        // (Netflix-style diagonal). Cards ride one serpentine loop: lane 1
-        // (left/background) -> lane 2 (middle, where the highlight slot lives)
-        // -> lane 3 (right/background) -> wraps endlessly back to lane 1.
-        carousel.style.transform = `translateZ(-140px) rotateX(12deg) rotateZ(-8deg) rotateY(-14deg)`;
+        // Card Shuffle: a close-up product-shot of three film reels.
+        //  - Hard Netflix-style tilt, pushed further for drama
+        //  - Middle lane dominates (Pinterest-style), side lanes smaller/behind
+        //  - Lanes roll in opposite directions at different speeds, loose like film
+        //  - The highlighted card is captured and FROZEN at the center plate
+        //    while everything else rolls past it
+        carousel.style.transform = `translateZ(-30px) rotateX(18deg) rotateZ(-14deg) rotateY(-16deg)`;
 
         const laneLen = totalCards / 3;
-        const laneSpacing = Math.min(380, window.innerWidth * 0.28);
-        const spacingY = 215;
-        const baseScale = 0.66;
-        const yLimit = window.innerHeight * 0.62;
+        const laneSpacing = Math.min(280, Math.max(220, window.innerWidth * 0.19));
+        const laneScale = [0.66, 0.98, 0.66]; // dominant middle, smaller sides
+        const laneFlow = [-250, 340, -285];   // px per album step; sign = direction
+        const yLock = -60;                    // the frozen plate position
+        const yLimit = window.innerHeight * 0.8;
 
         cards.forEach((card, index) => {
-            // Serpentine coordinate: scrolling forward advances s, so a card
-            // travels lane 1 -> off-screen -> lane 2 -> highlight -> lane 3 -> loop
+            // Serpentine loop coordinate: lane 1 -> middle -> lane 3 -> wraps
             let s = (activeIndexFloat - index + totalCards / 2) % totalCards;
             if (s < 0) s += totalCards;
             const lane = Math.min(2, Math.floor(s / laneLen));
             const local = s - lane * laneLen;
-
-            const x = (lane - 1) * laneSpacing;
-            const y = (local - laneLen / 2) * spacingY - 40;
-            const fog = card.querySelector('.fog-overlay');
 
             let offset = index - activeIndexFloat;
             while (offset > totalCards / 2) offset -= totalCards;
@@ -1396,7 +1417,23 @@ function updateCarousel() {
             const absOffset = Math.abs(offset);
             const isActive = absOffset < 0.5;
 
-            if (Math.abs(y) > yLimit + 280) {
+            // Film-reel flow position: each lane has its own speed and direction
+            const flowX = (lane - 1) * laneSpacing;
+            const flowY = (local - laneLen / 2) * laneFlow[lane] + yLock;
+
+            // Capture: smoothstep-blend into the frozen plate as a card nears the
+            // highlight, and release it back into the reel as it leaves — so the
+            // center stays locked while the reels stay loose
+            const tRaw = Math.min(1, absOffset);
+            const t = tRaw * tRaw * (3 - 2 * tRaw);
+            const x = lerp(0, flowX, t);
+            const y = lerp(yLock, flowY, t);
+            const z = lerp(150, lane === 1 ? 20 : -110, t);
+            const scale = lerp(1.08, laneScale[lane], t);
+            const bright = lerp(1, lane === 1 ? 0.72 : 0.48, t);
+
+            const fog = card.querySelector('.fog-overlay');
+            if (Math.abs(y) > yLimit + 340) {
                 card.style.visibility = 'hidden';
                 card.style.opacity = 0;
                 return;
@@ -1406,17 +1443,11 @@ function updateCarousel() {
             card.classList.toggle('active', isActive);
             if (isActive) updateAmbientBackground(card);
 
-            // Blend toward the highlight slot: bigger, closer, brighter
-            const t = Math.min(1, absOffset);
-            const z = lerp(150, lane === 1 ? 40 : -70, t);
-            const scale = lerp(baseScale * 1.32, baseScale, t);
-            const bright = lerp(1, lane === 1 ? 0.8 : 0.58, t);
-
             card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px) scale(${scale})`;
-            card.style.opacity = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 280) : 1;
+            card.style.opacity = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})`;
-            card.style.zIndex = Math.round(30 - absOffset);
-            if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.5, 0.15 + t * 0.25);
+            card.style.zIndex = isActive ? 40 : Math.round((lane === 1 ? 25 : 12) - absOffset);
+            if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
         });
 
     } else if (currentMode === 'helix') {
@@ -1521,8 +1552,12 @@ function hslToRgb(h, s, l) {
     return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
 }
 
-// Derive the UI accent + three aurora stage-light colors from one album color
-function setAccentPalette(rgb) {
+// Derive the UI accents + aurora stage lights from the album's own palette.
+// The secondary accent comes from the artwork's second dominant hue whenever
+// the extractor found one (Enemy: red + purple-blue; Purple Rain: orange +
+// purple); only when a cover is truly monochrome do we fall back to an
+// analogous shade 50° away — never an arbitrary complementary that breaks theme.
+function setAccentPalette(rgb, rgb2) {
     const [h, s] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
     const root = document.documentElement.style;
 
@@ -1530,16 +1565,20 @@ function setAccentPalette(rgb) {
     const accent = hslToRgb(h, Math.min(85, Math.max(45, s)), 62);
     root.setProperty('--accent-rgb', accent.join(', '));
 
-    // Secondary accent: hue rotated 150° for guaranteed contrast against the
-    // primary — used by the marquee fill and the card halo
-    const accent2 = hslToRgb((h + 150) % 360, Math.min(85, Math.max(55, s + 10)), 60);
+    let h2, s2;
+    if (rgb2) {
+        [h2, s2] = rgbToHsl(rgb2[0], rgb2[1], rgb2[2]);
+    } else {
+        h2 = (h + 310) % 360;
+        s2 = s;
+    }
+    const accent2 = hslToRgb(h2, Math.min(85, Math.max(50, s2)), 62);
     root.setProperty('--accent2-rgb', accent2.join(', '));
 
-    // Stage lights: base hue plus two companions rotated around the color wheel,
-    // kept dim so they read as atmosphere rather than flat color fill
+    // Stage lights: primary hue, the artwork's companion hue, and one analogous
     const c1 = hslToRgb(h, Math.min(80, s + 10), 30);
-    const c2 = hslToRgb((h + 50) % 360, Math.min(75, s + 5), 24);
-    const c3 = hslToRgb((h + 310) % 360, Math.min(70, s), 26);
+    const c2 = hslToRgb(h2, Math.min(75, s2 + 5), 24);
+    const c3 = hslToRgb((h + 40) % 360, Math.min(70, s), 26);
     root.setProperty('--aurora-c1', `rgb(${c1.join(',')})`);
     root.setProperty('--aurora-c2', `rgb(${c2.join(',')})`);
     root.setProperty('--aurora-c3', `rgb(${c3.join(',')})`);
@@ -1565,16 +1604,19 @@ function updateNowPlaying(index) {
         }
     }
 
-    setAccentPalette(extractedColorCache[track.cover] || track.color);
+    setAccentPalette(
+        extractedColorCache[track.cover] || track.color,
+        extractedSecondaryCache[track.cover] || null
+    );
 
-    // Crossfade the giant marquee to the new artist
+    // Crossfade the giant marquee to the new artist (fast — landing should pop)
     if (backdropMarqueeEl && marqueeTextEl) {
         backdropMarqueeEl.classList.add('swapping');
         clearTimeout(marqueeSwapTimer);
         marqueeSwapTimer = setTimeout(() => {
             marqueeTextEl.textContent = track.artist.toUpperCase();
             backdropMarqueeEl.classList.remove('swapping');
-        }, 380);
+        }, 160);
     }
 }
 

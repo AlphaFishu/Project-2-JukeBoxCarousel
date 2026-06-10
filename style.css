@@ -137,7 +137,7 @@ body {
        visible against the album-accent background instead of blending into it */
     color: rgba(var(--accent2-rgb), 0.13);
     -webkit-text-stroke: 1px rgba(var(--accent2-rgb), 0.20);
-    transition: opacity 0.45s ease;
+    transition: opacity 0.22s ease; /* fast swap — landing on an album should pop */
 }
 
 /* Vinyl Records sits on a flat accent background, so the marquee gets a strong,
