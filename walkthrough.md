@@ -1,4 +1,13 @@
-# Walkthrough: Card Shuffle Camera Presets (v2.95)
+# Walkthrough: 48-Album Library + Shuffle Calibration Tools (v2.96)
+
+1. **Library: 28 → 48 albums.** Twenty classics/moderns added (Abbey Road, Rumours, Back in Black, Dark Side of the Moon, Random Access Memories, Divide, 21, thank u next, Take Care, Born to Die, AM, Currents, Planet Her, Map of the Soul: 7, The Eminem Show, Viva la Vida, Hybrid Theory, IGOR, Whenever You Need Somebody, Back to Black). Covers and real tracklists/durations/explicit flags fetched once from the free iTunes Search API and baked in as static data — no runtime API calls. New entries use original placeholder verse text instead of copyrighted lyrics.
+2. **Card Shuffle calibration panel** (⚙ Calibrate in the angle row): 13 live sliders — zoom/distance, tilt X/Y/Z, lane count (3/5/7), lane spacing, card spacing, main/sub lane size, highlight size, plate X/Y, and vignette strength (vignette is darkest at edges so the centered highlight card stays clean). Values persist in localStorage.
+3. **Print / Apply JSON** — "Print values" copies the current calibration as one JSON line (clipboard + textarea + console) so a favorite setup can be shared as a reference; "Apply JSON" loads a pasted setup. The 6 camera presets now load into the same calibration system as starting points.
+4. **Renderer generalized** — lanes up to 7, flow directions/speeds derived from a per-lane-distance pattern, dock steps tightened for 48 segments.
+
+---
+
+# Previous: Card Shuffle Camera Presets (v2.95)
 
 1. **Bigger, higher plate** — the frozen highlight card scales up to ~1.3 (was 1.08) and the plate moved up from −60 to −110, fixing "too small / too low".
 2. **Parameterized renderer** — the Card Shuffle branch is now fully data-driven: each camera preset defines the plane tilt, lane x-slots (asymmetry allowed), per-lane scale + flow speed/direction, and plate position/size. Lane count comes from the array length.

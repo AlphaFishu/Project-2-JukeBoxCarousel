@@ -382,6 +382,286 @@ const tracks = [
             { title: "L'AMOUR DE MA VIE", artist: "Billie Eilish", plays: "5:33", duration: "5:33", explicit: true }
         ],
         lyrics: "I want you to stay\n'Til I'm in the grave\n'Til I'm rot and decay, dead on the floor\nKeep you like a secret, but I wanna tell more\nAs long as I'm breathing, you're what I'm living for\n\nAnd I don't know what I'm crying for\nI don't think I could love you more\nIt might not be long, but baby, I\n\nI'll love you 'til the day that I die\n'Til the day that I die\n'Til the light leaves my eyes\n'Til the day that I die"
+    },
+    {
+        title: "Abbey Road",
+        artist: "The Beatles",
+        color: [180, 160, 120],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/48/53/43/485343e3-dd6a-0034-faec-f4b6403f8108/13UMGIM63890.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Come Together (2019 Mix)", artist: "The Beatles", plays: "0.6B plays", duration: "4:20", explicit: false },
+            { title: "Something (2019 Mix)", artist: "The Beatles", plays: "652M plays", duration: "3:02", explicit: false },
+            { title: "Maxwell's Silver Hammer (2019 Mix)", artist: "The Beatles", plays: "373M plays", duration: "3:28", explicit: false },
+            { title: "Oh! Darling (2019 Mix)", artist: "The Beatles", plays: "243M plays", duration: "3:27", explicit: false },
+            { title: "Octopus's Garden (2019 Mix)", artist: "The Beatles", plays: "366M plays", duration: "2:51", explicit: false }
+        ],
+        lyrics: "Abbey Road\nThe Beatles\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Rumours",
+        artist: "Fleetwood Mac",
+        color: [200, 170, 130],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/4d/13/ba/4d13bac3-d3d5-7581-2c74-034219eadf2b/081227970949.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Second Hand News", artist: "Fleetwood Mac", plays: "1.3B plays", duration: "2:56", explicit: false },
+            { title: "Dreams", artist: "Fleetwood Mac", plays: "753M plays", duration: "4:18", explicit: false },
+            { title: "Never Going Back Again", artist: "Fleetwood Mac", plays: "90M plays", duration: "2:14", explicit: false },
+            { title: "Don't Stop", artist: "Fleetwood Mac", plays: "300M plays", duration: "3:13", explicit: false },
+            { title: "Go Your Own Way", artist: "Fleetwood Mac", plays: "753M plays", duration: "3:44", explicit: false }
+        ],
+        lyrics: "Rumours\nFleetwood Mac\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Back in Black",
+        artist: "AC/DC",
+        color: [30, 30, 30],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1e/14/58/1e145814-281a-58e0-3ab1-145f5d1af421/886443673441.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Hells Bells", artist: "AC/DC", plays: "1.2B plays", duration: "5:13", explicit: false },
+            { title: "Shoot to Thrill", artist: "AC/DC", plays: "508M plays", duration: "5:18", explicit: false },
+            { title: "What Do You Do for Money Honey", artist: "AC/DC", plays: "588M plays", duration: "3:36", explicit: false },
+            { title: "Givin the Dog a Bone", artist: "AC/DC", plays: "751M plays", duration: "3:32", explicit: false },
+            { title: "Let Me Put My Love Into You", artist: "AC/DC", plays: "208M plays", duration: "4:16", explicit: false }
+        ],
+        lyrics: "Back in Black\nAC/DC\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "The Dark Side of the Moon",
+        artist: "Pink Floyd",
+        color: [60, 50, 140],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3e/17/ec/3e17ec6d-f980-c64f-19e0-a6fd8bbf0c10/886445635850.jpg/600x600bb.jpg",
+        songs: [
+            { title: "In the Flesh?", artist: "Pink Floyd", plays: "1.3B plays", duration: "3:19", explicit: false },
+            { title: "The Thin Ice", artist: "Pink Floyd", plays: "502M plays", duration: "2:27", explicit: false },
+            { title: "Another Brick In the Wall, Pt. 1", artist: "Pink Floyd", plays: "737M plays", duration: "3:11", explicit: false },
+            { title: "The Happiest Days of Our Lives", artist: "Pink Floyd", plays: "231M plays", duration: "1:51", explicit: false },
+            { title: "Another Brick In the Wall, Pt. 2", artist: "Pink Floyd", plays: "524M plays", duration: "3:59", explicit: false }
+        ],
+        lyrics: "The Dark Side of the Moon\nPink Floyd\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Random Access Memories",
+        artist: "Daft Punk",
+        color: [220, 190, 90],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e8/43/5f/e8435ffa-b6b9-b171-40ab-4ff3959ab661/886443919266.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Give Life Back to Music", artist: "Daft Punk", plays: "1.4B plays", duration: "4:34", explicit: false },
+            { title: "The Game of Love", artist: "Daft Punk", plays: "509M plays", duration: "5:22", explicit: false },
+            { title: "Giorgio by Moroder", artist: "Daft Punk", plays: "282M plays", duration: "9:05", explicit: false },
+            { title: "Within", artist: "Daft Punk", plays: "744M plays", duration: "3:49", explicit: false },
+            { title: "Instant Crush", artist: "Daft Punk & Julian Casablancas", plays: "661M plays", duration: "5:38", explicit: false }
+        ],
+        lyrics: "Random Access Memories\nDaft Punk\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Divide",
+        artist: "Ed Sheeran",
+        color: [70, 150, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/e6/e8/15e6e8a4-4190-6a8b-86c3-ab4a51b88288/190295851286.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Eraser", artist: "Ed Sheeran", plays: "1.4B plays", duration: "3:48", explicit: false },
+            { title: "Castle on the Hill", artist: "Ed Sheeran", plays: "350M plays", duration: "4:21", explicit: false },
+            { title: "Dive", artist: "Ed Sheeran", plays: "445M plays", duration: "3:58", explicit: false },
+            { title: "Shape of You", artist: "Ed Sheeran", plays: "95M plays", duration: "3:54", explicit: false },
+            { title: "Perfect", artist: "Ed Sheeran", plays: "245M plays", duration: "4:23", explicit: false }
+        ],
+        lyrics: "Divide\nEd Sheeran\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "21",
+        artist: "Adele",
+        color: [80, 80, 90],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/eb/ca/25/ebca2596-cd1e-b295-91a3-771c868d0a79/191404113868.png/600x600bb.jpg",
+        songs: [
+            { title: "Rolling in the Deep", artist: "Adele", plays: "1.8B plays", duration: "3:48", explicit: false },
+            { title: "Rumour Has It", artist: "Adele", plays: "593M plays", duration: "3:43", explicit: false },
+            { title: "Turning Tables", artist: "Adele", plays: "758M plays", duration: "4:10", explicit: false },
+            { title: "Don't You Remember", artist: "Adele", plays: "209M plays", duration: "4:03", explicit: false },
+            { title: "Set Fire to the Rain", artist: "Adele", plays: "419M plays", duration: "4:03", explicit: false }
+        ],
+        lyrics: "21\nAdele\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "thank u, next",
+        artist: "Ariana Grande",
+        color: [190, 170, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/69/07/bb6907de-8ad4-970b-3311-121320e1bf9c/19UMGIM03691.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "imagine", artist: "Ariana Grande", plays: "1.9B plays", duration: "3:32", explicit: false },
+            { title: "needy", artist: "Ariana Grande", plays: "501M plays", duration: "2:52", explicit: false },
+            { title: "NASA", artist: "Ariana Grande", plays: "84M plays", duration: "3:02", explicit: false },
+            { title: "bloodline", artist: "Ariana Grande", plays: "293M plays", duration: "3:37", explicit: false },
+            { title: "fake smile", artist: "Ariana Grande", plays: "617M plays", duration: "3:29", explicit: false }
+        ],
+        lyrics: "thank u, next\nAriana Grande\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Take Care",
+        artist: "Drake",
+        color: [120, 100, 70],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/d2/53/62/d2536245-b94c-b3fd-7168-9512f655f6d4/00602527899091.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Over My Dead Body", artist: "Drake", plays: "1.9B plays", duration: "4:33", explicit: false },
+            { title: "Shot for Me", artist: "Drake", plays: "722M plays", duration: "3:45", explicit: false },
+            { title: "Headlines", artist: "Drake", plays: "294M plays", duration: "3:56", explicit: false },
+            { title: "Crew Love (feat. The Weeknd)", artist: "Drake", plays: "544M plays", duration: "3:29", explicit: false },
+            { title: "Take Care (feat. Rihanna)", artist: "Drake", plays: "466M plays", duration: "4:37", explicit: false }
+        ],
+        lyrics: "Take Care\nDrake\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Born to Die",
+        artist: "Lana Del Rey",
+        color: [150, 170, 190],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/59/10/66/591066ea-3c85-3dfe-ef82-ffdbbcdfc8b9/12UMGIM00033.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Born To Die", artist: "Lana Del Rey", plays: "1.0B plays", duration: "4:46", explicit: false },
+            { title: "Off To The Races", artist: "Lana Del Rey", plays: "620M plays", duration: "5:00", explicit: false },
+            { title: "Blue Jeans", artist: "Lana Del Rey", plays: "154M plays", duration: "3:31", explicit: false },
+            { title: "Video Games", artist: "Lana Del Rey", plays: "198M plays", duration: "4:42", explicit: false },
+            { title: "Diet Mountain Dew", artist: "Lana Del Rey", plays: "370M plays", duration: "3:43", explicit: false }
+        ],
+        lyrics: "Born to Die\nLana Del Rey\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "AM",
+        artist: "Arctic Monkeys",
+        color: [25, 25, 35],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/69/9c/b5/699cb5d6-115c-ff73-9d26-e57ea4350d72/887828031795.png/600x600bb.jpg",
+        songs: [
+            { title: "Do I Wanna Know?", artist: "Arctic Monkeys", plays: "1.1B plays", duration: "4:32", explicit: false },
+            { title: "R U Mine?", artist: "Arctic Monkeys", plays: "609M plays", duration: "3:22", explicit: false },
+            { title: "One for the Road", artist: "Arctic Monkeys", plays: "466M plays", duration: "3:26", explicit: false },
+            { title: "Arabella", artist: "Arctic Monkeys", plays: "748M plays", duration: "3:27", explicit: false },
+            { title: "I Want It All", artist: "Arctic Monkeys", plays: "366M plays", duration: "3:04", explicit: false }
+        ],
+        lyrics: "AM\nArctic Monkeys\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Currents",
+        artist: "Tame Impala",
+        color: [90, 140, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/64/48/5c/64485cc9-968c-68cc-764e-9a7c71733def/00602567155454.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "List of People (To Try and Forget About)", artist: "Tame Impala", plays: "0.7B plays", duration: "4:40", explicit: false },
+            { title: "Powerlines", artist: "Tame Impala", plays: "187M plays", duration: "4:19", explicit: false },
+            { title: "Taxi’s Here", artist: "Tame Impala", plays: "285M plays", duration: "4:48", explicit: false },
+            { title: "Reality in Motion (Gum Remix)", artist: "Tame Impala", plays: "698M plays", duration: "5:04", explicit: false },
+            { title: "Let it Happen (Soulwax Remix)", artist: "Tame Impala", plays: "449M plays", duration: "9:18", explicit: false }
+        ],
+        lyrics: "Currents\nTame Impala\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Planet Her",
+        artist: "Doja Cat",
+        color: [230, 140, 190],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/14/f3/28/14f32832-b9d9-1ba1-e20a-18c2ff8b6a80/886449410873.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Woman", artist: "Doja Cat", plays: "1.9B plays", duration: "2:53", explicit: false },
+            { title: "Naked", artist: "Doja Cat", plays: "245M plays", duration: "3:44", explicit: false },
+            { title: "Payday (feat. Young Thug)", artist: "Doja Cat", plays: "743M plays", duration: "3:33", explicit: false },
+            { title: "Get Into It (Yuh)", artist: "Doja Cat", plays: "322M plays", duration: "2:18", explicit: false },
+            { title: "Need To Know", artist: "Doja Cat", plays: "609M plays", duration: "3:31", explicit: false }
+        ],
+        lyrics: "Planet Her\nDoja Cat\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Map of the Soul: 7",
+        artist: "BTS",
+        color: [130, 130, 150],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/bd/68/9b/bd689bf2-ef25-4973-7ecd-7eb4965019c5/195081034713_Cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Intro : Persona", artist: "BTS", plays: "0.7B plays", duration: "2:51", explicit: false },
+            { title: "Boy With Luv (feat. Halsey)", artist: "BTS", plays: "175M plays", duration: "3:50", explicit: false },
+            { title: "Make It Right", artist: "BTS", plays: "127M plays", duration: "3:46", explicit: false },
+            { title: "Jamais Vu", artist: "BTS", plays: "228M plays", duration: "3:47", explicit: false },
+            { title: "Dionysus", artist: "BTS", plays: "301M plays", duration: "4:09", explicit: false }
+        ],
+        lyrics: "Map of the Soul: 7\nBTS\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "The Eminem Show",
+        artist: "Eminem",
+        color: [140, 40, 40],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music118/v4/dd/5c/e6/dd5ce621-f7d2-f767-7a08-e7a7eaa7870b/00602537526994.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Curtains Up (Skit)", artist: "Eminem", plays: "1.2B plays", duration: "0:30", explicit: false },
+            { title: "White America", artist: "Eminem", plays: "458M plays", duration: "5:24", explicit: false },
+            { title: "Business", artist: "Eminem", plays: "479M plays", duration: "4:12", explicit: false },
+            { title: "Cleanin' Out My Closet", artist: "Eminem", plays: "114M plays", duration: "4:58", explicit: false },
+            { title: "Square Dance", artist: "Eminem", plays: "384M plays", duration: "5:24", explicit: false }
+        ],
+        lyrics: "The Eminem Show\nEminem\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Viva la Vida",
+        artist: "Coldplay",
+        color: [180, 60, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/52/aa/85/52aa851f-15b7-6322-f91f-df84b15b7b19/190295978044.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Life in Technicolor", artist: "Coldplay", plays: "1.4B plays", duration: "2:29", explicit: false },
+            { title: "Cemeteries of London", artist: "Coldplay", plays: "263M plays", duration: "3:21", explicit: false },
+            { title: "Lost!", artist: "Coldplay", plays: "732M plays", duration: "3:55", explicit: false },
+            { title: "42", artist: "Coldplay", plays: "498M plays", duration: "3:57", explicit: false },
+            { title: "Lovers in Japan / Reign of Love", artist: "Coldplay", plays: "322M plays", duration: "6:51", explicit: false }
+        ],
+        lyrics: "Viva la Vida\nColdplay\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Hybrid Theory",
+        artist: "Linkin Park",
+        color: [170, 130, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/53/a7/7f/53a77fab-c54c-a57b-8130-248fc12d0c80/093624948995.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Papercut", artist: "LINKIN PARK", plays: "1.4B plays", duration: "3:04", explicit: false },
+            { title: "One Step Closer", artist: "LINKIN PARK", plays: "118M plays", duration: "2:36", explicit: false },
+            { title: "With You", artist: "LINKIN PARK", plays: "527M plays", duration: "3:23", explicit: false },
+            { title: "Points of Authority", artist: "LINKIN PARK", plays: "418M plays", duration: "3:20", explicit: false },
+            { title: "Crawling", artist: "LINKIN PARK", plays: "533M plays", duration: "3:29", explicit: false }
+        ],
+        lyrics: "Hybrid Theory\nLinkin Park\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "IGOR",
+        artist: "Tyler, The Creator",
+        color: [230, 150, 170],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/6f/e3/09/6fe30938-89fb-e4ae-d67a-648746c26db1/196871668248.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Intro", artist: "Tyla & Kelvin Momo", plays: "1.6B plays", duration: "0:41", explicit: false },
+            { title: "Safer", artist: "Tyla", plays: "467M plays", duration: "2:39", explicit: false },
+            { title: "Water", artist: "Tyla", plays: "71M plays", duration: "3:20", explicit: false },
+            { title: "Truth or Dare", artist: "Tyla", plays: "174M plays", duration: "3:10", explicit: false },
+            { title: "No.1 (feat. Tems)", artist: "Tyla", plays: "84M plays", duration: "2:27", explicit: false }
+        ],
+        lyrics: "IGOR\nTyler, The Creator\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Whenever You Need Somebody",
+        artist: "Rick Astley",
+        color: [200, 60, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/b3/21/d3/b321d3e4-edfe-124b-d0cd-a64ad1df3290/4050538793840.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Never Gonna Give You Up (2022 Remaster)", artist: "Rick Astley", plays: "0.7B plays", duration: "3:34", explicit: false },
+            { title: "Whenever You Need Somebody (2022 Remaster)", artist: "Rick Astley", plays: "189M plays", duration: "3:53", explicit: false },
+            { title: "Together Forever (2022 Remaster)", artist: "Rick Astley", plays: "516M plays", duration: "3:26", explicit: false },
+            { title: "It Would Take a Strong Strong Man (2022 Remaster)", artist: "Rick Astley", plays: "345M plays", duration: "3:40", explicit: false },
+            { title: "The Love Has Gone (2022 Remaster)", artist: "Rick Astley", plays: "471M plays", duration: "4:20", explicit: false }
+        ],
+        lyrics: "Whenever You Need Somebody\nRick Astley\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Back to Black",
+        artist: "Amy Winehouse",
+        color: [40, 40, 50],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/cf/3f/09/cf3f0994-980d-d8ed-088d-ae89af256b73/15UMGIM24224.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Rehab", artist: "Amy Winehouse", plays: "1.1B plays", duration: "3:35", explicit: false },
+            { title: "You Know I'm No Good", artist: "Amy Winehouse", plays: "291M plays", duration: "4:17", explicit: false },
+            { title: "Me & Mr. Jones", artist: "Amy Winehouse", plays: "64M plays", duration: "2:33", explicit: false },
+            { title: "Just Friends", artist: "Amy Winehouse", plays: "646M plays", duration: "3:13", explicit: false },
+            { title: "Back to Black", artist: "Amy Winehouse", plays: "545M plays", duration: "4:01", explicit: false }
+        ],
+        lyrics: "Back to Black\nAmy Winehouse\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
     }
 ];
 
@@ -518,6 +798,10 @@ modeButtons.forEach(btn => {
         currentMode = btn.dataset.mode;
         document.body.classList.add(`body-${currentMode}`);
 
+        // Calibrated vignette applies only in Card Shuffle; other modes use the default
+        const vEl = document.querySelector('.vignette-overlay');
+        if (vEl) vEl.style.opacity = currentMode === 'shuffle' ? shuffleCalib.vignette : '';
+
         // Reset active index states when switching layouts to force visual re-render on the same card
         lastActiveIndex = -1;
         lastActiveCardIndex = -1;
@@ -549,74 +833,131 @@ modeButtons.forEach(btn => {
     });
 });
 
-// 1.6 Card Shuffle camera presets — each one is pure data: plane tilt, lane
-// x-slots (asymmetric allowed), per-lane scale and flow speed/direction, and
-// the frozen plate's position/size. laneX length decides the lane count.
+// 1.6 Card Shuffle camera presets — flat calibration objects. Every field is
+// also a live slider in the calibration panel, so a preset is just a starting
+// point you can tweak, print as JSON, and share back as a reference.
 const shufflePresets = [
-    { // Close-Up: the user's drawing — 5 lanes, dramatic near camera, asymmetric
-        name: 'Close-Up',
-        transform: 'translateZ(40px) rotateX(15deg) rotateZ(-10deg) rotateY(-13deg)',
-        unitVw: 0.155, unitMax: 250,
-        laneX: [-2.35, -1.2, -0.08, 1.05, 2.25],
-        laneScale: [0.5, 0.66, 1.0, 0.66, 0.5],
-        laneFlow: [-185, 235, 305, -215, 165],
-        lockX: -16, lockY: -110, lockScale: 1.3, lockZ: 140
-    },
-    { // Reverse: same energy, tilted to the opposite side
-        name: 'Reverse',
-        transform: 'translateZ(-20px) rotateX(16deg) rotateZ(12deg) rotateY(15deg)',
-        unitVw: 0.20, unitMax: 290,
-        laneX: [-1.05, 0, 1.05],
-        laneScale: [0.66, 0.98, 0.66],
-        laneFlow: [250, -340, 285],
-        lockY: -110, lockScale: 1.24, lockZ: 150
-    },
-    { // Overhead: looking down a table of rolling reels
-        name: 'Overhead',
-        transform: 'translateZ(-40px) rotateX(40deg) rotateZ(-5deg)',
-        unitVw: 0.19, unitMax: 280,
-        laneX: [-1.1, 0, 1.1],
-        laneScale: [0.7, 0.95, 0.7],
-        laneFlow: [-300, 380, -330],
-        lockY: -60, lockScale: 1.3, lockZ: 180
-    },
-    { // Dutch: hard cinematic roll, nearly flat plane
-        name: 'Dutch',
-        transform: 'translateZ(-10px) rotateZ(-24deg) rotateX(6deg)',
-        unitVw: 0.21, unitMax: 310,
-        laneX: [-1.1, 0, 1.1],
-        laneScale: [0.6, 0.95, 0.6],
-        laneFlow: [-280, 330, -300],
-        lockY: -90, lockScale: 1.26, lockZ: 150
-    },
-    { // Front: straight-on slot machine, no tilt at all
-        name: 'Front',
-        transform: 'translateZ(-60px)',
-        unitVw: 0.185, unitMax: 270,
-        laneX: [-1.05, 0, 1.05],
-        laneScale: [0.62, 0.95, 0.62],
-        laneFlow: [-260, 330, -290],
-        lockY: -100, lockScale: 1.22, lockZ: 120
-    },
-    { // Wide: pulled-back gallery overview, 5 gentle lanes
-        name: 'Wide',
-        transform: 'translateZ(-300px) rotateX(10deg) rotateY(9deg)',
-        unitVw: 0.16, unitMax: 240,
-        laneX: [-2.2, -1.1, 0, 1.1, 2.2],
-        laneScale: [0.5, 0.62, 0.85, 0.62, 0.5],
-        laneFlow: [-200, 250, 300, -230, 180],
-        lockY: -80, lockScale: 1.08, lockZ: 100
-    }
+    { name: 'Close-Up', zoom: 40,   tiltX: 15, tiltY: -13, tiltZ: -10, lanes: 5, laneGap: 235, flowSpacing: 300, mainScale: 1.00, subScale: 0.62, lockScale: 1.30, lockX: -16, lockY: -110, vignette: 1 },
+    { name: 'Reverse',  zoom: -20,  tiltX: 16, tiltY: 15,  tiltZ: 12,  lanes: 3, laneGap: 290, flowSpacing: 330, mainScale: 0.98, subScale: 0.66, lockScale: 1.24, lockX: 0,   lockY: -110, vignette: 1 },
+    { name: 'Overhead', zoom: -40,  tiltX: 40, tiltY: 0,   tiltZ: -5,  lanes: 3, laneGap: 280, flowSpacing: 370, mainScale: 0.95, subScale: 0.70, lockScale: 1.30, lockX: 0,   lockY: -60,  vignette: 1 },
+    { name: 'Dutch',    zoom: -10,  tiltX: 6,  tiltY: 0,   tiltZ: -24, lanes: 3, laneGap: 300, flowSpacing: 330, mainScale: 0.95, subScale: 0.60, lockScale: 1.26, lockX: 0,   lockY: -90,  vignette: 1 },
+    { name: 'Front',    zoom: -60,  tiltX: 0,  tiltY: 0,   tiltZ: 0,   lanes: 3, laneGap: 270, flowSpacing: 320, mainScale: 0.95, subScale: 0.62, lockScale: 1.22, lockX: 0,   lockY: -100, vignette: 1 },
+    { name: 'Wide',     zoom: -300, tiltX: 10, tiltY: 9,   tiltZ: 0,   lanes: 5, laneGap: 240, flowSpacing: 280, mainScale: 0.85, subScale: 0.55, lockScale: 1.08, lockX: 0,   lockY: -80,  vignette: 1 }
 ];
 
-let shuffleAngle = 0;
-document.querySelectorAll('.angle-btn').forEach(btn => {
+// Flow direction/speed by lane distance from center (-3..3): middle runs
+// forward, neighbours backward, outer lanes alternate again — each at a
+// slightly different speed so the reels feel loose, not mechanical
+const FLOW_PATTERN = { '-3': -0.80, '-2': 0.70, '-1': -0.85, '0': 1, '1': -0.78, '2': 0.92, '3': -0.66 };
+
+// Live calibration state (persisted in localStorage, edited via the panel)
+let shuffleCalib = { ...shufflePresets[0] };
+try {
+    const saved = JSON.parse(localStorage.getItem('jukebox-shuffle-calib'));
+    if (saved && typeof saved.zoom === 'number') shuffleCalib = { ...shuffleCalib, ...saved };
+} catch (e) { /* fresh start */ }
+
+const calibSchema = [
+    ['zoom',        'Zoom (dist)',   -400, 250,  1],
+    ['tiltX',       'Tilt X',        -45,  45,   1],
+    ['tiltY',       'Tilt Y',        -45,  45,   1],
+    ['tiltZ',       'Tilt Z',        -45,  45,   1],
+    ['lanes',       'Lanes',          3,   7,    2],
+    ['laneGap',     'Lane spacing',   100, 420,  2],
+    ['flowSpacing', 'Card spacing',   140, 480,  5],
+    ['mainScale',   'Main lane size', 0.5, 1.4,  0.01],
+    ['subScale',    'Sub lane size',  0.3, 1.1,  0.01],
+    ['lockScale',   'Highlight size', 0.8, 1.9,  0.01],
+    ['lockX',       'Plate X',       -250, 250,  2],
+    ['lockY',       'Plate Y',       -300, 120,  2],
+    ['vignette',    'Vignette',       0,   1,    0.01]
+];
+
+const vignetteEl = document.querySelector('.vignette-overlay');
+
+function applyCalibSideEffects() {
+    if (vignetteEl) {
+        vignetteEl.style.opacity = currentMode === 'shuffle' ? shuffleCalib.vignette : '';
+    }
+    try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
+}
+
+// Build the calibration panel rows from the schema
+const calibRowsEl = document.getElementById('calibRows');
+const calibInputs = {};
+if (calibRowsEl) {
+    calibSchema.forEach(([key, label, min, max, step]) => {
+        const row = document.createElement('div');
+        row.className = 'calib-row';
+        row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
+        const input = row.querySelector('input');
+        const out = row.querySelector('output');
+        input.value = shuffleCalib[key];
+        out.textContent = shuffleCalib[key];
+        input.addEventListener('input', () => {
+            shuffleCalib[key] = parseFloat(input.value);
+            out.textContent = input.value;
+            applyCalibSideEffects();
+        });
+        calibInputs[key] = { input, out };
+        calibRowsEl.appendChild(row);
+    });
+}
+
+function syncCalibPanel() {
+    calibSchema.forEach(([key]) => {
+        if (calibInputs[key]) {
+            calibInputs[key].input.value = shuffleCalib[key];
+            calibInputs[key].out.textContent = shuffleCalib[key];
+        }
+    });
+}
+
+// Preset buttons load their values into the live calibration
+document.querySelectorAll('.angle-btn[data-angle]').forEach(btn => {
     btn.addEventListener('click', () => {
-        document.querySelectorAll('.angle-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.angle-btn[data-angle]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        shuffleAngle = parseInt(btn.dataset.angle, 10) || 0;
+        const idx = parseInt(btn.dataset.angle, 10) || 0;
+        shuffleCalib = { ...shufflePresets[idx] };
+        syncCalibPanel();
+        applyCalibSideEffects();
     });
 });
+
+// Panel toggle + print/load JSON
+const calibToggleBtn = document.getElementById('calibToggle');
+if (calibToggleBtn) {
+    calibToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('calib-open');
+        calibToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
+    });
+}
+
+const calibJsonEl = document.getElementById('calibJson');
+const calibPrintBtn = document.getElementById('calibPrint');
+const calibApplyBtn = document.getElementById('calibApply');
+if (calibPrintBtn && calibJsonEl) {
+    calibPrintBtn.addEventListener('click', () => {
+        const json = JSON.stringify(shuffleCalib);
+        calibJsonEl.value = json;
+        calibJsonEl.select();
+        if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
+        console.log('[Shuffle calibration]', json);
+    });
+}
+if (calibApplyBtn && calibJsonEl) {
+    calibApplyBtn.addEventListener('click', () => {
+        try {
+            const parsed = JSON.parse(calibJsonEl.value);
+            shuffleCalib = { ...shuffleCalib, ...parsed };
+            syncCalibPanel();
+            applyCalibSideEffects();
+        } catch (e) {
+            calibJsonEl.value = 'Invalid JSON: ' + e.message;
+        }
+    });
+}
 
 // 2. Infinite Virtual Scroll Logic
 let currentRotation = 0;
@@ -1459,17 +1800,16 @@ function updateCarousel() {
 
     } else if (currentMode === 'shuffle') {
         // Card Shuffle: film reels on a tilted product-shot plane, fully driven
-        // by the selected camera preset (see shufflePresets). The highlighted
-        // card is captured and FROZEN at the plate while the reels roll past it.
-        const p = shufflePresets[shuffleAngle];
-        carousel.style.transform = p.transform;
+        // by the live calibration object (sliders/presets/pasted JSON). The
+        // highlighted card is captured and FROZEN at the plate while reels roll.
+        const c = shuffleCalib;
+        carousel.style.transform =
+            `translateZ(${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
-        const laneCount = p.laneX.length;
+        const laneCount = Math.max(3, Math.round(c.lanes) | 1); // odd: 3, 5, or 7
         const midLane = Math.floor(laneCount / 2);
         const laneLen = totalCards / laneCount;
-        const unit = Math.min(p.unitMax, window.innerWidth * p.unitVw);
         const yLimit = window.innerHeight * 0.8;
-        const lockX = p.lockX || 0;
 
         cards.forEach((card, index) => {
             // Serpentine loop coordinate: leftmost lane -> ... -> rightmost -> wraps.
@@ -1478,6 +1818,8 @@ function updateCarousel() {
             if (s < 0) s += totalCards;
             const lane = Math.min(laneCount - 1, Math.floor(s / laneLen));
             const local = s - lane * laneLen;
+            const laneD = lane - midLane;               // signed distance from center
+            const laneDist = Math.abs(laneD);
 
             let offset = index - activeIndexFloat;
             while (offset > totalCards / 2) offset -= totalCards;
@@ -1485,20 +1827,20 @@ function updateCarousel() {
             const absOffset = Math.abs(offset);
             const isActive = absOffset < 0.5;
 
-            // Film-reel flow: each lane has its own x slot, speed, and direction
-            const flowX = p.laneX[lane] * unit;
-            const flowY = (local - laneLen / 2) * p.laneFlow[lane] + p.lockY;
+            // Film-reel flow: lane x from gap, speed/direction from the pattern
+            const flowX = laneD * c.laneGap;
+            const flowY = (local - laneLen / 2) * c.flowSpacing * (FLOW_PATTERN[laneD] || 0.8) + c.lockY;
+            const laneScale = lane === midLane ? c.mainScale : Math.max(0.25, c.subScale * (1 - 0.08 * (laneDist - 1)));
 
             // Capture: smoothstep-blend into the frozen plate as a card nears the
             // highlight, and release it back into the reel as it leaves — so the
             // center stays locked while the reels stay loose
             const tRaw = Math.min(1, absOffset);
             const t = tRaw * tRaw * (3 - 2 * tRaw);
-            const laneDist = Math.abs(lane - midLane);
-            const x = lerp(lockX, flowX, t);
-            const y = lerp(p.lockY, flowY, t);
-            const z = lerp(p.lockZ, lane === midLane ? 20 : -80 - laneDist * 40, t);
-            const scale = lerp(p.lockScale, p.laneScale[lane], t);
+            const x = lerp(c.lockX, flowX, t);
+            const y = lerp(c.lockY, flowY, t);
+            const z = lerp(150, lane === midLane ? 20 : -80 - laneDist * 40, t);
+            const scale = lerp(c.lockScale, laneScale, t);
             const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
             const fog = card.querySelector('.fog-overlay');
