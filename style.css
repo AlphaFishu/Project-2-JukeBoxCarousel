@@ -690,31 +690,76 @@ body.body-shuffle.calib-open .calib-panel {
 }
 
 /* Calibration tabs */
+/* Underline tabs (no pills) */
 .calib-tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 10px;
+    gap: 14px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 .calib-tab {
-    flex: 1;
-    padding: 6px 0;
-    border-radius: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    padding: 4px 0 8px;
+    border: none;
     background: transparent;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.45);
     font-family: inherit;
-    font-size: 0.58rem;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.calib-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .calib-tab.active {
-    background: #2c2c36;
     color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+/* Section divider with a small label */
+.calib-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 7px;
+    font-size: 0.54rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.calib-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Checkbox row */
+.calib-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 8px;
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.calib-check input {
+    width: 14px;
+    height: 14px;
+    accent-color: #e8e8ee;
+    cursor: pointer;
 }
 
 .calib-page {

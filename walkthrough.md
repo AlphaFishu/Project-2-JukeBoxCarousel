@@ -1,4 +1,14 @@
-# Walkthrough: Calibration v3 — True Gaps, Isolated Plate, Real Lane Speed (v2.98)
+# Walkthrough: Calibration UX + Main-Card Tilt + Motion Blur (v2.99)
+
+1. **Clearer naming + grouping** — Layout tab is now split by `--- Main ---` / `--- Sub ---` dividers. "Highlight size" → **Main size**, "Plate X/Y" → **Main X / Main Y**. Camera tilts relabeled "Scene tilt X/Y/Z" to distinguish from the new main-card tilt.
+2. **Main-card tilt (X/Y/Z)** — a dedicated `--- Main tilt ---` section rotates ONLY the frozen highlight card (faded by 1−t so reel cards stay flat), for a custom hero pose. Its own **Reset tilt** button zeroes just those three.
+3. **Motion blur** — `--- Motion blur ---` section with a **Sub-lane blur** checkbox; when on, a **Blur strength** slider appears and sub-lane cards blur proportionally to scroll speed (main lane stays sharp). Off by default.
+4. **Underline tabs** — calibration tabs are now text + underline, not pills.
+5. **Separate resets** — **Reset camera** (Camera tab) restores the rig/scene-tilt; **Reset tilt** (Layout, main-tilt section) clears only the main-card pose. Fully independent.
+
+---
+
+# Previous: Calibration v3 — True Gaps, Isolated Plate, Real Lane Speed (v2.98)
 
 1. **Equal card gaps, for real** — spacing is now defined as the visible EDGE gap: per-card step = scaled card height + gap. Previously equal center-spacing looked unequal because sub-lane cards are smaller.
 2. **Main/Sub card gap isolated** — two sliders (`Main card gap`, `Sub card gap`), each can go negative for deliberate overlap-stack looks.

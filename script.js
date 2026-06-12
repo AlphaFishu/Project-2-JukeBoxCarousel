@@ -851,39 +851,60 @@ function laneDirection(laneDist) {
     return laneDist === 0 ? 1 : (laneDist % 2 === 1 ? -1 : 1);
 }
 
+// Defaults for newer calibration keys not present in older presets/saved state
+const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8 };
+
 // Live calibration state (persisted in localStorage, edited via the panel)
-let shuffleCalib = { ...shufflePresets[0] };
+let shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[0] };
 try {
     const saved = JSON.parse(localStorage.getItem('jukebox-shuffle-calib'));
     if (saved && typeof saved.zoom === 'number') shuffleCalib = { ...shuffleCalib, ...saved };
 } catch (e) { /* fresh start */ }
 
-const calibSchema = [
-    // [key, label, min, max, step, tab]
-    ['zoom',          'Camera Z (zoom)', -400, 250,  1,    'cam'],
-    ['camX',          'Camera X',        -400, 400,  2,    'cam'],
-    ['camY',          'Camera Y',        -400, 400,  2,    'cam'],
-    ['tiltX',         'Tilt X',          -45,  45,   1,    'cam'],
-    ['tiltY',         'Tilt Y',          -45,  45,   1,    'cam'],
-    ['tiltZ',         'Tilt Z',          -45,  45,   1,    'cam'],
-    ['lanes',         'Lanes',            3,   7,    2,    'lay'],
-    ['laneGap',       'Lane spacing',     100, 420,  2,    'lay'],
-    ['mainPad',       'Main lane pad',    0,   220,  2,    'lay'],
-    ['mainCardGap',   'Main card gap',   -160, 260,  2,    'lay'],
-    ['subCardGap',    'Sub card gap',    -160, 260,  2,    'lay'],
-    ['mainScale',     'Main lane size',   0.5, 1.4,  0.01, 'lay'],
-    ['subScale',      'Sub lane size',    0.3, 1.1,  0.01, 'lay'],
-    ['lockScale',     'Highlight size',   0.8, 1.9,  0.01, 'lay'],
-    ['lockX',         'Plate X',         -250, 250,  2,    'lay'],
-    ['lockY',         'Plate Y',         -300, 120,  2,    'lay'],
-    ['subSpeed',      'Sub lane speed',   0.2, 2,    0.05, 'fx'],
-    ['snap',          'Scroll snap',      0,   1,    0.02, 'fx'],
-    ['vignette',      'Vignette radial',  0,   2,    0.02, 'fx'],
-    ['vignetteSides', 'Side strength',    0,   2,    0.02, 'fx'],
-    ['vignetteReach', 'Side reach %',     5,   48,   1,    'fx']
-];
-
+// Tabbed, grouped panel. Item kinds: slider | divider | check | button.
+// Labels are explicit about Main (the frozen highlight + its lane) vs Sub.
 const calibTabs = [['cam', 'Camera'], ['lay', 'Layout'], ['fx', 'Motion/FX']];
+const calibPages = {
+    cam: [
+        { button: 'resetCamera', label: 'Reset camera' },
+        { slider: 'zoom',  label: 'Camera Z (zoom)', min: -400, max: 250, step: 1 },
+        { slider: 'camX',  label: 'Camera X', min: -400, max: 400, step: 2 },
+        { slider: 'camY',  label: 'Camera Y', min: -400, max: 400, step: 2 },
+        { slider: 'tiltX', label: 'Scene tilt X', min: -45, max: 45, step: 1 },
+        { slider: 'tiltY', label: 'Scene tilt Y', min: -45, max: 45, step: 1 },
+        { slider: 'tiltZ', label: 'Scene tilt Z', min: -45, max: 45, step: 1 }
+    ],
+    lay: [
+        { slider: 'lanes',   label: 'Lanes', min: 3, max: 7, step: 2 },
+        { slider: 'laneGap', label: 'Lane spacing', min: 100, max: 420, step: 2 },
+        { divider: 'Main' },
+        { slider: 'mainPad',     label: 'Main lane pad', min: 0, max: 220, step: 2 },
+        { slider: 'mainCardGap', label: 'Main card gap', min: -160, max: 260, step: 2 },
+        { slider: 'mainScale',   label: 'Main lane size', min: 0.5, max: 1.4, step: 0.01 },
+        { slider: 'lockScale',   label: 'Main size', min: 0.8, max: 1.9, step: 0.01 },
+        { slider: 'lockX',       label: 'Main X', min: -250, max: 250, step: 2 },
+        { slider: 'lockY',       label: 'Main Y', min: -300, max: 120, step: 2 },
+        { divider: 'Main tilt' },
+        { slider: 'mainTiltX', label: 'Main tilt X', min: -60, max: 60, step: 1 },
+        { slider: 'mainTiltY', label: 'Main tilt Y', min: -60, max: 60, step: 1 },
+        { slider: 'mainTiltZ', label: 'Main tilt Z', min: -60, max: 60, step: 1 },
+        { button: 'resetTilt', label: 'Reset tilt' },
+        { divider: 'Sub' },
+        { slider: 'subCardGap', label: 'Sub card gap', min: -160, max: 260, step: 2 },
+        { slider: 'subScale',   label: 'Sub lane size', min: 0.3, max: 1.1, step: 0.01 }
+    ],
+    fx: [
+        { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
+        { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
+        { divider: 'Vignette' },
+        { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
+        { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
+        { slider: 'vignetteReach', label: 'Side reach %', min: 5, max: 48, step: 1 },
+        { divider: 'Motion blur' },
+        { check: 'motionBlur', label: 'Sub-lane blur' },
+        { slider: 'motionBlurAmt', label: 'Blur strength', min: 0, max: 30, step: 0.5, dep: 'motionBlur' }
+    ]
+};
 const vignetteEl = document.querySelector('.vignette-overlay');
 
 // Composes the vignette from two controllable shadows: the classic radial and
@@ -911,10 +932,33 @@ function applyCalibSideEffects() {
     try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
 }
 
-// Build the tabbed calibration panel from the schema
+// Build the tabbed calibration panel from calibPages
 const calibRowsEl = document.getElementById('calibRows');
 const calibInputs = {};
+const calibChecks = {};
+const calibDepRows = {}; // depKey -> [rows shown only when that checkbox is on]
 let lastPresetIdx = 0;
+
+function setDepVisibility(depKey) {
+    (calibDepRows[depKey] || []).forEach(r => { r.style.display = shuffleCalib[depKey] ? 'grid' : 'none'; });
+}
+
+// Reset camera restores ONLY the camera rig (position + scene tilt) of the
+// active preset. Reset tilt clears ONLY the main-card tilt. They're separate.
+function resetCamera() {
+    const p = shufflePresets[lastPresetIdx];
+    ['zoom', 'camX', 'camY', 'tiltX', 'tiltY', 'tiltZ'].forEach(k => { shuffleCalib[k] = p[k] || 0; });
+    syncCalibPanel();
+    applyCalibSideEffects();
+}
+function resetTilt() {
+    shuffleCalib.mainTiltX = 0;
+    shuffleCalib.mainTiltY = 0;
+    shuffleCalib.mainTiltZ = 0;
+    syncCalibPanel();
+    applyCalibSideEffects();
+}
+
 if (calibRowsEl) {
     const tabBar = document.createElement('div');
     tabBar.className = 'calib-tabs';
@@ -930,51 +974,70 @@ if (calibRowsEl) {
             pages[id].classList.add('active');
         });
         tabBar.appendChild(tabBtn);
-
         const page = document.createElement('div');
         page.className = 'calib-page' + (i === 0 ? ' active' : '');
         pages[id] = page;
     });
     calibRowsEl.appendChild(tabBar);
 
-    // Reset camera: restores the camera (position + tilt) of the last preset
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'calib-btn';
-    resetBtn.textContent = 'Reset camera';
-    resetBtn.addEventListener('click', () => {
-        const p = shufflePresets[lastPresetIdx];
-        ['zoom', 'camX', 'camY', 'tiltX', 'tiltY', 'tiltZ'].forEach(k => { shuffleCalib[k] = p[k] || 0; });
-        syncCalibPanel();
-        applyCalibSideEffects();
-    });
-    pages.cam.appendChild(resetBtn);
-
-    calibSchema.forEach(([key, label, min, max, step, tab]) => {
-        const row = document.createElement('div');
-        row.className = 'calib-row';
-        row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
-        const input = row.querySelector('input');
-        const out = row.querySelector('output');
-        input.value = shuffleCalib[key];
-        out.textContent = shuffleCalib[key];
-        input.addEventListener('input', () => {
-            shuffleCalib[key] = parseFloat(input.value);
-            out.textContent = input.value;
-            applyCalibSideEffects();
+    Object.keys(calibPages).forEach(tabId => {
+        calibPages[tabId].forEach(item => {
+            if (item.divider) {
+                const d = document.createElement('div');
+                d.className = 'calib-divider';
+                d.innerHTML = `<span>${item.divider}</span>`;
+                pages[tabId].appendChild(d);
+            } else if (item.button) {
+                const b = document.createElement('button');
+                b.className = 'calib-btn';
+                b.textContent = item.label;
+                b.addEventListener('click', item.button === 'resetCamera' ? resetCamera : resetTilt);
+                pages[tabId].appendChild(b);
+            } else if (item.check) {
+                const row = document.createElement('label');
+                row.className = 'calib-check';
+                row.innerHTML = `<input type="checkbox"><span>${item.label}</span>`;
+                const chk = row.querySelector('input');
+                chk.checked = !!shuffleCalib[item.check];
+                chk.addEventListener('change', () => {
+                    shuffleCalib[item.check] = chk.checked ? 1 : 0;
+                    setDepVisibility(item.check);
+                    applyCalibSideEffects();
+                });
+                calibChecks[item.check] = chk;
+                pages[tabId].appendChild(row);
+            } else {
+                const row = document.createElement('div');
+                row.className = 'calib-row';
+                row.innerHTML = `<label>${item.label}</label><input type="range" min="${item.min}" max="${item.max}" step="${item.step}"><output></output>`;
+                const input = row.querySelector('input');
+                const out = row.querySelector('output');
+                input.value = shuffleCalib[item.slider];
+                out.textContent = shuffleCalib[item.slider];
+                input.addEventListener('input', () => {
+                    shuffleCalib[item.slider] = parseFloat(input.value);
+                    out.textContent = input.value;
+                    applyCalibSideEffects();
+                });
+                calibInputs[item.slider] = { input, out };
+                if (item.dep) (calibDepRows[item.dep] = calibDepRows[item.dep] || []).push(row);
+                pages[tabId].appendChild(row);
+            }
         });
-        calibInputs[key] = { input, out };
-        pages[tab].appendChild(row);
     });
 
     calibTabs.forEach(([id]) => calibRowsEl.appendChild(pages[id]));
+    Object.keys(calibDepRows).forEach(setDepVisibility);
 }
 
 function syncCalibPanel() {
-    calibSchema.forEach(([key]) => {
-        if (calibInputs[key]) {
-            calibInputs[key].input.value = shuffleCalib[key];
-            calibInputs[key].out.textContent = shuffleCalib[key];
-        }
+    Object.keys(calibInputs).forEach(key => {
+        calibInputs[key].input.value = shuffleCalib[key];
+        calibInputs[key].out.textContent = shuffleCalib[key];
+    });
+    Object.keys(calibChecks).forEach(key => {
+        calibChecks[key].checked = !!shuffleCalib[key];
+        setDepVisibility(key);
     });
 }
 
@@ -985,7 +1048,7 @@ document.querySelectorAll('.angle-btn[data-angle]').forEach(btn => {
         btn.classList.add('active');
         const idx = parseInt(btn.dataset.angle, 10) || 0;
         lastPresetIdx = idx;
-        shuffleCalib = { ...shufflePresets[idx] };
+        shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[idx] };
         syncCalibPanel();
         applyCalibSideEffects();
     });
@@ -1880,6 +1943,9 @@ function updateCarousel() {
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
+        // Live scroll speed drives the optional sub-lane motion blur
+        const shuffleSpeed = Math.abs(targetRotation - currentRotation);
+
         const laneCount = Math.max(3, Math.round(c.lanes) | 1); // odd: 3, 5, or 7
         const midLane = Math.floor(laneCount / 2);
         const laneLen = totalCards / laneCount;
@@ -1951,10 +2017,24 @@ function updateCarousel() {
             card.classList.toggle('active', isActive);
             if (isActive) updateAmbientBackground(card);
 
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px) scale(${scale})`;
+            // Main-card tilt: rotate ONLY the captured plate (faded out by 1-t,
+            // so reel cards stay flat). Custom 3D pose for the highlighted album.
+            const mt = 1 - t;
+            const tiltStr = (c.mainTiltX || c.mainTiltY || c.mainTiltZ)
+                ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
+                : '';
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
-            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})`;
+
+            // Optional motion blur: sub-lane cards blur with scroll speed (off by
+            // default; strength sets the ceiling). Main lane stays sharp.
+            let blurStr = '';
+            if (c.motionBlur && lane !== midLane && !isActive) {
+                const blurPx = Math.min(c.motionBlurAmt, shuffleSpeed * 0.06);
+                if (blurPx > 0.3) blurStr = ` blur(${blurPx.toFixed(1)}px)`;
+            }
+            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
             card.style.zIndex = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
             if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
         });
