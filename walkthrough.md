@@ -1,4 +1,15 @@
-# Walkthrough: Calibration v2 — Camera Rig, Tabs, Lane Physics (v2.97)
+# Walkthrough: Calibration v3 — True Gaps, Isolated Plate, Real Lane Speed (v2.98)
+
+1. **Equal card gaps, for real** — spacing is now defined as the visible EDGE gap: per-card step = scaled card height + gap. Previously equal center-spacing looked unequal because sub-lane cards are smaller.
+2. **Main/Sub card gap isolated** — two sliders (`Main card gap`, `Sub card gap`), each can go negative for deliberate overlap-stack looks.
+3. **Vignette sides reach** — new `Side reach %` slider (5–48%) lets the left/right shadows push as close to the middle as wanted; `Side strength` and `Vignette radial` control intensity (both to 2×).
+4. **Plate X/Y isolated** — `lockY` no longer leaks into every lane's flow (that's why Plate Y moved the whole stack). The reels center on a fixed stack base; Plate X/Y move only the captured highlight card.
+5. **Real sub-lane speed** — `Sub lane speed` is now a phase drift: the lane's whole content scrolls faster/slower (wrapping within the lane) while card spacing stays untouched — the "fake reel" approach. The middle lane stays locked to the true scroll because the frozen-plate capture depends on neighbors arriving in true positions (which is also why the separate "main speed" slider was removed — it's structurally impossible with a frozen plate). Wrap points fade out so cards never pop.
+6. **Helix marquee** — scroll drift removed in Helix; text is pinned at the left edge (mouse-shift only), so the artist name reliably starts at the left.
+
+---
+
+# Previous: Calibration v2 — Camera Rig, Tabs, Lane Physics (v2.97)
 
 1. **Camera position X/Y/Z** — the camera is now a full rig: `Camera X/Y` pan the framing for cropping compositions, `Camera Z` is the existing zoom. A **Reset camera** button restores the active preset's camera (position + tilt) without touching layout values.
 2. **Solid utility panel** — calibration UI dropped the glass look: solid `#17171d` surface, solid light knobs (tools, not jewelry).
