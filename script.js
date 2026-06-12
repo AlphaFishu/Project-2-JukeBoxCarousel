@@ -1194,7 +1194,7 @@ function laneDirection(laneDist) {
 }
 
 // Defaults for newer calibration keys not present in older presets/saved state
-const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8 };
+const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0 };
 
 // Live calibration state (persisted in localStorage, edited via the panel)
 let shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[0] };
@@ -1440,13 +1440,13 @@ const shuffle2Presets = [
         name: 'Dynamic',
         calib: { "mainTiltX": -3, "mainTiltY": 16, "mainTiltZ": -17, "motionBlur": 0, "motionBlurAmt": 8, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.3, "lockX": 162, "lockY": -92, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 0.88, "vignetteReach": 26 },
         // Song list right, anchored at the main card's top; lyrics at its bottom-left
-        ui: { songs: { x: 330, y: -300, w: 350 }, lyrics: { x: -720, y: 120, w: 410 } }
+        ui: { songs: { anchor: 'right-top', w: 330 }, lyrics: { anchor: 'left-bottom', w: 380 } }
     },
     {
         name: 'Intro',
         calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics
-        ui: { songs: { x: -660, y: -330, w: 340 } }
+        ui: { songs: { anchor: 'left-top', w: 320 } }
     },
     {
         name: 'Maison',
@@ -1455,7 +1455,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flip Up',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 800 },
         ui: {}
     }
 ];
@@ -1475,15 +1475,27 @@ function stopS2Lyrics() {
     }
 }
 
-// Panels are drawn in the main card's perspective: scene tilt + main-card tilt
-// combined, so the song list and lyrics sit on the same visual plane as the card.
+const s2RigEl = document.getElementById('s2Rig');
+const s2OverlayEl = document.getElementById('shuffle2Overlay');
+
+// Panels live in a mirror of the real 3D rig: the overlay shares the scene's
+// perspective, the rig carries the exact camera transform, and each panel gets
+// the main card's plate transform (position + main tilt) plus an in-plane
+// offset to its anchor corner — so position AND perspective match the card.
 function applyShuffle2Layout() {
     const p = shuffle2Presets[shuffle2Idx];
     const c = p.calib;
-    const rx = (c.tiltX || 0) + (c.mainTiltX || 0);
-    const ry = (c.tiltY || 0) + (c.mainTiltY || 0);
-    const rz = (c.tiltZ || 0) + (c.mainTiltZ || 0);
-    const tilt = `perspective(960px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+    if (s2RigEl) {
+        s2RigEl.style.transform =
+            `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
+    }
+
+    const s = c.lockScale || 1;
+    const halfW = 112 * s; // card is 224x320, scaled by the plate size
+    const halfH = 160 * s;
+    const gap = 26;
+    const plate = `translate3d(${112 + c.lockX}px, ${160 + c.lockY}px, 150px) ` +
+        `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
 
     [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
         if (!el) return;
@@ -1493,11 +1505,34 @@ function applyShuffle2Layout() {
             return;
         }
         el.style.display = 'block';
-        el.style.left = `calc(50% + ${cfg.x}px)`;
-        el.style.top = `calc(50% + ${cfg.y}px)`;
         el.style.width = `${cfg.w}px`;
-        el.style.transform = tilt;
+        let inPlane = '';
+        if (cfg.anchor === 'right-top') inPlane = `translateX(${halfW + gap}px) translateY(${-halfH}px)`;
+        else if (cfg.anchor === 'left-top') inPlane = `translateX(${-halfW - gap - cfg.w}px) translateY(${-halfH}px)`;
+        else if (cfg.anchor === 'left-bottom') inPlane = `translateX(${-halfW - gap - cfg.w}px) translateY(${halfH}px) translateY(-100%)`;
+        else if (cfg.anchor === 'right-bottom') inPlane = `translateX(${halfW + gap}px) translateY(${halfH}px) translateY(-100%)`;
+        el.style.transform = `${plate} ${inPlane}`;
     });
+}
+
+// Skeleton gate: while the reels are moving fast, panels hold a skeleton
+// (shapes without data); once the scroll settles, real content eases in ~150ms
+let s2PendingIndex = -1;
+let s2RevealTimer = null;
+
+function requestShuffle2Overlay(index) {
+    s2PendingIndex = index;
+    clearTimeout(s2RevealTimer);
+    const fast = Math.abs(targetRotation - currentRotation) > 25;
+    if (fast) {
+        if (s2OverlayEl) s2OverlayEl.classList.add('s2-skeleton');
+        s2RevealTimer = setTimeout(() => requestShuffle2Overlay(s2PendingIndex), 160);
+    } else {
+        s2RevealTimer = setTimeout(() => {
+            updateShuffle2Overlay(s2PendingIndex);
+            if (s2OverlayEl) s2OverlayEl.classList.remove('s2-skeleton');
+        }, 150);
+    }
 }
 
 function updateShuffle2Overlay(index) {
@@ -2464,14 +2499,28 @@ function updateCarousel() {
             const edgeSlots = Math.min(slotLocal, laneLen - slotLocal);
             const wrapFade = lane === midLane ? 1 : Math.min(1, edgeSlots / 0.6);
 
+            // Lane bend (film-roll curvature): the reels arc away like a strip
+            // of film on a drum — a slice of circumference, not a full cylinder.
+            // The captured main card stays flat (the bend fades with capture t).
+            let bentY = flowY;
+            let bentZ = lane === midLane ? 20 : -80 - laneDist * 40;
+            let bendRX = 0;
+            if (c.laneBend) {
+                const bendR = c.laneBend;
+                const a = (flowY - (-60)) / bendR; // arc angle from the stack base
+                bentY = -60 + Math.sin(a) * bendR;
+                bentZ += (Math.cos(a) - 1) * bendR;
+                bendRX = -a * 57.2958 * 0.8; // tangent tilt along the curve
+            }
+
             // Capture: smoothstep-blend into the frozen plate as a card nears the
             // highlight, and release it back into the reel as it leaves — so the
             // center stays locked while the reels stay loose
             const tRaw = Math.min(1, absOffset);
             const t = tRaw * tRaw * (3 - 2 * tRaw);
             const x = lerp(c.lockX, flowX, t);
-            const y = lerp(c.lockY, flowY, t);
-            const z = lerp(150, lane === midLane ? 20 : -80 - laneDist * 40, t);
+            const y = lerp(c.lockY, bentY, t);
+            const z = lerp(150, bentZ, t);
             const scale = lerp(c.lockScale, laneScale, t);
             const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
@@ -2492,7 +2541,8 @@ function updateCarousel() {
             const tiltStr = (c.mainTiltX || c.mainTiltY || c.mainTiltZ)
                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
                 : '';
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${tiltStr} scale(${scale})`;
+            const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
 
@@ -2557,6 +2607,10 @@ function updateCarousel() {
     povX = lerp(povX, 50 + mouseNX * 5, 0.06);
     povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
     if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
+    // Keep the Card 2 panel rig's vanishing point identical to the scene's
+    if (currentMode === 'shuffle2' && s2OverlayEl) {
+        s2OverlayEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
+    }
 
     // Kinetic marquee: drifts opposite to scroll plus a slight mouse offset.
     // Helix pins the text to the left edge (mouse shift only, no scroll drift,
@@ -2585,6 +2639,7 @@ const marqueeTextEl = document.getElementById('marqueeText');
 const sceneEl = document.querySelector('.scene');
 let marqueeSwapTimer = null;
 let lastDockIndex = -1;
+let lastStepIdx = -1;
 
 // Shortest-path jump to an album index (same wrap math as clicking a card)
 function jumpToIndex(index) {
@@ -2661,9 +2716,23 @@ function updateNowPlaying(index) {
     }
     if (dockArtistEl) dockArtistEl.textContent = track.artist;
 
-    // Skip the highlight along the segmented steps
+    // Skip the highlight along the segmented steps, flashing every step on the
+    // path so fast scrolls leave a white fading trail instead of vanishing
     if (dockStepsEl) {
         const steps = dockStepsEl.children;
+        if (lastStepIdx >= 0 && lastStepIdx !== index && steps.length) {
+            let d = index - lastStepIdx;
+            if (d > totalCards / 2) d -= totalCards;
+            if (d < -totalCards / 2) d += totalCards;
+            const dir = d > 0 ? 1 : -1;
+            for (let k = lastStepIdx; k !== index; k = (k + dir + totalCards) % totalCards) {
+                if (steps[k]) steps[k].classList.add('flash');
+            }
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                for (const s of steps) s.classList.remove('flash');
+            }));
+        }
+        lastStepIdx = index;
         for (let i = 0; i < steps.length; i++) {
             steps[i].classList.toggle('active', i === index);
         }
@@ -2675,7 +2744,8 @@ function updateNowPlaying(index) {
     );
 
     // Card 2 contextual panels follow the active album like Rolling Album does
-    if (currentMode === 'shuffle2') updateShuffle2Overlay(index);
+    // (skeleton-gated: data hides during fast scroll, eases back in on settle)
+    if (currentMode === 'shuffle2') requestShuffle2Overlay(index);
 
     // Crossfade the giant marquee to the new artist (fast — landing should pop)
     if (backdropMarqueeEl && marqueeTextEl) {

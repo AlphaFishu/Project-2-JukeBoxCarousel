@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=35">
+    <link rel="stylesheet" href="style.css?v=36">
 </head>
 
 <body>
@@ -83,10 +83,14 @@
         <button class="angle-btn" data-angle2="3">Flip Up</button>
     </div>
 
-    <!-- Card 2 contextual panels: song list + lyrics drawn in the main card's perspective -->
+    <!-- Card 2 contextual panels: a screen-space mirror of the 3D rig (same
+         perspective, same camera chain) so panels sit EXACTLY on the main
+         card's plane while staying above the vignette -->
     <div class="shuffle2-overlay" id="shuffle2Overlay" aria-hidden="true">
-        <div class="s2-panel s2-songs" id="s2Songs"></div>
-        <div class="s2-panel s2-lyrics" id="s2Lyrics"></div>
+        <div class="s2-rig" id="s2Rig">
+            <div class="s2-panel s2-songs" id="s2Songs"></div>
+            <div class="s2-panel s2-lyrics" id="s2Lyrics"></div>
+        </div>
     </div>
 
     <!-- Watermark -->
@@ -140,7 +144,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=35"></script>
+    <script src="script.js?v=36"></script>
 </body>
 
 </html>
