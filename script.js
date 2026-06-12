@@ -662,6 +662,342 @@ const tracks = [
             { title: "Back to Black", artist: "Amy Winehouse", plays: "545M plays", duration: "4:01", explicit: false }
         ],
         lyrics: "Back to Black\nAmy Winehouse\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "THE BOOK",
+        artist: "YOASOBI",
+        color: [255, 90, 140],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7f/8c/90/7f8c90dd-e11f-30d5-271d-4b72eee970bd/195497666737.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Epilogue", artist: "YOASOBI", plays: "1.3B plays", duration: "0:51", explicit: false },
+            { title: "Encore", artist: "YOASOBI", plays: "639M plays", duration: "4:31", explicit: false },
+            { title: "Harujion", artist: "YOASOBI", plays: "309M plays", duration: "3:19", explicit: false },
+            { title: "Ano yume wo nazotte", artist: "YOASOBI", plays: "149M plays", duration: "4:01", explicit: false },
+            { title: "Probably", artist: "YOASOBI", plays: "699M plays", duration: "4:17", explicit: false }
+        ],
+        lyrics: "THE BOOK\nYOASOBI\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Kyogen",
+        artist: "Ado",
+        color: [40, 30, 50],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/fc/7d/ec/fc7dec1b-51e0-310b-bc71-88c0bf287e00/198009967544.png/600x600bb.jpg",
+        songs: [
+            { title: "Readymade (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "0.8B plays", duration: "4:09", explicit: false },
+            { title: "Odo (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "152M plays", duration: "3:48", explicit: false },
+            { title: "Domestic De Violence (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "91M plays", duration: "2:59", explicit: false },
+            { title: "Freedom (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "213M plays", duration: "2:58", explicit: false },
+            { title: "Fireworks (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "257M plays", duration: "3:57", explicit: false }
+        ],
+        lyrics: "Kyogen\nAdo\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "STRAY SHEEP",
+        artist: "Kenshi Yonezu",
+        color: [120, 180, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/6b/0f/0b/6b0f0b3d-e842-5ee1-83a8-1b12142a9dfd/dj.bpfbtyiy.jpg/600x600bb.jpg",
+        songs: [
+            { title: "カムパネルラ", artist: "Kenshi Yonezu", plays: "1.9B plays", duration: "3:56", explicit: false },
+            { title: "Flamingo", artist: "Kenshi Yonezu", plays: "98M plays", duration: "3:16", explicit: false },
+            { title: "Kanden", artist: "Kenshi Yonezu", plays: "599M plays", duration: "4:25", explicit: false },
+            { title: "PLACEBO", artist: "Kenshi Yonezu & Yojiro Noda", plays: "265M plays", duration: "4:00", explicit: false },
+            { title: "Paprika", artist: "Kenshi Yonezu", plays: "397M plays", duration: "3:23", explicit: false }
+        ],
+        lyrics: "STRAY SHEEP\nKenshi Yonezu\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "LOVE ALL SERVE ALL",
+        artist: "Fujii Kaze",
+        color: [230, 210, 90],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/85/2e/2b/852e2b6c-93ec-806a-95b2-8f5eda2f775c/22UMGIM18886.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Kirari", artist: "Fujii Kaze", plays: "1.2B plays", duration: "3:48", explicit: false },
+            { title: "Matsuri", artist: "Fujii Kaze", plays: "444M plays", duration: "3:46", explicit: false },
+            { title: "Hedemo Ne-Yo (LASA edit)", artist: "Fujii Kaze", plays: "120M plays", duration: "3:09", explicit: false },
+            { title: "YABA", artist: "Fujii Kaze", plays: "416M plays", duration: "4:12", explicit: false },
+            { title: "MO-EH-YO (Ignite)", artist: "Fujii Kaze", plays: "247M plays", duration: "4:37", explicit: false }
+        ],
+        lyrics: "LOVE ALL SERVE ALL\nFujii Kaze\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Editorial",
+        artist: "Official HIGE DANdism",
+        color: [60, 110, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/9b/da/69/9bda6999-3a29-3634-c1db-d35cd95ab5c2/PCCA_06057_A.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Editorial", artist: "OFFICIAL HIGE DANDISM", plays: "1.5B plays", duration: "2:14", explicit: false },
+            { title: "Apoptosis", artist: "OFFICIAL HIGE DANDISM", plays: "177M plays", duration: "6:30", explicit: false },
+            { title: "I Love...", artist: "OFFICIAL HIGE DANDISM", plays: "654M plays", duration: "4:43", explicit: false },
+            { title: "Filament", artist: "OFFICIAL HIGE DANDISM", plays: "498M plays", duration: "4:05", explicit: false },
+            { title: "Hello", artist: "OFFICIAL HIGE DANDISM", plays: "225M plays", duration: "4:42", explicit: false }
+        ],
+        lyrics: "Editorial\nOfficial HIGE DANdism\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "CEREMONY",
+        artist: "King Gnu",
+        color: [200, 60, 70],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/c6/09/71/c609710d-85fc-8ed3-8457-ac2377a5eab0/jacket_BVCL01048B00Y_550.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Opening Ceremony", artist: "King Gnu", plays: "1.7B plays", duration: "0:49", explicit: false },
+            { title: "Doron", artist: "King Gnu", plays: "699M plays", duration: "3:03", explicit: false },
+            { title: "Teenager Forever", artist: "King Gnu", plays: "218M plays", duration: "3:09", explicit: false },
+            { title: "Humor", artist: "King Gnu", plays: "257M plays", duration: "3:27", explicit: false },
+            { title: "Hakujitsu", artist: "King Gnu", plays: "594M plays", duration: "4:36", explicit: false }
+        ],
+        lyrics: "CEREMONY\nKing Gnu\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Walpurgis",
+        artist: "Aimer",
+        color: [90, 70, 160],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/54/af/b2/54afb286-3614-f2c8-e633-2831bd2fd76b/4547366491647.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Walpurgis - prologue", artist: "Aimer", plays: "0.9B plays", duration: "2:24", explicit: false },
+            { title: "STAND ALONE", artist: "Aimer", plays: "606M plays", duration: "4:46", explicit: false },
+            { title: "cold rain", artist: "Aimer", plays: "208M plays", duration: "3:50", explicit: false },
+            { title: "trill", artist: "Aimer", plays: "286M plays", duration: "5:21", explicit: false },
+            { title: "chikyugi (with Vaundy)", artist: "Aimer", plays: "145M plays", duration: "3:53", explicit: false }
+        ],
+        lyrics: "Walpurgis\nAimer\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "LEO-NiNE",
+        artist: "LiSA",
+        color: [40, 40, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/51/b3/58/51b35899-bda2-50d2-2c00-b2b95999b3c3/4547366473681.jpg/600x600bb.jpg",
+        songs: [
+            { title: "play the world! (feat. Pablo)", artist: "LiSA", plays: "1.5B plays", duration: "4:19", explicit: false },
+            { title: "Gurenge", artist: "LiSA", plays: "542M plays", duration: "3:58", explicit: false },
+            { title: "Harebutai", artist: "LiSA", plays: "490M plays", duration: "4:59", explicit: false },
+            { title: "Makotoshiyaka", artist: "LiSA", plays: "170M plays", duration: "3:58", explicit: false },
+            { title: "cancellation", artist: "LiSA", plays: "310M plays", duration: "4:11", explicit: false }
+        ],
+        lyrics: "LEO-NiNE\nLiSA\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "BORN PINK",
+        artist: "BLACKPINK",
+        color: [240, 120, 180],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c3/64/46/c364465f-6271-8aae-93a8-b9979d2befe5/20UMGIM82075.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "How You Like That", artist: "BLACKPINK", plays: "0.8B plays", duration: "3:01", explicit: false },
+            { title: "Ice Cream", artist: "BLACKPINK & Selena Gomez", plays: "95M plays", duration: "2:56", explicit: false },
+            { title: "Pretty Savage", artist: "BLACKPINK", plays: "323M plays", duration: "3:19", explicit: false },
+            { title: "Bet You Wanna (feat. Cardi B)", artist: "BLACKPINK", plays: "553M plays", duration: "2:39", explicit: false },
+            { title: "Lovesick Girls", artist: "BLACKPINK", plays: "152M plays", duration: "3:13", explicit: false }
+        ],
+        lyrics: "BORN PINK\nBLACKPINK\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Get Up",
+        artist: "NewJeans",
+        color: [150, 200, 230],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/d3/4b/7e/d34b7e1e-af3b-43b6-2949-7a8c652a1bc9/196922462726_Cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "New Jeans", artist: "NewJeans", plays: "0.9B plays", duration: "1:49", explicit: false },
+            { title: "Super Shy", artist: "NewJeans", plays: "678M plays", duration: "2:35", explicit: false },
+            { title: "ETA", artist: "NewJeans", plays: "748M plays", duration: "2:31", explicit: false },
+            { title: "Cool With You", artist: "NewJeans", plays: "364M plays", duration: "2:28", explicit: false },
+            { title: "Get Up", artist: "NewJeans", plays: "439M plays", duration: "0:36", explicit: false }
+        ],
+        lyrics: "Get Up\nNewJeans\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "ROCK-STAR",
+        artist: "Stray Kids",
+        color: [200, 60, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/36/cc/6d/36cc6d5f-1be5-188e-ce54-80f57b023791/8809928950532_Cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "MEGAVERSE", artist: "Stray Kids", plays: "1.1B plays", duration: "3:06", explicit: false },
+            { title: "LALALALA", artist: "Stray Kids", plays: "360M plays", duration: "3:02", explicit: false },
+            { title: "BLIND SPOT", artist: "Stray Kids", plays: "313M plays", duration: "3:21", explicit: false },
+            { title: "COMFLEX", artist: "Stray Kids", plays: "564M plays", duration: "2:52", explicit: false },
+            { title: "Cover Me", artist: "Stray Kids", plays: "121M plays", duration: "3:11", explicit: false }
+        ],
+        lyrics: "ROCK-STAR\nStray Kids\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "FML",
+        artist: "SEVENTEEN",
+        color: [80, 140, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/d1/66/eb/d166eb7e-7210-b3ff-be39-638cd37bfc89/196922401282_Cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "F*ck My Life", artist: "SEVENTEEN", plays: "1.4B plays", duration: "3:22", explicit: false },
+            { title: "Super", artist: "SEVENTEEN", plays: "197M plays", duration: "3:20", explicit: false },
+            { title: "Fire", artist: "SEVENTEEN", plays: "414M plays", duration: "2:38", explicit: false },
+            { title: "I Don't Understand But I Luv U", artist: "SEVENTEEN", plays: "244M plays", duration: "3:30", explicit: false },
+            { title: "Dust", artist: "SEVENTEEN", plays: "536M plays", duration: "2:45", explicit: false }
+        ],
+        lyrics: "FML\nSEVENTEEN\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Ready To Be",
+        artist: "TWICE",
+        color: [255, 140, 170],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/8c/cf/96/8ccf96fa-afa3-c039-6e33-d19ae58ae074/738676860610_Cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "SET ME FREE", artist: "TWICE", plays: "1.9B plays", duration: "3:02", explicit: false },
+            { title: "MOONLIGHT SUNRISE", artist: "TWICE", plays: "76M plays", duration: "3:00", explicit: false },
+            { title: "GOT THE THRILLS", artist: "TWICE", plays: "249M plays", duration: "2:54", explicit: false },
+            { title: "BLAME IT ON ME", artist: "TWICE", plays: "707M plays", duration: "2:41", explicit: false },
+            { title: "WALLFLOWER", artist: "TWICE", plays: "579M plays", duration: "2:56", explicit: false }
+        ],
+        lyrics: "Ready To Be\nTWICE\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "I've IVE",
+        artist: "IVE",
+        color: [220, 80, 110],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/3a/23/b7/3a23b7f4-0b43-df9d-b7e4-14f992443324/197188335663.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Blue Blood", artist: "IVE", plays: "1.0B plays", duration: "2:48", explicit: false },
+            { title: "I AM", artist: "IVE", plays: "222M plays", duration: "3:04", explicit: false },
+            { title: "Kitsch", artist: "IVE", plays: "477M plays", duration: "3:15", explicit: false },
+            { title: "Lips", artist: "IVE", plays: "132M plays", duration: "3:01", explicit: false },
+            { title: "Heroine", artist: "IVE", plays: "266M plays", duration: "2:51", explicit: false }
+        ],
+        lyrics: "I've IVE\nIVE\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Evolve",
+        artist: "Imagine Dragons",
+        color: [210, 130, 70],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/11/7a/b8/117ab805-6811-8929-18b9-0fad7baf0c25/17UMGIM98210.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Next to Me", artist: "Imagine Dragons", plays: "0.7B plays", duration: "3:50", explicit: false },
+            { title: "I Don't Know Why", artist: "Imagine Dragons", plays: "588M plays", duration: "3:10", explicit: false },
+            { title: "Whatever It Takes", artist: "Imagine Dragons", plays: "436M plays", duration: "3:21", explicit: false },
+            { title: "Believer", artist: "Imagine Dragons", plays: "340M plays", duration: "3:24", explicit: false },
+            { title: "Walking the Wire", artist: "Imagine Dragons", plays: "141M plays", duration: "3:53", explicit: false }
+        ],
+        lyrics: "Evolve\nImagine Dragons\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "OK Computer",
+        artist: "Radiohead",
+        color: [180, 190, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/07/60/ba/0760ba0f-148c-b18f-d0ff-169ee96f3af5/634904078164.png/600x600bb.jpg",
+        songs: [
+            { title: "Airbag", artist: "Radiohead", plays: "1.2B plays", duration: "4:48", explicit: false },
+            { title: "Paranoid Android", artist: "Radiohead", plays: "413M plays", duration: "6:27", explicit: false },
+            { title: "Subterranean Homesick Alien", artist: "Radiohead", plays: "155M plays", duration: "4:28", explicit: false },
+            { title: "Exit Music (For a Film)", artist: "Radiohead", plays: "668M plays", duration: "4:27", explicit: false },
+            { title: "Let Down", artist: "Radiohead", plays: "436M plays", duration: "5:00", explicit: false }
+        ],
+        lyrics: "OK Computer\nRadiohead\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Demon Days",
+        artist: "Gorillaz",
+        color: [60, 70, 90],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1c/0f/81/1c0f818a-e458-dd84-6f1b-ccbdf5fe14d6/825646291045.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Intro", artist: "Gorillaz", plays: "1.8B plays", duration: "1:03", explicit: false },
+            { title: "Last Living Souls", artist: "Gorillaz", plays: "381M plays", duration: "3:10", explicit: false },
+            { title: "Kids with Guns", artist: "Gorillaz & Neneh Cherry", plays: "715M plays", duration: "3:46", explicit: false },
+            { title: "O Green World", artist: "Gorillaz", plays: "408M plays", duration: "4:32", explicit: false },
+            { title: "Dirty Harry (feat. Bootie Brown)", artist: "Gorillaz", plays: "606M plays", duration: "3:44", explicit: false }
+        ],
+        lyrics: "Demon Days\nGorillaz\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Graduation",
+        artist: "Kanye West",
+        color: [120, 150, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/39/25/2d/39252d65-2d50-b991-0962-f7a98a761271/00602517483507.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Good Morning", artist: "Kanye West", plays: "0.6B plays", duration: "3:15", explicit: false },
+            { title: "Champion", artist: "Kanye West", plays: "470M plays", duration: "2:48", explicit: false },
+            { title: "Stronger", artist: "Kanye West", plays: "703M plays", duration: "5:12", explicit: false },
+            { title: "I Wonder", artist: "Kanye West", plays: "231M plays", duration: "4:03", explicit: false },
+            { title: "Good Life (feat. T-Pain)", artist: "Kanye West", plays: "334M plays", duration: "3:27", explicit: false }
+        ],
+        lyrics: "Graduation\nKanye West\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Astroworld",
+        artist: "Travis Scott",
+        color: [220, 160, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e7/49/8f/e7498f65-df8f-bead-d6e3-2a8d4d642a79/886447235317.jpg/600x600bb.jpg",
+        songs: [
+            { title: "STARGAZING", artist: "Travis Scott", plays: "1.6B plays", duration: "4:31", explicit: false },
+            { title: "CAROUSEL", artist: "Travis Scott", plays: "738M plays", duration: "3:00", explicit: false },
+            { title: "SICKO MODE", artist: "Travis Scott", plays: "178M plays", duration: "5:13", explicit: false },
+            { title: "R.I.P. SCREW", artist: "Travis Scott", plays: "300M plays", duration: "3:06", explicit: false },
+            { title: "STOP TRYING TO BE GOD", artist: "Travis Scott", plays: "658M plays", duration: "5:38", explicit: false }
+        ],
+        lyrics: "Astroworld\nTravis Scott\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Ctrl",
+        artist: "SZA",
+        color: [150, 130, 100],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/a2/bc/ad/a2bcad46-b389-4be1-8bac-5a0959b0b8e4/886446548449.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Supermodel", artist: "SZA", plays: "0.7B plays", duration: "3:01", explicit: false },
+            { title: "Love Galore (feat. Travis Scott)", artist: "SZA", plays: "184M plays", duration: "4:35", explicit: false },
+            { title: "Doves In The Wind (feat. Kendrick Lamar)", artist: "SZA", plays: "522M plays", duration: "4:26", explicit: false },
+            { title: "Drew Barrymore", artist: "SZA", plays: "163M plays", duration: "3:51", explicit: false },
+            { title: "Prom", artist: "SZA", plays: "484M plays", duration: "3:16", explicit: false }
+        ],
+        lyrics: "Ctrl\nSZA\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "RENAISSANCE",
+        artist: "Beyoncé",
+        color: [190, 190, 200],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/fe/ba/43/feba43be-99e8-ad8c-9fad-1bfdea7a4e98/196589344267.jpg/600x600bb.jpg",
+        songs: [
+            { title: "I'M THAT GIRL", artist: "Beyoncé", plays: "1.5B plays", duration: "3:28", explicit: false },
+            { title: "COZY", artist: "Beyoncé", plays: "420M plays", duration: "3:30", explicit: false },
+            { title: "ALIEN SUPERSTAR", artist: "Beyoncé", plays: "255M plays", duration: "3:35", explicit: false },
+            { title: "CUFF IT", artist: "Beyoncé", plays: "305M plays", duration: "3:45", explicit: false },
+            { title: "ENERGY (feat. BEAM)", artist: "Beyoncé", plays: "445M plays", duration: "1:57", explicit: false }
+        ],
+        lyrics: "RENAISSANCE\nBeyoncé\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "good kid, m.A.A.d city",
+        artist: "Kendrick Lamar",
+        color: [70, 80, 110],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/36/86/ec/3686ec99-dec4-0a01-8b74-2d8a9a0263a7/12UMGIM52988.rgb.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Sherane a.k.a Master Splinter’s Daughter", artist: "Kendrick Lamar", plays: "1.0B plays", duration: "4:33", explicit: false },
+            { title: "Bitch, Don’t Kill My Vibe", artist: "Kendrick Lamar", plays: "450M plays", duration: "5:11", explicit: false },
+            { title: "Backseat Freestyle", artist: "Kendrick Lamar", plays: "226M plays", duration: "3:33", explicit: false },
+            { title: "The Art of Peer Pressure", artist: "Kendrick Lamar", plays: "130M plays", duration: "5:25", explicit: false },
+            { title: "Money Trees (feat. Jay Rock)", artist: "Kendrick Lamar", plays: "100M plays", duration: "6:27", explicit: false }
+        ],
+        lyrics: "good kid, m.A.A.d city\nKendrick Lamar\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "replica",
+        artist: "Vaundy",
+        color: [120, 90, 70],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/8a/eb/75/8aeb7526-6fe4-a81a-5dce-c5d026e7f036/4547366655728.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Audio 007", artist: "VAUNDY", plays: "1.0B plays", duration: "1:11", explicit: false },
+            { title: "ZERO", artist: "VAUNDY", plays: "730M plays", duration: "3:52", explicit: false },
+            { title: "Bidenkyu", artist: "VAUNDY", plays: "68M plays", duration: "2:57", explicit: false },
+            { title: "Carnival", artist: "VAUNDY", plays: "261M plays", duration: "3:24", explicit: false },
+            { title: "one liter full of love", artist: "VAUNDY", plays: "622M plays", duration: "3:10", explicit: false }
+        ],
+        lyrics: "replica\nVaundy\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+    },
+    {
+        title: "Your Name",
+        artist: "RADWIMPS",
+        color: [120, 170, 220],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/56/b3/8c/56b38c05-1728-402c-016c-c1e4b0635be8/4988031167618_cover.jpg/600x600bb.jpg",
+        songs: [
+            { title: "Dream Lantern", artist: "RADWIMPS", plays: "1.2B plays", duration: "2:12", explicit: false },
+            { title: "School Road", artist: "RADWIMPS", plays: "227M plays", duration: "1:08", explicit: false },
+            { title: "Itomori High School", artist: "RADWIMPS", plays: "682M plays", duration: "1:52", explicit: false },
+            { title: "First View of Tokyo", artist: "RADWIMPS", plays: "138M plays", duration: "1:20", explicit: false },
+            { title: "Cafe at Last", artist: "RADWIMPS", plays: "231M plays", duration: "1:32", explicit: false }
+        ],
+        lyrics: "Your Name\nRADWIMPS\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
     }
 ];
 
@@ -792,14 +1128,20 @@ modeButtons.forEach(btn => {
         updateSliderPosition(btn);
 
         // Remove previous body mode classes
-        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-shuffle', 'body-helix');
+        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-shuffle', 'body-shuffle2', 'body-helix');
 
         // Update mode state
         currentMode = btn.dataset.mode;
         document.body.classList.add(`body-${currentMode}`);
 
-        // Calibrated vignette applies only in Card Shuffle; other modes use the default
+        // Calibrated vignette applies only in the Card modes; others use the default
         applyVignette();
+
+        // Card 2 panels follow mode changes
+        stopS2Lyrics();
+        if (currentMode === 'shuffle2') {
+            updateShuffle2Overlay(lastActiveCardIndex >= 0 ? lastActiveCardIndex : 0);
+        }
 
         // Reset active index states when switching layouts to force visual re-render on the same card
         lastActiveIndex = -1;
@@ -913,10 +1255,11 @@ const vignetteEl = document.querySelector('.vignette-overlay');
 // is transparent at the center, so the highlighted card is never darkened.
 function applyVignette() {
     if (!vignetteEl) return;
-    if (currentMode === 'shuffle') {
-        const r = Math.min(0.95, 0.42 * shuffleCalib.vignette);
-        const sAlpha = Math.min(0.92, 0.5 * shuffleCalib.vignetteSides);
-        const reach = Math.min(48, Math.max(5, shuffleCalib.vignetteReach || 22));
+    if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
+        const sc = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
+        const r = Math.min(0.95, 0.42 * sc.vignette);
+        const sAlpha = Math.min(0.92, 0.5 * sc.vignetteSides);
+        const reach = Math.min(48, Math.max(5, sc.vignetteReach || 22));
         vignetteEl.style.background =
             `linear-gradient(90deg, rgba(0,0,0,${sAlpha}) 0%, rgba(0,0,0,0) ${reach}%, rgba(0,0,0,0) ${100 - reach}%, rgba(0,0,0,${sAlpha}) 100%), ` +
             `radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 52%, rgba(0,0,0,${r}) 100%)`;
@@ -1087,6 +1430,129 @@ if (calibApplyBtn && calibJsonEl) {
         }
     });
 }
+
+// ============================================================================
+// Card 2: user-directed shuffle presets (printed JSONs) + contextual panels.
+// Card 1 keeps the free calibration; Card 2 runs these fixed compositions.
+// ============================================================================
+const shuffle2Presets = [
+    {
+        name: 'Dynamic',
+        calib: { "mainTiltX": -3, "mainTiltY": 16, "mainTiltZ": -17, "motionBlur": 0, "motionBlurAmt": 8, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.3, "lockX": 162, "lockY": -92, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 0.88, "vignetteReach": 26 },
+        // Song list right, anchored at the main card's top; lyrics at its bottom-left
+        ui: { songs: { x: 330, y: -300, w: 350 }, lyrics: { x: -720, y: 120, w: 410 } }
+    },
+    {
+        name: 'Intro',
+        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
+        // Song list top-left, aligned with the main card's top edge; no lyrics
+        ui: { songs: { x: -660, y: -330, w: 340 } }
+    },
+    {
+        name: 'Maison',
+        calib: { "mainTiltX": -18, "mainTiltY": 21, "mainTiltZ": 15, "motionBlur": 0, "motionBlurAmt": 9.5, "zoom": 142, "camX": -68, "camY": 0, "tiltX": 15, "tiltY": -15, "tiltZ": -10, "lanes": 5, "laneGap": 228, "mainPad": 0, "mainCardGap": 18, "subCardGap": 18, "mainScale": 0.94, "subScale": 0.84, "lockScale": 0.94, "lockX": 74, "lockY": -4, "subSpeed": 1.5, "snap": 0.62, "vignette": 0, "vignetteSides": 2, "vignetteReach": 32 },
+        ui: {}
+    },
+    {
+        name: 'Flip Up',
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25 },
+        ui: {}
+    }
+];
+shuffle2Presets.forEach(p => { p.calib = { ...CALIB_EXTRA_DEFAULTS, ...p.calib }; });
+
+let shuffle2Idx = 0;
+
+const s2SongsEl = document.getElementById('s2Songs');
+const s2LyricsEl = document.getElementById('s2Lyrics');
+let s2LyricsInterval = null;
+let s2LineIdx = 0;
+
+function stopS2Lyrics() {
+    if (s2LyricsInterval) {
+        clearInterval(s2LyricsInterval);
+        s2LyricsInterval = null;
+    }
+}
+
+// Panels are drawn in the main card's perspective: scene tilt + main-card tilt
+// combined, so the song list and lyrics sit on the same visual plane as the card.
+function applyShuffle2Layout() {
+    const p = shuffle2Presets[shuffle2Idx];
+    const c = p.calib;
+    const rx = (c.tiltX || 0) + (c.mainTiltX || 0);
+    const ry = (c.tiltY || 0) + (c.mainTiltY || 0);
+    const rz = (c.tiltZ || 0) + (c.mainTiltZ || 0);
+    const tilt = `perspective(960px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+
+    [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
+        if (!el) return;
+        const cfg = p.ui && p.ui[key];
+        if (!cfg) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = 'block';
+        el.style.left = `calc(50% + ${cfg.x}px)`;
+        el.style.top = `calc(50% + ${cfg.y}px)`;
+        el.style.width = `${cfg.w}px`;
+        el.style.transform = tilt;
+    });
+}
+
+function updateShuffle2Overlay(index) {
+    if (currentMode !== 'shuffle2') return;
+    const track = tracks[index];
+    if (!track) return;
+    const p = shuffle2Presets[shuffle2Idx];
+    applyShuffle2Layout();
+
+    if (p.ui && p.ui.songs && s2SongsEl) {
+        s2SongsEl.innerHTML = track.songs.map((song, i) => `
+            <div class="s2-track">
+                <img src="${track.cover}" alt="">
+                <div class="s2-track-info">
+                    <div class="s2-track-title">${song.title}</div>
+                    <div class="s2-track-meta">${song.explicit ? '<span class="explicit-badge">E</span>' : ''}${song.artist} &bull; ${song.plays} &bull; ${track.title}</div>
+                </div>
+                ${i === 0 ? '<div class="equalizer" style="--equalizer-color: rgb(var(--accent-rgb))"><div class="equalizer-bar"></div><div class="equalizer-bar"></div><div class="equalizer-bar"></div><div class="equalizer-bar"></div></div>' : ''}
+                <span class="s2-track-dur">${song.duration}</span>
+            </div>`).join('');
+    }
+
+    stopS2Lyrics();
+    if (p.ui && p.ui.lyrics && s2LyricsEl) {
+        // Rolling-Album-style live lyric window: 4 lines, active highlighted, cycling
+        const lines = track.lyrics.split('\n').filter(l => l.trim() !== '');
+        s2LineIdx = 0;
+        const render = () => {
+            const win = [];
+            for (let d = -1; d <= 2; d++) {
+                const li = (s2LineIdx + d + lines.length) % lines.length;
+                win.push(`<div class="lyric-line${d === 0 ? ' active' : ''}">${lines[li]}</div>`);
+            }
+            s2LyricsEl.innerHTML = `<div class="s2-lyrics-box">${win.join('')}</div>`;
+        };
+        render();
+        s2LyricsInterval = setInterval(() => {
+            s2LineIdx = (s2LineIdx + 1) % lines.length;
+            render();
+        }, 2600);
+    } else if (s2LyricsEl) {
+        s2LyricsEl.innerHTML = '';
+    }
+}
+
+// Card 2 preset buttons
+document.querySelectorAll('.angle-btn[data-angle2]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.angle-btn[data-angle2]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        shuffle2Idx = parseInt(btn.dataset.angle2, 10) || 0;
+        applyVignette();
+        updateShuffle2Overlay(lastActiveCardIndex >= 0 ? lastActiveCardIndex : 0);
+    });
+});
 
 // 2. Infinite Virtual Scroll Logic
 let currentRotation = 0;
@@ -1603,10 +2069,13 @@ function updateCarousel() {
     // In Card Shuffle, the snap calibration magnetizes the target to the
     // nearest card and stiffens the follow speed for a crisper landing.
     let lerpFactor = 0.08;
-    if (currentMode === 'shuffle' && shuffleCalib.snap > 0) {
-        const snapTarget = Math.round(targetRotation / rotationAngle) * rotationAngle;
-        targetRotation = lerp(targetRotation, snapTarget, shuffleCalib.snap * 0.18);
-        lerpFactor = 0.08 + shuffleCalib.snap * 0.14;
+    if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
+        const sc = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
+        if (sc.snap > 0) {
+            const snapTarget = Math.round(targetRotation / rotationAngle) * rotationAngle;
+            targetRotation = lerp(targetRotation, snapTarget, sc.snap * 0.18);
+            lerpFactor = 0.08 + sc.snap * 0.14;
+        }
     }
     currentRotation = lerp(currentRotation, targetRotation, lerpFactor);
 
@@ -1935,11 +2404,11 @@ function updateCarousel() {
             updateDetailsPanel(activeIndex);
         }
 
-    } else if (currentMode === 'shuffle') {
-        // Card Shuffle: film reels on a tilted product-shot plane, fully driven
-        // by the live calibration object (sliders/presets/pasted JSON). The
-        // highlighted card is captured and FROZEN at the plate while reels roll.
-        const c = shuffleCalib;
+    } else if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
+        // Card 1 / Card 2: film reels on a tilted product-shot plane. Card 1 is
+        // driven by the live calibration; Card 2 by its directed preset JSONs.
+        // The highlighted card is captured and FROZEN at the plate while reels roll.
+        const c = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
@@ -2204,6 +2673,9 @@ function updateNowPlaying(index) {
         extractedColorCache[track.cover] || track.color,
         extractedSecondaryCache[track.cover] || null
     );
+
+    // Card 2 contextual panels follow the active album like Rolling Album does
+    if (currentMode === 'shuffle2') updateShuffle2Overlay(index);
 
     // Crossfade the giant marquee to the new artist (fast — landing should pop)
     if (backdropMarqueeEl && marqueeTextEl) {
