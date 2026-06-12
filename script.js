@@ -799,8 +799,7 @@ modeButtons.forEach(btn => {
         document.body.classList.add(`body-${currentMode}`);
 
         // Calibrated vignette applies only in Card Shuffle; other modes use the default
-        const vEl = document.querySelector('.vignette-overlay');
-        if (vEl) vEl.style.opacity = currentMode === 'shuffle' ? shuffleCalib.vignette : '';
+        applyVignette();
 
         // Reset active index states when switching layouts to force visual re-render on the same card
         lastActiveIndex = -1;
@@ -837,18 +836,20 @@ modeButtons.forEach(btn => {
 // also a live slider in the calibration panel, so a preset is just a starting
 // point you can tweak, print as JSON, and share back as a reference.
 const shufflePresets = [
-    { name: 'Close-Up', zoom: 40,   tiltX: 15, tiltY: -13, tiltZ: -10, lanes: 5, laneGap: 235, flowSpacing: 300, mainScale: 1.00, subScale: 0.62, lockScale: 1.30, lockX: -16, lockY: -110, vignette: 1 },
-    { name: 'Reverse',  zoom: -20,  tiltX: 16, tiltY: 15,  tiltZ: 12,  lanes: 3, laneGap: 290, flowSpacing: 330, mainScale: 0.98, subScale: 0.66, lockScale: 1.24, lockX: 0,   lockY: -110, vignette: 1 },
-    { name: 'Overhead', zoom: -40,  tiltX: 40, tiltY: 0,   tiltZ: -5,  lanes: 3, laneGap: 280, flowSpacing: 370, mainScale: 0.95, subScale: 0.70, lockScale: 1.30, lockX: 0,   lockY: -60,  vignette: 1 },
-    { name: 'Dutch',    zoom: -10,  tiltX: 6,  tiltY: 0,   tiltZ: -24, lanes: 3, laneGap: 300, flowSpacing: 330, mainScale: 0.95, subScale: 0.60, lockScale: 1.26, lockX: 0,   lockY: -90,  vignette: 1 },
-    { name: 'Front',    zoom: -60,  tiltX: 0,  tiltY: 0,   tiltZ: 0,   lanes: 3, laneGap: 270, flowSpacing: 320, mainScale: 0.95, subScale: 0.62, lockScale: 1.22, lockX: 0,   lockY: -100, vignette: 1 },
-    { name: 'Wide',     zoom: -300, tiltX: 10, tiltY: 9,   tiltZ: 0,   lanes: 5, laneGap: 240, flowSpacing: 280, mainScale: 0.85, subScale: 0.55, lockScale: 1.08, lockX: 0,   lockY: -80,  vignette: 1 }
+    { name: 'Close-Up', zoom: 40,   camX: 0, camY: 0, tiltX: 15, tiltY: -13, tiltZ: -10, lanes: 5, laneGap: 235, mainPad: 20, flowSpacing: 300, mainScale: 1.00, subScale: 0.62, lockScale: 1.30, lockX: -16, lockY: -110, mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 },
+    { name: 'Reverse',  zoom: -20,  camX: 0, camY: 0, tiltX: 16, tiltY: 15,  tiltZ: 12,  lanes: 3, laneGap: 290, mainPad: 0,  flowSpacing: 330, mainScale: 0.98, subScale: 0.66, lockScale: 1.24, lockX: 0,   lockY: -110, mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 },
+    { name: 'Overhead', zoom: -40,  camX: 0, camY: 0, tiltX: 40, tiltY: 0,   tiltZ: -5,  lanes: 3, laneGap: 280, mainPad: 0,  flowSpacing: 370, mainScale: 0.95, subScale: 0.70, lockScale: 1.30, lockX: 0,   lockY: -60,  mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 },
+    { name: 'Dutch',    zoom: -10,  camX: 0, camY: 0, tiltX: 6,  tiltY: 0,   tiltZ: -24, lanes: 3, laneGap: 300, mainPad: 0,  flowSpacing: 330, mainScale: 0.95, subScale: 0.60, lockScale: 1.26, lockX: 0,   lockY: -90,  mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 },
+    { name: 'Front',    zoom: -60,  camX: 0, camY: 0, tiltX: 0,  tiltY: 0,   tiltZ: 0,   lanes: 3, laneGap: 270, mainPad: 0,  flowSpacing: 320, mainScale: 0.95, subScale: 0.62, lockScale: 1.22, lockX: 0,   lockY: -100, mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 },
+    { name: 'Wide',     zoom: -300, camX: 0, camY: 0, tiltX: 10, tiltY: 9,   tiltZ: 0,   lanes: 5, laneGap: 240, mainPad: 0,  flowSpacing: 280, mainScale: 0.85, subScale: 0.55, lockScale: 1.08, lockX: 0,   lockY: -80,  mainSpeed: 1, subSpeed: 1, snap: 0.4, vignette: 1, vignetteSides: 0 }
 ];
 
-// Flow direction/speed by lane distance from center (-3..3): middle runs
-// forward, neighbours backward, outer lanes alternate again — each at a
-// slightly different speed so the reels feel loose, not mechanical
-const FLOW_PATTERN = { '-3': -0.80, '-2': 0.70, '-1': -0.85, '0': 1, '1': -0.78, '2': 0.92, '3': -0.66 };
+// Lane direction by distance from center: middle forward, neighbours backward,
+// outer lanes alternate. Speed is a separate calibration (mainSpeed/subSpeed)
+// so card spacing stays uniform unless the user dials in parallax.
+function laneDirection(laneDist) {
+    return laneDist === 0 ? 1 : (laneDist % 2 === 1 ? -1 : 1);
+}
 
 // Live calibration state (persisted in localStorage, edited via the panel)
 let shuffleCalib = { ...shufflePresets[0] };
@@ -858,35 +859,95 @@ try {
 } catch (e) { /* fresh start */ }
 
 const calibSchema = [
-    ['zoom',        'Zoom (dist)',   -400, 250,  1],
-    ['tiltX',       'Tilt X',        -45,  45,   1],
-    ['tiltY',       'Tilt Y',        -45,  45,   1],
-    ['tiltZ',       'Tilt Z',        -45,  45,   1],
-    ['lanes',       'Lanes',          3,   7,    2],
-    ['laneGap',     'Lane spacing',   100, 420,  2],
-    ['flowSpacing', 'Card spacing',   140, 480,  5],
-    ['mainScale',   'Main lane size', 0.5, 1.4,  0.01],
-    ['subScale',    'Sub lane size',  0.3, 1.1,  0.01],
-    ['lockScale',   'Highlight size', 0.8, 1.9,  0.01],
-    ['lockX',       'Plate X',       -250, 250,  2],
-    ['lockY',       'Plate Y',       -300, 120,  2],
-    ['vignette',    'Vignette',       0,   1,    0.01]
+    // [key, label, min, max, step, tab]
+    ['zoom',          'Camera Z (zoom)', -400, 250,  1,    'cam'],
+    ['camX',          'Camera X',        -400, 400,  2,    'cam'],
+    ['camY',          'Camera Y',        -400, 400,  2,    'cam'],
+    ['tiltX',         'Tilt X',          -45,  45,   1,    'cam'],
+    ['tiltY',         'Tilt Y',          -45,  45,   1,    'cam'],
+    ['tiltZ',         'Tilt Z',          -45,  45,   1,    'cam'],
+    ['lanes',         'Lanes',            3,   7,    2,    'lay'],
+    ['laneGap',       'Lane spacing',     100, 420,  2,    'lay'],
+    ['mainPad',       'Main lane pad',    0,   220,  2,    'lay'],
+    ['flowSpacing',   'Card spacing',     140, 480,  5,    'lay'],
+    ['mainScale',     'Main lane size',   0.5, 1.4,  0.01, 'lay'],
+    ['subScale',      'Sub lane size',    0.3, 1.1,  0.01, 'lay'],
+    ['lockScale',     'Highlight size',   0.8, 1.9,  0.01, 'lay'],
+    ['lockX',         'Plate X',         -250, 250,  2,    'lay'],
+    ['lockY',         'Plate Y',         -300, 120,  2,    'lay'],
+    ['mainSpeed',     'Main lane speed',  0.2, 2,    0.05, 'fx'],
+    ['subSpeed',      'Sub lane speed',   0.2, 2,    0.05, 'fx'],
+    ['snap',          'Scroll snap',      0,   1,    0.02, 'fx'],
+    ['vignette',      'Vignette radial',  0,   2,    0.02, 'fx'],
+    ['vignetteSides', 'Vignette sides',   0,   2,    0.02, 'fx']
 ];
 
+const calibTabs = [['cam', 'Camera'], ['lay', 'Layout'], ['fx', 'Motion/FX']];
 const vignetteEl = document.querySelector('.vignette-overlay');
 
-function applyCalibSideEffects() {
-    if (vignetteEl) {
-        vignetteEl.style.opacity = currentMode === 'shuffle' ? shuffleCalib.vignette : '';
+// Composes the vignette from two controllable shadows: the classic radial and
+// straight left/right side bars. Both can go past 1 for heavy looks. Only
+// active in Card Shuffle; other modes keep the stylesheet default. The radial
+// is transparent at the center, so the highlighted card is never darkened.
+function applyVignette() {
+    if (!vignetteEl) return;
+    if (currentMode === 'shuffle') {
+        const r = Math.min(0.95, 0.42 * shuffleCalib.vignette);
+        const sAlpha = Math.min(0.92, 0.5 * shuffleCalib.vignetteSides);
+        vignetteEl.style.background =
+            `linear-gradient(90deg, rgba(0,0,0,${sAlpha}) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 78%, rgba(0,0,0,${sAlpha}) 100%), ` +
+            `radial-gradient(ellipse at 50% 42%, rgba(0,0,0,0) 52%, rgba(0,0,0,${r}) 100%)`;
+        vignetteEl.style.opacity = 1;
+    } else {
+        vignetteEl.style.background = '';
+        vignetteEl.style.opacity = '';
     }
+}
+
+function applyCalibSideEffects() {
+    applyVignette();
     try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
 }
 
-// Build the calibration panel rows from the schema
+// Build the tabbed calibration panel from the schema
 const calibRowsEl = document.getElementById('calibRows');
 const calibInputs = {};
+let lastPresetIdx = 0;
 if (calibRowsEl) {
-    calibSchema.forEach(([key, label, min, max, step]) => {
+    const tabBar = document.createElement('div');
+    tabBar.className = 'calib-tabs';
+    const pages = {};
+    calibTabs.forEach(([id, label], i) => {
+        const tabBtn = document.createElement('button');
+        tabBtn.className = 'calib-tab' + (i === 0 ? ' active' : '');
+        tabBtn.textContent = label;
+        tabBtn.addEventListener('click', () => {
+            tabBar.querySelectorAll('.calib-tab').forEach(b => b.classList.remove('active'));
+            tabBtn.classList.add('active');
+            Object.values(pages).forEach(pg => pg.classList.remove('active'));
+            pages[id].classList.add('active');
+        });
+        tabBar.appendChild(tabBtn);
+
+        const page = document.createElement('div');
+        page.className = 'calib-page' + (i === 0 ? ' active' : '');
+        pages[id] = page;
+    });
+    calibRowsEl.appendChild(tabBar);
+
+    // Reset camera: restores the camera (position + tilt) of the last preset
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'calib-btn';
+    resetBtn.textContent = 'Reset camera';
+    resetBtn.addEventListener('click', () => {
+        const p = shufflePresets[lastPresetIdx];
+        ['zoom', 'camX', 'camY', 'tiltX', 'tiltY', 'tiltZ'].forEach(k => { shuffleCalib[k] = p[k] || 0; });
+        syncCalibPanel();
+        applyCalibSideEffects();
+    });
+    pages.cam.appendChild(resetBtn);
+
+    calibSchema.forEach(([key, label, min, max, step, tab]) => {
         const row = document.createElement('div');
         row.className = 'calib-row';
         row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
@@ -900,8 +961,10 @@ if (calibRowsEl) {
             applyCalibSideEffects();
         });
         calibInputs[key] = { input, out };
-        calibRowsEl.appendChild(row);
+        pages[tab].appendChild(row);
     });
+
+    calibTabs.forEach(([id]) => calibRowsEl.appendChild(pages[id]));
 }
 
 function syncCalibPanel() {
@@ -919,6 +982,7 @@ document.querySelectorAll('.angle-btn[data-angle]').forEach(btn => {
         document.querySelectorAll('.angle-btn[data-angle]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const idx = parseInt(btn.dataset.angle, 10) || 0;
+        lastPresetIdx = idx;
         shuffleCalib = { ...shufflePresets[idx] };
         syncCalibPanel();
         applyCalibSideEffects();
@@ -1470,8 +1534,16 @@ function updateActiveCardMarquees(activeIndex) {
 }
 
 function updateCarousel() {
-    // Lerp current towards target (0.08 is the smoothness factor)
-    currentRotation = lerp(currentRotation, targetRotation, 0.08);
+    // Lerp current towards target (0.08 is the base smoothness factor).
+    // In Card Shuffle, the snap calibration magnetizes the target to the
+    // nearest card and stiffens the follow speed for a crisper landing.
+    let lerpFactor = 0.08;
+    if (currentMode === 'shuffle' && shuffleCalib.snap > 0) {
+        const snapTarget = Math.round(targetRotation / rotationAngle) * rotationAngle;
+        targetRotation = lerp(targetRotation, snapTarget, shuffleCalib.snap * 0.18);
+        lerpFactor = 0.08 + shuffleCalib.snap * 0.14;
+    }
+    currentRotation = lerp(currentRotation, targetRotation, lerpFactor);
 
     if (currentMode === 'coverflow') {
         // Calculate dynamic desaturation & darkening based on rotation scroll speed
@@ -1804,7 +1876,7 @@ function updateCarousel() {
         // highlighted card is captured and FROZEN at the plate while reels roll.
         const c = shuffleCalib;
         carousel.style.transform =
-            `translateZ(${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
+            `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
         const laneCount = Math.max(3, Math.round(c.lanes) | 1); // odd: 3, 5, or 7
         const midLane = Math.floor(laneCount / 2);
@@ -1827,9 +1899,12 @@ function updateCarousel() {
             const absOffset = Math.abs(offset);
             const isActive = absOffset < 0.5;
 
-            // Film-reel flow: lane x from gap, speed/direction from the pattern
-            const flowX = laneD * c.laneGap;
-            const flowY = (local - laneLen / 2) * c.flowSpacing * (FLOW_PATTERN[laneD] || 0.8) + c.lockY;
+            // Film-reel flow: uniform card spacing per lane group; speed and
+            // direction are separate, so parallax is an explicit choice.
+            // mainPad pushes both side groups away from the main lane only.
+            const flowX = laneD * c.laneGap + Math.sign(laneD) * (c.mainPad || 0);
+            const speedMul = lane === midLane ? (c.mainSpeed || 1) : (c.subSpeed || 1);
+            const flowY = (local - laneLen / 2) * c.flowSpacing * laneDirection(laneDist) * speedMul + c.lockY;
             const laneScale = lane === midLane ? c.mainScale : Math.max(0.25, c.subScale * (1 - 0.08 * (laneDist - 1)));
 
             // Capture: smoothstep-blend into the frozen plate as a card nears the
@@ -1911,10 +1986,12 @@ function updateCarousel() {
     povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
     if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
 
-    // Kinetic marquee: drifts opposite to scroll plus a slight mouse offset
+    // Kinetic marquee: drifts opposite to scroll plus a slight mouse offset.
+    // Helix anchors the text to the left edge instead of centering it.
     if (backdropMarqueeEl) {
         const drift = -normalizedRotation * 0.8 - mouseNX * 14;
-        backdropMarqueeEl.style.transform = `translateX(calc(-50% + ${drift.toFixed(1)}px))`;
+        const align = currentMode === 'helix' ? '0%' : '-50%';
+        backdropMarqueeEl.style.transform = `translateX(calc(${align} + ${drift.toFixed(1)}px))`;
     }
 
     requestAnimationFrame(updateCarousel);

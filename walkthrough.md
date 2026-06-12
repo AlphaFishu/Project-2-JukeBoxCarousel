@@ -1,4 +1,18 @@
-# Walkthrough: 48-Album Library + Shuffle Calibration Tools (v2.96)
+# Walkthrough: Calibration v2 — Camera Rig, Tabs, Lane Physics (v2.97)
+
+1. **Camera position X/Y/Z** — the camera is now a full rig: `Camera X/Y` pan the framing for cropping compositions, `Camera Z` is the existing zoom. A **Reset camera** button restores the active preset's camera (position + tilt) without touching layout values.
+2. **Solid utility panel** — calibration UI dropped the glass look: solid `#17171d` surface, solid light knobs (tools, not jewelry).
+3. **Tabs** — 20 controls split into **Camera** (zoom, pan, tilts, reset), **Layout** (lanes, spacings, sizes, plate), **Motion/FX** (speeds, snap, vignettes).
+4. **Vignette, two channels** — `Vignette radial` (now up to 2× strength) plus new `Vignette sides`: straight left/right edge shadows for letterbox-style crops. The radial stays transparent at center so the highlight card is never darkened.
+5. **Lane speed parallax** — `Main lane speed` and `Sub lane speed` are separate multipliers. Card spacing is now **uniform by default** (the old per-lane speed pattern made gaps unequal — fixed); dialing speeds apart is an explicit parallax choice.
+6. **Main lane pad** — pushes both side groups away from the main lane only, while sub-lane-to-sub-lane spacing stays at `Lane spacing`.
+7. **Scroll snap** — magnetizes the scroll target to the nearest card and stiffens the follow speed; at 1.0 each flick lands crisply on the next album.
+8. **Dock step trail** — steps brightened (0.16 → 0.30 floor) with a slow 0.9s decay after losing the highlight, so fast scrolling leaves a visible glowing trail instead of steps blinking out. Activation stays instant.
+9. **Helix marquee** — anchored to the left edge in Helix mode, giving it a different editorial feel from the centered modes.
+
+---
+
+# Previous: 48-Album Library + Shuffle Calibration Tools (v2.96)
 
 1. **Library: 28 → 48 albums.** Twenty classics/moderns added (Abbey Road, Rumours, Back in Black, Dark Side of the Moon, Random Access Memories, Divide, 21, thank u next, Take Care, Born to Die, AM, Currents, Planet Her, Map of the Soul: 7, The Eminem Show, Viva la Vida, Hybrid Theory, IGOR, Whenever You Need Somebody, Back to Black). Covers and real tracklists/durations/explicit flags fetched once from the free iTunes Search API and baked in as static data — no runtime API calls. New entries use original placeholder verse text instead of copyrighted lyrics.
 2. **Card Shuffle calibration panel** (⚙ Calibrate in the angle row): 13 live sliders — zoom/distance, tilt X/Y/Z, lane count (3/5/7), lane spacing, card spacing, main/sub lane size, highlight size, plate X/Y, and vignette strength (vignette is darkest at edges so the centered highlight card stays clean). Values persist in localStorage.

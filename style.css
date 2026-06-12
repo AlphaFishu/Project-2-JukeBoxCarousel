@@ -160,6 +160,11 @@ body.body-depth .backdrop-marquee {
     opacity: 0;
 }
 
+/* Helix reads differently: marquee anchored to the left edge instead of centered */
+body.body-helix .backdrop-marquee {
+    left: 3vw;
+}
+
 /* --- Cinematic Vignette --- */
 .vignette-overlay {
     position: fixed;
@@ -612,13 +617,10 @@ body.body-shuffle .title-overlay {
     box-sizing: border-box;
     padding: 14px;
     border-radius: 14px;
-    background: rgba(14, 14, 20, 0.55);
-    backdrop-filter: blur(22px) saturate(1.5);
-    -webkit-backdrop-filter: blur(22px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow:
-        inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.35),
-        0 10px 28px rgba(0, 0, 0, 0.35);
+    /* Utility tool, not jewelry: solid dark surface, no glass */
+    background: #17171d;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
     z-index: 9998;
     opacity: 0;
     pointer-events: none;
@@ -684,8 +686,65 @@ body.body-shuffle.calib-open .calib-panel {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgb(var(--accent-rgb));
-    box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.7);
+    background: #f2f2f5; /* solid knob, no glow */
+}
+
+/* Calibration tabs */
+.calib-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.calib-tab {
+    flex: 1;
+    padding: 6px 0;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: inherit;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.calib-tab.active {
+    background: #2c2c36;
+    color: #ffffff;
+}
+
+.calib-page {
+    display: none;
+}
+
+.calib-page.active {
+    display: block;
+}
+
+.calib-btn {
+    width: 100%;
+    margin: 2px 0 8px;
+    padding: 7px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-family: inherit;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.calib-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
 }
 
 .calib-io textarea {
@@ -842,9 +901,15 @@ body.body-depth .now-playing-dock {
     flex: 1 1 0;
     height: 4px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.16);
+    /* Brighter floor + slow decay: fast scrolling leaves a visible glowing
+       trail behind the highlight instead of steps blinking out */
+    background: rgba(255, 255, 255, 0.30);
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: background-color 0.9s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dock-step.active {
+    transition: background-color 0.12s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .dock-step:hover {
