@@ -169,7 +169,7 @@ body.body-helix .backdrop-marquee {
 /* --- Watermark --- */
 .watermark {
     position: fixed;
-    top: 22px;
+    top: 27px; /* optically aligned with the mode pill row */
     left: 24px;
     z-index: 9999;
     pointer-events: none;
@@ -186,6 +186,12 @@ body.body-helix .backdrop-marquee {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.55);
     letter-spacing: 0.06em;
+}
+
+/* When the window narrows enough to collide with the mode pill, the watermark
+   drops to the row below it (toggled by JS measurement) */
+.watermark.wm-below {
+    top: 86px;
 }
 
 /* --- Card 2 contextual panels (song list + lyrics in card perspective) --- */
@@ -223,51 +229,38 @@ body.body-shuffle2 .shuffle2-overlay {
     display: none;
 }
 
-/* Skeleton state while scrolling fast: shapes stay, data hides — then content
-   eases back in ~150ms after the scroll settles */
-.s2-panel,
-.s2-panel * {
-    transition: opacity 0.15s ease;
+/* Rolling-Album behavior: panels fade out entirely during fast scrolling and
+   fade back in once the scroll settles */
+.s2-panel {
+    transition: opacity 0.3s ease;
 }
 
-.s2-skeleton .s2-track-title,
-.s2-skeleton .s2-track-meta,
-.s2-skeleton .s2-track-dur,
-.s2-skeleton .lyric-line {
-    color: transparent !important;
-    background: rgba(255, 255, 255, 0.10);
-    border-radius: 4px;
-}
-
-.s2-skeleton .s2-track img {
-    opacity: 0.25;
-}
-
-.s2-skeleton .equalizer,
-.s2-skeleton .explicit-badge {
+.shuffle2-overlay.s2-hidden .s2-panel {
     opacity: 0;
 }
 
-.s2-skeleton .lyric-line::before {
-    opacity: 0;
-}
-
+/* Panel rows: no fill, no stroke. Two variants via the bottom-right toggle:
+   body.s2-blur-on = the box blurs whatever is behind it (frosted area only);
+   without it = nothing at all, pure floating text. */
 .s2-track {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    margin-bottom: 6px;
+    gap: 9px;
+    padding: 7px 10px;
+    margin-bottom: 5px;
     border-radius: 9px;
-    background: rgba(8, 8, 12, 0.52);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: transparent;
+    border: none;
+}
+
+body.s2-blur-on .s2-track {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .s2-track img {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border-radius: 5px;
     object-fit: cover;
     flex-shrink: 0;
@@ -279,44 +272,81 @@ body.body-shuffle2 .shuffle2-overlay {
 }
 
 .s2-track-title {
-    font-size: 0.74rem;
+    font-size: 0.66rem;
     font-weight: 700;
     color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .s2-track-meta {
-    font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.55rem;
+    color: rgba(255, 255, 255, 0.6);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
     gap: 5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .s2-track-dur {
-    font-size: 0.64rem;
-    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.58rem;
+    color: rgba(255, 255, 255, 0.6);
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .s2-lyrics-box {
-    padding: 16px 20px;
+    padding: 12px 14px;
     border-radius: 12px;
-    background: rgba(10, 10, 12, 0.40);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: transparent;
+    border: none;
+}
+
+body.s2-blur-on .s2-lyrics-box {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .s2-lyrics-box .lyric-line {
-    font-size: 1.05rem;
-    margin-bottom: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+/* Bottom-right A/B toggle for the panel background style */
+.s2-blur-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 24px;
+    z-index: 9999;
+    display: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(19, 19, 26, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.s2-blur-toggle:hover {
+    background: rgba(40, 40, 50, 0.95);
+    color: #fff;
+}
+
+body.body-shuffle2 .s2-blur-toggle {
+    display: block;
 }
 
 /* --- Cinematic Vignette --- */

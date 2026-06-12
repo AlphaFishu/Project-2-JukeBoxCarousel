@@ -1493,7 +1493,7 @@ function applyShuffle2Layout() {
     const s = c.lockScale || 1;
     const halfW = 112 * s; // card is 224x320, scaled by the plate size
     const halfH = 160 * s;
-    const gap = 26;
+    const gap = 16; // tight to the card — no long-distance drift
     const plate = `translate3d(${112 + c.lockX}px, ${160 + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
 
@@ -1505,18 +1505,37 @@ function applyShuffle2Layout() {
             return;
         }
         el.style.display = 'block';
-        el.style.width = `${cfg.w}px`;
+        // Responsive clamp: panels never exceed ~22% of the window width
+        const w = Math.min(cfg.w, Math.round(window.innerWidth * 0.22));
+        el.style.width = `${w}px`;
         let inPlane = '';
         if (cfg.anchor === 'right-top') inPlane = `translateX(${halfW + gap}px) translateY(${-halfH}px)`;
-        else if (cfg.anchor === 'left-top') inPlane = `translateX(${-halfW - gap - cfg.w}px) translateY(${-halfH}px)`;
-        else if (cfg.anchor === 'left-bottom') inPlane = `translateX(${-halfW - gap - cfg.w}px) translateY(${halfH}px) translateY(-100%)`;
+        else if (cfg.anchor === 'left-top') inPlane = `translateX(${-halfW - gap - w}px) translateY(${-halfH}px)`;
+        else if (cfg.anchor === 'left-bottom') inPlane = `translateX(${-halfW - gap - w}px) translateY(${halfH}px) translateY(-100%)`;
         else if (cfg.anchor === 'right-bottom') inPlane = `translateX(${halfW + gap}px) translateY(${halfH}px) translateY(-100%)`;
         el.style.transform = `${plate} ${inPlane}`;
     });
 }
 
-// Skeleton gate: while the reels are moving fast, panels hold a skeleton
-// (shapes without data); once the scroll settles, real content eases in ~150ms
+// Watermark: drop below the mode pill if the window narrows into a collision
+const watermarkEl = document.querySelector('.watermark');
+function checkWatermarkOverlap() {
+    if (!watermarkEl) return;
+    const sel = document.querySelector('.mode-selector');
+    if (!sel) return;
+    watermarkEl.classList.remove('wm-below');
+    const w = watermarkEl.getBoundingClientRect();
+    const sRect = sel.getBoundingClientRect();
+    if (w.right + 14 > sRect.left) watermarkEl.classList.add('wm-below');
+}
+checkWatermarkOverlap();
+window.addEventListener('resize', () => {
+    checkWatermarkOverlap();
+    if (currentMode === 'shuffle2') applyShuffle2Layout();
+});
+
+// Rolling-Album behavior: while the reels are moving fast the panels fade out
+// completely; once the scroll settles, content updates and fades back in
 let s2PendingIndex = -1;
 let s2RevealTimer = null;
 
@@ -1525,14 +1544,24 @@ function requestShuffle2Overlay(index) {
     clearTimeout(s2RevealTimer);
     const fast = Math.abs(targetRotation - currentRotation) > 25;
     if (fast) {
-        if (s2OverlayEl) s2OverlayEl.classList.add('s2-skeleton');
+        if (s2OverlayEl) s2OverlayEl.classList.add('s2-hidden');
         s2RevealTimer = setTimeout(() => requestShuffle2Overlay(s2PendingIndex), 160);
     } else {
         s2RevealTimer = setTimeout(() => {
             updateShuffle2Overlay(s2PendingIndex);
-            if (s2OverlayEl) s2OverlayEl.classList.remove('s2-skeleton');
+            if (s2OverlayEl) s2OverlayEl.classList.remove('s2-hidden');
         }, 150);
     }
+}
+
+// A/B toggle: frosted-blur boxes vs nothing at all (default: blur on)
+document.body.classList.add('s2-blur-on');
+const s2BlurToggleBtn = document.getElementById('s2BlurToggle');
+if (s2BlurToggleBtn) {
+    s2BlurToggleBtn.addEventListener('click', () => {
+        const on = document.body.classList.toggle('s2-blur-on');
+        s2BlurToggleBtn.textContent = on ? 'Blur BG: On' : 'Blur BG: Off';
+    });
 }
 
 function updateShuffle2Overlay(index) {
