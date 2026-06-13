@@ -201,7 +201,7 @@ body.body-helix .backdrop-marquee {
 .shuffle2-overlay {
     position: fixed;
     inset: 0;
-    z-index: 9997; /* above the vignette so panels are never shadowed */
+    z-index: 9998; /* above the blur proxies (9996) so panel text stays crisp */
     pointer-events: none;
     display: none;
     perspective: 960px;
@@ -253,10 +253,8 @@ body.body-shuffle2 .shuffle2-overlay {
     border: none;
 }
 
-body.s2-blur-on .s2-track {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
+/* (Real frosting is done by the screen-space proxies below; the in-3D panels
+   only carry text.) */
 
 .s2-track img {
     width: 30px;
@@ -308,9 +306,52 @@ body.s2-blur-on .s2-track {
     border: none;
 }
 
-body.s2-blur-on .s2-lyrics-box {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+/* --- Card 2 blur proxies (flat, outside the 3D rig) --- */
+.s2-proxy-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9996; /* above vignette, below the panel text (overlay = 9998) */
+    pointer-events: none;
+    display: none;
+}
+
+body.body-shuffle2 .s2-proxy-layer {
+    display: block;
+}
+
+.s2-blur-proxy {
+    position: fixed;
+    left: 0;
+    top: 0;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    /* Feathered edges so the frosted area has no visible boundary */
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 58%, transparent 100%);
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 58%, transparent 100%);
+}
+
+/* Mode: Blur — frost only */
+body.s2bg-blur .s2-blur-proxy {
+    opacity: 1;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* Mode: Glass — frost + saturated brightness lift + faint film, no outline */
+body.s2bg-glass .s2-blur-proxy {
+    opacity: 1;
+    backdrop-filter: blur(16px) saturate(1.7) brightness(1.12);
+    -webkit-backdrop-filter: blur(16px) saturate(1.7) brightness(1.12);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Mode: None — proxies stay hidden (default panels = pure floating text) */
+
+/* Hide proxies along with the panels during fast scroll */
+.shuffle2-overlay.s2-hidden ~ .s2-proxy-layer .s2-blur-proxy,
+body.s2-proxies-hidden .s2-blur-proxy {
+    opacity: 0 !important;
 }
 
 .s2-lyrics-box .lyric-line {
@@ -320,12 +361,20 @@ body.s2-blur-on .s2-lyrics-box {
 }
 
 /* Bottom-right A/B toggle for the panel background style */
-.s2-blur-toggle {
+/* BG style dropdown (bottom-right, opens UPWARD since we're at screen bottom) */
+.s2-bg-dd {
     position: fixed;
     right: 22px;
     bottom: 24px;
     z-index: 9999;
     display: none;
+}
+
+body.body-shuffle2 .s2-bg-dd {
+    display: block;
+}
+
+.s2-blur-toggle {
     padding: 8px 14px;
     border-radius: 10px;
     background: rgba(19, 19, 26, 0.92);
@@ -345,8 +394,55 @@ body.s2-blur-on .s2-lyrics-box {
     color: #fff;
 }
 
-body.body-shuffle2 .s2-blur-toggle {
-    display: block;
+.s2-bg-menu {
+    position: absolute;
+    bottom: calc(100% + 8px); /* pops up, not down */
+    right: 0;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px;
+    border-radius: 10px;
+    background: rgba(19, 19, 26, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.s2-bg-dd.open .s2-bg-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.s2-bg-menu button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: inherit;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.s2-bg-menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.s2-bg-menu button.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
 }
 
 /* --- Cinematic Vignette --- */

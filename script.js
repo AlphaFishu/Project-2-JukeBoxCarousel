@@ -1554,14 +1554,59 @@ function requestShuffle2Overlay(index) {
     }
 }
 
-// A/B toggle: frosted-blur boxes vs nothing at all (default: blur on)
-document.body.classList.add('s2-blur-on');
-const s2BlurToggleBtn = document.getElementById('s2BlurToggle');
-if (s2BlurToggleBtn) {
-    s2BlurToggleBtn.addEventListener('click', () => {
-        const on = document.body.classList.toggle('s2-blur-on');
-        s2BlurToggleBtn.textContent = on ? 'Blur BG: On' : 'Blur BG: Off';
+// BG style dropdown: None / Blur / Glass (default Blur). Opens upward.
+let s2BgMode = 'blur';
+document.body.classList.add('s2bg-blur');
+const s2BgDd = document.getElementById('s2BgDd');
+const s2BgBtn = document.getElementById('s2BgBtn');
+const s2BgMenu = document.getElementById('s2BgMenu');
+const s2BgLabels = { none: 'No BG', blur: 'Blur', glass: 'Glass' };
+
+if (s2BgBtn && s2BgDd) {
+    s2BgBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        s2BgDd.classList.toggle('open');
     });
+    document.addEventListener('click', () => s2BgDd.classList.remove('open'));
+}
+if (s2BgMenu) {
+    s2BgMenu.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            s2BgMode = b.dataset.bg;
+            document.body.classList.remove('s2bg-none', 's2bg-blur', 's2bg-glass');
+            document.body.classList.add(`s2bg-${s2BgMode}`);
+            s2BgMenu.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+            s2BgBtn.innerHTML = `BG: ${s2BgLabels[s2BgMode]} &#9652;`;
+            s2BgDd.classList.remove('open');
+        });
+    });
+}
+
+// Position each flat blur proxy over its panel's projected (3D) footprint.
+// The panel's getBoundingClientRect is the screen-space bounds of the rotated
+// quad; feathered proxy edges hide the axis-aligned-vs-skewed mismatch.
+const s2ProxySongsEl = document.getElementById('s2ProxySongs');
+const s2ProxyLyricsEl = document.getElementById('s2ProxyLyrics');
+function placeProxy(proxy, panel) {
+    if (!proxy || !panel) return;
+    if (s2BgMode === 'none' || panel.style.display === 'none' ||
+        (s2OverlayEl && s2OverlayEl.classList.contains('s2-hidden'))) {
+        proxy.style.opacity = '0';
+        return;
+    }
+    const r = panel.getBoundingClientRect();
+    if (!r.width || !r.height) { proxy.style.opacity = '0'; return; }
+    const pad = 6;
+    proxy.style.left = `${r.left - pad}px`;
+    proxy.style.top = `${r.top - pad}px`;
+    proxy.style.width = `${r.width + pad * 2}px`;
+    proxy.style.height = `${r.height + pad * 2}px`;
+    proxy.style.opacity = '1';
+}
+function syncS2Proxies() {
+    placeProxy(s2ProxySongsEl, s2SongsEl);
+    placeProxy(s2ProxyLyricsEl, s2LyricsEl);
 }
 
 function updateShuffle2Overlay(index) {
@@ -2636,9 +2681,11 @@ function updateCarousel() {
     povX = lerp(povX, 50 + mouseNX * 5, 0.06);
     povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
     if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
-    // Keep the Card 2 panel rig's vanishing point identical to the scene's
+    // Keep the Card 2 panel rig's vanishing point identical to the scene's,
+    // and track the flat blur proxies onto the panels' projected footprints
     if (currentMode === 'shuffle2' && s2OverlayEl) {
         s2OverlayEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
+        syncS2Proxies();
     }
 
     // Kinetic marquee: drifts opposite to scroll plus a slight mouse offset.
