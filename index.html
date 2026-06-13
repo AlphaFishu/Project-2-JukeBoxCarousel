@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=38">
+    <link rel="stylesheet" href="style.css?v=40">
 </head>
 
 <body>
@@ -47,20 +47,20 @@
         <button class="mode-btn" data-mode="cylinder">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1"/><path d="m19 5-7 7"/></svg> Jukebox
         </button>
-        <button class="mode-btn active" data-mode="coverflow">
+        <button class="mode-btn" data-mode="coverflow">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Vinyl Records
+        </button>
+        <button class="mode-btn active" data-mode="shuffle2">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M7.5 4v16M16.5 4v16"/></svg> Dynamic Motion
         </button>
         <button class="mode-btn" data-mode="depth">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-8 4 8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></svg> Rolling Album
         </button>
-        <button class="mode-btn" data-mode="shuffle">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg> Card 1
-        </button>
-        <button class="mode-btn" data-mode="shuffle2">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v11"/></svg> Card 2
-        </button>
         <button class="mode-btn" data-mode="helix">
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3"/><path d="M18 8H6"/><path d="M19 12H9"/><path d="M16 16h-6"/><path d="M11 20H9"/></svg> Helix
+        </button>
+        <button class="mode-btn" data-mode="shuffle">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg> Card 1
         </button>
     </div>
 
@@ -77,10 +77,11 @@
 
     <!-- Card 2 directed presets -->
     <div class="shuffle-angles" id="shuffle2Angles">
-        <button class="angle-btn active" data-angle2="0">Dynamic</button>
+        <button class="angle-btn active" data-angle2="0">Cinematic</button>
         <button class="angle-btn" data-angle2="1">Intro</button>
         <button class="angle-btn" data-angle2="2">Maison</button>
         <button class="angle-btn" data-angle2="3">Flip Up</button>
+        <button class="angle-btn angle-calib-toggle" id="calib2Toggle">&#9881; Calibrate</button>
     </div>
 
     <!-- Card 2 contextual panels: a screen-space mirror of the 3D rig (same
@@ -162,7 +163,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=38"></script>
+    <script src="script.js?v=40"></script>
 </body>
 
 </html>

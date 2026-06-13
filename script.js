@@ -54,18 +54,18 @@ const tracks = [
         lyrics: "I made it through the wilderness\nSomehow I made it through\nDidn't know how lost I was\nUntil I found you\n\nI was beat, incomplete\nI'd been had, I was sad and blue\nBut you made me feel\nYeah, you made me feel shiny and new\n\nLike a virgin\nTouched for the very first time\nLike a virgin\nWhen your heart beats next to mine"
     },
     {
-        title: "BRAT",
-        artist: "Charli xcx",
-        color: [142, 201, 58],
-        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/63/884e6321-ad41-aab1-f6f0-20efcafcfd55/075679666130.jpg/600x600bb.jpg",
+        title: "Blinding Lights - Single",
+        artist: "The Weeknd",
+        color: [220, 40, 30],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/a6/6e/bf/a66ebf79-5008-8948-b352-a790fc87446b/19UM1IM04638.rgb.jpg/600x600bb.jpg",
         songs: [
-            { title: "Apple", artist: "Charli xcx", plays: "395M plays", duration: "2:31", explicit: false },
-            { title: "Guess featuring billie eilish", artist: "Charli xcx & Billie Eilish", plays: "570M plays", duration: "2:23", explicit: false },
-            { title: "360", artist: "Charli xcx", plays: "410M plays", duration: "2:26", explicit: true },
-            { title: "Von dutch", artist: "Charli xcx", plays: "280M plays", duration: "2:44", explicit: true },
-            { title: "Girl, so confusing", artist: "Charli xcx", plays: "360M plays", duration: "2:54", explicit: false }
+            { title: "Blinding Lights", artist: "The Weeknd", plays: "4.1B plays", duration: "3:20", explicit: false },
+            { title: "Save Your Tears", artist: "The Weeknd", plays: "1.9B plays", duration: "3:35", explicit: false },
+            { title: "In Your Eyes", artist: "The Weeknd", plays: "720M plays", duration: "3:57", explicit: false },
+            { title: "Out of Time", artist: "The Weeknd", plays: "410M plays", duration: "3:34", explicit: false },
+            { title: "Sacrifice", artist: "The Weeknd", plays: "320M plays", duration: "3:08", explicit: true }
         ],
-        lyrics: "I think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\n\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time\nI think about it all the time"
+        lyrics: "Yeah\nI've been tryna call\nI've been on my own for long enough\nMaybe you can show me how to love, maybe\nI'm going through withdrawals\nYou don't even have to do too much\nYou can turn me on with just a touch, baby\n\nI said, ooh, I'm blinded by the lights\nNo, I can't sleep until I feel your touch"
     },
     {
         title: "Purple Rain",
@@ -678,18 +678,18 @@ const tracks = [
         lyrics: "THE BOOK\nYOASOBI\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
     },
     {
-        title: "Kyogen",
+        title: "Show - Single",
         artist: "Ado",
-        color: [40, 30, 50],
-        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/fc/7d/ec/fc7dec1b-51e0-310b-bc71-88c0bf287e00/198009967544.png/600x600bb.jpg",
+        color: [180, 40, 60],
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/80/e8/82/80e8826c-f877-9a74-0e7b-a142108feda0/23UMGIM92958.rgb.jpg/600x600bb.jpg",
         songs: [
-            { title: "Readymade (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "0.8B plays", duration: "4:09", explicit: false },
-            { title: "Odo (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "152M plays", duration: "3:48", explicit: false },
-            { title: "Domestic De Violence (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "91M plays", duration: "2:59", explicit: false },
-            { title: "Freedom (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "213M plays", duration: "2:58", explicit: false },
-            { title: "Fireworks (From \"Kyougen) [for Piano Solo]", artist: "daigoro789", plays: "257M plays", duration: "3:57", explicit: false }
+            { title: "Show", artist: "Ado", plays: "180M plays", duration: "2:58", explicit: false },
+            { title: "New Genesis", artist: "Ado", plays: "320M plays", duration: "3:24", explicit: false },
+            { title: "Gira Gira", artist: "Ado", plays: "210M plays", duration: "3:30", explicit: false },
+            { title: "Usseewa", artist: "Ado", plays: "450M plays", duration: "3:08", explicit: true },
+            { title: "Odo", artist: "Ado", plays: "280M plays", duration: "3:31", explicit: false }
         ],
-        lyrics: "Kyogen\nAdo\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
+        lyrics: "Show\nAdo\n\nDrop the needle, let it spin\nEvery groove a place we've been\nDial it up and let it play\nThe jukebox knows just what to say\n\nRound and round the record goes\nWhere it stops, the music knows"
     },
     {
         title: "STRAY SHEEP",
@@ -1005,8 +1005,8 @@ const carousel = document.getElementById('carousel');
 const totalCards = tracks.length;
 
 // Layout State
-let currentMode = 'coverflow';
-document.body.classList.add('body-coverflow');
+let currentMode = 'shuffle2';
+document.body.classList.add('body-shuffle2');
 
 // Details Panel State
 let lastActiveIndex = -1;
@@ -1203,6 +1203,10 @@ try {
     if (saved && typeof saved.zoom === 'number') shuffleCalib = { ...shuffleCalib, ...saved };
 } catch (e) { /* fresh start */ }
 
+// The panel edits whichever object calibTarget points at: shuffleCalib for
+// Card 1, or the active Card 2 preset's calib (so Flip Up etc. are tunable).
+let calibTarget = shuffleCalib;
+
 // Tabbed, grouped panel. Item kinds: slider | divider | check | button.
 // Labels are explicit about Main (the frozen highlight + its lane) vs Sub.
 const calibTabs = [['cam', 'Camera'], ['lay', 'Layout'], ['fx', 'Motion/FX']];
@@ -1238,6 +1242,7 @@ const calibPages = {
     fx: [
         { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
         { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
+        { slider: 'laneBend', label: 'Lane curve', min: 0, max: 100, step: 1 },
         { divider: 'Vignette' },
         { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
         { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
@@ -1272,7 +1277,13 @@ function applyVignette() {
 
 function applyCalibSideEffects() {
     applyVignette();
-    try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
+    if (calibTarget === shuffleCalib) {
+        try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
+    } else {
+        // Editing a Card 2 preset live: re-lay panels and refresh proxies
+        applyShuffle2Layout();
+        if (s2OverlayEl && !s2OverlayEl.classList.contains('s2-hidden')) syncS2Proxies();
+    }
 }
 
 // Build the tabbed calibration panel from calibPages
@@ -1283,21 +1294,21 @@ const calibDepRows = {}; // depKey -> [rows shown only when that checkbox is on]
 let lastPresetIdx = 0;
 
 function setDepVisibility(depKey) {
-    (calibDepRows[depKey] || []).forEach(r => { r.style.display = shuffleCalib[depKey] ? 'grid' : 'none'; });
+    (calibDepRows[depKey] || []).forEach(r => { r.style.display = calibTarget[depKey] ? 'grid' : 'none'; });
 }
 
-// Reset camera restores ONLY the camera rig (position + scene tilt) of the
-// active preset. Reset tilt clears ONLY the main-card tilt. They're separate.
+// Reset camera restores ONLY the camera rig (position + scene tilt). Reset tilt
+// clears ONLY the main-card tilt. They're separate, and act on calibTarget.
 function resetCamera() {
-    const p = shufflePresets[lastPresetIdx];
-    ['zoom', 'camX', 'camY', 'tiltX', 'tiltY', 'tiltZ'].forEach(k => { shuffleCalib[k] = p[k] || 0; });
+    const p = calibTarget === shuffleCalib ? shufflePresets[lastPresetIdx] : {};
+    ['zoom', 'camX', 'camY', 'tiltX', 'tiltY', 'tiltZ'].forEach(k => { calibTarget[k] = p[k] || 0; });
     syncCalibPanel();
     applyCalibSideEffects();
 }
 function resetTilt() {
-    shuffleCalib.mainTiltX = 0;
-    shuffleCalib.mainTiltY = 0;
-    shuffleCalib.mainTiltZ = 0;
+    calibTarget.mainTiltX = 0;
+    calibTarget.mainTiltY = 0;
+    calibTarget.mainTiltZ = 0;
     syncCalibPanel();
     applyCalibSideEffects();
 }
@@ -1341,9 +1352,9 @@ if (calibRowsEl) {
                 row.className = 'calib-check';
                 row.innerHTML = `<input type="checkbox"><span>${item.label}</span>`;
                 const chk = row.querySelector('input');
-                chk.checked = !!shuffleCalib[item.check];
+                chk.checked = !!calibTarget[item.check];
                 chk.addEventListener('change', () => {
-                    shuffleCalib[item.check] = chk.checked ? 1 : 0;
+                    calibTarget[item.check] = chk.checked ? 1 : 0;
                     setDepVisibility(item.check);
                     applyCalibSideEffects();
                 });
@@ -1355,10 +1366,10 @@ if (calibRowsEl) {
                 row.innerHTML = `<label>${item.label}</label><input type="range" min="${item.min}" max="${item.max}" step="${item.step}"><output></output>`;
                 const input = row.querySelector('input');
                 const out = row.querySelector('output');
-                input.value = shuffleCalib[item.slider];
-                out.textContent = shuffleCalib[item.slider];
+                input.value = calibTarget[item.slider];
+                out.textContent = calibTarget[item.slider];
                 input.addEventListener('input', () => {
-                    shuffleCalib[item.slider] = parseFloat(input.value);
+                    calibTarget[item.slider] = parseFloat(input.value);
                     out.textContent = input.value;
                     applyCalibSideEffects();
                 });
@@ -1375,11 +1386,11 @@ if (calibRowsEl) {
 
 function syncCalibPanel() {
     Object.keys(calibInputs).forEach(key => {
-        calibInputs[key].input.value = shuffleCalib[key];
-        calibInputs[key].out.textContent = shuffleCalib[key];
+        calibInputs[key].input.value = calibTarget[key];
+        calibInputs[key].out.textContent = calibTarget[key];
     });
     Object.keys(calibChecks).forEach(key => {
-        calibChecks[key].checked = !!shuffleCalib[key];
+        calibChecks[key].checked = !!calibTarget[key];
         setDepVisibility(key);
     });
 }
@@ -1392,17 +1403,31 @@ document.querySelectorAll('.angle-btn[data-angle]').forEach(btn => {
         const idx = parseInt(btn.dataset.angle, 10) || 0;
         lastPresetIdx = idx;
         shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[idx] };
+        calibTarget = shuffleCalib;
         syncCalibPanel();
         applyCalibSideEffects();
     });
 });
 
-// Panel toggle + print/load JSON
+// Panel toggle + print/load JSON. Card 1 gear edits shuffleCalib...
 const calibToggleBtn = document.getElementById('calibToggle');
 if (calibToggleBtn) {
     calibToggleBtn.addEventListener('click', () => {
+        calibTarget = shuffleCalib;
+        syncCalibPanel();
         document.body.classList.toggle('calib-open');
         calibToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
+    });
+}
+
+// ...Card 2 gear edits the active Card 2 preset's calib live (e.g. Flip Up)
+const calib2ToggleBtn = document.getElementById('calib2Toggle');
+if (calib2ToggleBtn) {
+    calib2ToggleBtn.addEventListener('click', () => {
+        calibTarget = shuffle2Presets[shuffle2Idx].calib;
+        syncCalibPanel();
+        document.body.classList.toggle('calib-open');
+        calib2ToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
     });
 }
 
@@ -1411,7 +1436,7 @@ const calibPrintBtn = document.getElementById('calibPrint');
 const calibApplyBtn = document.getElementById('calibApply');
 if (calibPrintBtn && calibJsonEl) {
     calibPrintBtn.addEventListener('click', () => {
-        const json = JSON.stringify(shuffleCalib);
+        const json = JSON.stringify(calibTarget);
         calibJsonEl.value = json;
         calibJsonEl.select();
         if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
@@ -1422,7 +1447,7 @@ if (calibApplyBtn && calibJsonEl) {
     calibApplyBtn.addEventListener('click', () => {
         try {
             const parsed = JSON.parse(calibJsonEl.value);
-            shuffleCalib = { ...shuffleCalib, ...parsed };
+            Object.assign(calibTarget, parsed);
             syncCalibPanel();
             applyCalibSideEffects();
         } catch (e) {
@@ -1455,7 +1480,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flip Up',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 800 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75 },
         ui: {}
     }
 ];
@@ -1542,15 +1567,15 @@ let s2RevealTimer = null;
 function requestShuffle2Overlay(index) {
     s2PendingIndex = index;
     clearTimeout(s2RevealTimer);
-    const fast = Math.abs(targetRotation - currentRotation) > 25;
+    const fast = Math.abs(targetRotation - currentRotation) > 55;
     if (fast) {
+        // Only truly fast flicks blank the panels (anti motion-sickness)
         if (s2OverlayEl) s2OverlayEl.classList.add('s2-hidden');
         s2RevealTimer = setTimeout(() => requestShuffle2Overlay(s2PendingIndex), 160);
     } else {
-        s2RevealTimer = setTimeout(() => {
-            updateShuffle2Overlay(s2PendingIndex);
-            if (s2OverlayEl) s2OverlayEl.classList.remove('s2-hidden');
-        }, 150);
+        // Slow scroll: update the song list/lyrics live with each album, no delay
+        updateShuffle2Overlay(s2PendingIndex);
+        if (s2OverlayEl) s2OverlayEl.classList.remove('s2-hidden');
     }
 }
 
@@ -1660,6 +1685,11 @@ document.querySelectorAll('.angle-btn[data-angle2]').forEach(btn => {
         shuffle2Idx = parseInt(btn.dataset.angle2, 10) || 0;
         applyVignette();
         updateShuffle2Overlay(lastActiveCardIndex >= 0 ? lastActiveCardIndex : 0);
+        // If the calibration panel is open, retarget it to this preset
+        if (document.body.classList.contains('calib-open')) {
+            calibTarget = shuffle2Presets[shuffle2Idx].calib;
+            syncCalibPanel();
+        }
     });
 });
 
@@ -2580,7 +2610,9 @@ function updateCarousel() {
             let bentZ = lane === midLane ? 20 : -80 - laneDist * 40;
             let bendRX = 0;
             if (c.laneBend) {
-                const bendR = c.laneBend;
+                // "Lane curve" 0..100 (higher = tighter). Convert to a drum radius:
+                // 75 reproduces the original Flip-Up arc (radius ~800).
+                const bendR = 60000 / c.laneBend;
                 const a = (flowY - (-60)) / bendR; // arc angle from the stack base
                 bentY = -60 + Math.sin(a) * bendR;
                 bentZ += (Math.cos(a) - 1) * bendR;
