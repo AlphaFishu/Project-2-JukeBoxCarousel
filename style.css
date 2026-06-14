@@ -171,53 +171,62 @@ body.body-helix .backdrop-marquee {
    flare at the very top, and an elliptical pool that lands behind the card.
    All screen-blended and blurred so there are no hard edges. */
 /* Hidden by default — ONLY shown in Spotlight mode (body-dynamic). The element
-   carries no animation here, so its opacity:0 actually holds in other modes. */
+   carries no animation here, so its opacity:0 actually holds in other modes.
+   A single natural sun shaft (like light through a cave mouth): soft-edged
+   beam, bright source, strong landing pool — no stripes. */
 .stage-spotlight {
     position: fixed;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    width: 60vw;
-    height: 128vh;
+    transform: translateX(-50%) rotate(4deg); /* subtle natural slant */
+    transform-origin: 50% -20%;
+    width: 64vw;
+    height: 132vh;
     z-index: 3; /* in FRONT of the dimmed background lane (cards z2) */
     pointer-events: none;
     opacity: 0;
     mix-blend-mode: screen;
     overflow: hidden;
+    /* wide soft halo so the beam blooms into the dark instead of ending hard */
+    background: radial-gradient(42% 68% at 50% 2%,
+        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, 0) 72%);
 }
 
-/* Layer 1: bright sun-halo bloom at the lamp + a focused core down the middle */
+/* The shaft: a bright lamp source feathering down into a soft converging beam.
+   Stacked radials of different widths give a natural, edge-soft falloff. */
 .stage-spotlight::before {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -6% 0 0 0;
     background:
-        radial-gradient(18vw 18vw at 50% 2%,
-            rgba(255, 255, 255, 0.75) 0%,
-            rgba(255, 255, 255, 0.25) 40%,
-            rgba(255, 255, 255, 0) 72%),
-        radial-gradient(26% 80% at 50% 0%,
-            rgba(255, 255, 255, 0.28) 0%,
-            rgba(var(--accent-rgb), 0.10) 45%,
-            rgba(255, 255, 255, 0) 78%);
-    filter: blur(6px);
+        radial-gradient(14vw 11vh at 50% 0%,
+            rgba(255, 255, 255, 0.85) 0%,
+            rgba(255, 255, 255, 0.30) 50%,
+            rgba(255, 255, 255, 0) 76%),
+        radial-gradient(20% 84% at 50% 0%,
+            rgba(255, 255, 255, 0.30) 0%,
+            rgba(255, 255, 255, 0.12) 42%,
+            rgba(var(--accent-rgb), 0.06) 62%,
+            rgba(255, 255, 255, 0) 82%);
+    filter: blur(18px);
 }
 
-/* Layer 2: god rays — light shafts fanning from the lamp point, faded with
-   distance by a downward mask. This is what reads as strong sunlight. */
+/* The landing pool where the shaft meets the stage floor behind the card */
 .stage-spotlight::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background: repeating-conic-gradient(from 180deg at 50% 1%,
-        rgba(255, 255, 255, 0.16) 0deg,
-        rgba(255, 255, 255, 0) 2.2deg,
-        rgba(255, 255, 255, 0) 5deg,
-        rgba(255, 255, 255, 0.16) 7.5deg);
-    -webkit-mask-image: radial-gradient(46% 92% at 50% 0%, #000 8%, rgba(0,0,0,0) 72%);
-    mask-image: radial-gradient(46% 92% at 50% 0%, #000 8%, rgba(0,0,0,0) 72%);
-    filter: blur(3px);
-    opacity: 0.9;
+    left: 50%;
+    bottom: 3%;
+    transform: translateX(-54%) rotate(-3deg);
+    width: 42vw;
+    height: 22vh;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%,
+        rgba(255, 255, 255, 0.24) 0%,
+        rgba(var(--accent-rgb), 0.10) 46%,
+        rgba(255, 255, 255, 0) 76%);
+    filter: blur(22px);
 }
 
 body.body-dynamic .stage-spotlight {

@@ -1472,8 +1472,9 @@ const shuffle2Presets = [
         name: 'Elevated',
         square: true, // 1:1 card, less rounded (Elevated only)
         calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
-        // Song list top-left, aligned with the main card's top edge; no lyrics
-        ui: { songs: { anchor: 'left-top', w: 320 } }
+        // Song list top-left, aligned with the main card's top edge; no lyrics.
+        // dy pulls it up to sit flush at the card top (offset from the 50° tilt).
+        ui: { songs: { anchor: 'left-top', w: 320, dy: -28 } }
     },
     {
         name: 'Maison', // retired preset (kept for index stability), not in the nav
@@ -1541,11 +1542,15 @@ function applyShuffle2Layout() {
         // Responsive clamp: panels never exceed ~22% of the window width
         const w = Math.min(cfg.w, Math.round(window.innerWidth * 0.22));
         el.style.width = `${w}px`;
+        // Optional per-preset fine nudge (rig units) to seat the panel exactly
+        // on the card edge despite each preset's tilt/perspective
+        const dx = cfg.dx || 0;
+        const dy = cfg.dy || 0;
         let inPlane = '';
-        if (cfg.anchor === 'right-top') inPlane = `translateX(${halfW + gap}px) translateY(${-halfH}px)`;
-        else if (cfg.anchor === 'left-top') inPlane = `translateX(${-halfW - gap - w}px) translateY(${-halfH}px)`;
-        else if (cfg.anchor === 'left-bottom') inPlane = `translateX(${-halfW - gap - w}px) translateY(${halfH}px) translateY(-100%)`;
-        else if (cfg.anchor === 'right-bottom') inPlane = `translateX(${halfW + gap}px) translateY(${halfH}px) translateY(-100%)`;
+        if (cfg.anchor === 'right-top') inPlane = `translateX(${halfW + gap + dx}px) translateY(${-halfH + dy}px)`;
+        else if (cfg.anchor === 'left-top') inPlane = `translateX(${-halfW - gap - w + dx}px) translateY(${-halfH + dy}px)`;
+        else if (cfg.anchor === 'left-bottom') inPlane = `translateX(${-halfW - gap - w + dx}px) translateY(${halfH + dy}px) translateY(-100%)`;
+        else if (cfg.anchor === 'right-bottom') inPlane = `translateX(${halfW + gap + dx}px) translateY(${halfH + dy}px) translateY(-100%)`;
         el.style.transform = `${plate} ${inPlane}`;
     });
 }
