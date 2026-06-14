@@ -166,6 +166,85 @@ body.body-helix .backdrop-marquee {
     left: 3vw;
 }
 
+/* --- Spotlight mode: a single top-down opera-house followspot --- */
+/* Layered soft light: a wide cone from a point above the stage, a bright source
+   flare at the very top, and an elliptical pool that lands behind the card.
+   All screen-blended and blurred so there are no hard edges. */
+.stage-spotlight {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70vw;
+    height: 116vh;
+    z-index: 1; /* behind the 3D stage (z2), above the page background */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+    mix-blend-mode: screen;
+    /* Volumetric beam: a vertical light gradient clipped to a cone (narrow at
+       the lamp, fanning down to the stage). Heavy blur softens the clip into a
+       soft-edged shaft of light instead of a hard triangle. */
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.30) 0%,
+        rgba(255, 255, 255, 0.16) 30%,
+        rgba(var(--accent-rgb), 0.08) 60%,
+        rgba(255, 255, 255, 0) 88%);
+    clip-path: polygon(43% 0%, 57% 0%, 82% 100%, 18% 100%);
+    filter: blur(26px);
+    animation: spot-breathe 7s ease-in-out infinite alternate;
+}
+
+/* Bright lamp flare at the very top of the beam */
+.stage-spotlight::before {
+    content: '';
+    position: absolute;
+    top: -4vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22vw;
+    height: 18vh;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
+    filter: blur(8px);
+}
+
+/* Warm elliptical pool where the beam lands behind the card */
+.stage-spotlight::after {
+    content: '';
+    position: absolute;
+    top: 34%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64vw;
+    height: 60vh;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(var(--accent-rgb), 0.10) 40%,
+        rgba(255, 255, 255, 0) 72%);
+    filter: blur(18px);
+}
+
+body.body-dynamic .stage-spotlight {
+    opacity: 1;
+}
+
+/* Spotlight reads best with darker surroundings — deepen the vignette so the
+   beam and the lit card stand out against the wings */
+body.body-dynamic .vignette-overlay {
+    background: radial-gradient(ellipse 46% 60% at 50% 46%,
+        rgba(0, 0, 0, 0) 30%,
+        rgba(0, 0, 0, 0.5) 78%,
+        rgba(0, 0, 0, 0.72) 100%) !important;
+    opacity: 1 !important;
+}
+
+@keyframes spot-breathe {
+    from { opacity: 0.9; }
+    to   { opacity: 1; }
+}
+
 /* --- Watermark --- */
 .watermark {
     position: fixed;
@@ -1242,7 +1321,7 @@ body.body-shuffle2.calib-open .calib-panel {
     bottom: 26px;
     left: 50%;
     transform: translateX(-50%);
-    width: min(640px, calc(100vw - 32px));
+    width: min(460px, calc(100vw - 32px));
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

@@ -1463,8 +1463,8 @@ if (calibApplyBtn && calibJsonEl) {
 // ============================================================================
 const shuffle2Presets = [
     {
-        name: 'Dynamic',
-        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -78, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
+        name: 'Spotlight',
+        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -83, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
         // Song list right, anchored at the main card's top; lyrics at its bottom-left
         ui: { songs: { anchor: 'right-top', w: 330 }, lyrics: { anchor: 'left-bottom', w: 380 } }
     },
@@ -1524,9 +1524,10 @@ function applyShuffle2Layout() {
 
     const s = c.lockScale || 1;
     const halfW = 112 * s; // card is 224 wide, scaled by the plate size
-    const halfH = (p.square ? 112 : 160) * s; // square presets are 224 tall
+    const cardCenterY = p.square ? 112 : 160; // square presets are 224 tall
+    const halfH = cardCenterY * s;
     const gap = 16; // tight to the card — no long-distance drift
-    const plate = `translate3d(${112 + c.lockX}px, ${160 + c.lockY}px, 150px) ` +
+    const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
 
     [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
@@ -1655,12 +1656,19 @@ function syncS2Proxies() {
     placeProxy(s2ProxyLyricsEl, s2LyricsEl);
 }
 
+let lastS2Render = '';
 function updateShuffle2Overlay(index) {
     if (!isCard2(currentMode)) return;
     const track = tracks[index];
     if (!track) return;
     const p = shuffle2Presets[card2Idx()];
     applyShuffle2Layout();
+
+    // Skip the (reflow-heavy) innerHTML rebuild if the same album+mode is already
+    // shown — avoids stutter when slow-scrolling re-triggers the same index
+    const key = currentMode + ':' + index;
+    if (key === lastS2Render) return;
+    lastS2Render = key;
 
     if (p.ui && p.ui.songs && s2SongsEl) {
         s2SongsEl.innerHTML = track.songs.map((song, i) => `
