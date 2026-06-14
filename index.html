@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=45">
+    <link rel="stylesheet" href="style.css?v=46">
 </head>
 
 <body>
@@ -88,6 +88,20 @@
     <!-- Watermark -->
     <div class="watermark">Jukebox Effects<br><span>by Nino Ngamaharat</span></div>
 
+    <!-- Spotlight calibration (Spotlight mode only) -->
+    <button class="spot-calib-toggle" id="spotCalibToggle">&#10022; Light</button>
+    <div class="calib-panel spot-panel" id="spotPanel">
+        <div class="calib-title">Spotlight Calibration</div>
+        <div class="calib-rows" id="spotRows"></div>
+        <div class="calib-io">
+            <textarea id="spotJson" rows="3" spellcheck="false" placeholder="Spotlight JSON appears here..."></textarea>
+            <div class="calib-io-btns">
+                <button id="spotPrint">Print values</button>
+                <button id="spotApply">Apply JSON</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Data source credits (bottom-right) + modal -->
     <button class="credits-btn" id="creditsBtn">Data Source &amp; Credits</button>
     <div class="credits-modal" id="creditsModal" aria-hidden="true">
@@ -142,7 +156,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=45"></script>
+    <script src="script.js?v=46"></script>
 </body>
 
 </html>

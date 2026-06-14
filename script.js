@@ -1474,7 +1474,7 @@ const shuffle2Presets = [
         calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics.
         // dy pulls it up to sit flush at the card top (offset from the 50° tilt).
-        ui: { songs: { anchor: 'left-top', w: 320, dy: -28 } }
+        ui: { songs: { anchor: 'left-top', w: 260, dy: -28 } }
     },
     {
         name: 'Maison', // retired preset (kept for index stability), not in the nav
@@ -1607,6 +1607,97 @@ if (creditsBtn && creditsModal) {
     if (creditsClose) creditsClose.addEventListener('click', closeC);
     creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) closeC(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeC(); });
+}
+
+// ============================================================================
+// Spotlight calibration — every aspect of the followspot, generous ranges.
+// Each control writes a CSS var the .stage-spotlight reads live.
+// ============================================================================
+const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1 };
+// [key, label, min, max, step, cssVar, unit]
+const spotSchema = [
+    ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
+    ['x',        'Beam X',      -1000, 1000, 5, '--spot-x', 'px'],
+    ['width',    'Beam width',      4, 200, 1, '--spot-width', 'vw'],
+    ['height',   'Beam length',    20, 260, 1, '--spot-height', 'vh'],
+    ['slant',    'Slant',         -90,  90, 1, '--spot-slant', 'deg'],
+    ['srcAlpha', 'Source bright',   0,   3, 0.02, '--spot-source-alpha', ''],
+    ['srcSize',  'Source size',     1,  90, 1, '--spot-source-size', 'vw'],
+    ['beamAlpha','Beam bright',     0,   3, 0.02, '--spot-beam-alpha', ''],
+    ['blur',     'Softness',        0, 120, 1, '--spot-blur', 'px'],
+    ['tint',     'Accent tint',     0, 1.5, 0.01, '--spot-tint', ''],
+    ['poolAlpha','Pool bright',     0,   3, 0.02, '--spot-pool-alpha', ''],
+    ['poolW',    'Pool width',      2, 160, 1, '--spot-pool-w', 'vw'],
+    ['poolH',    'Pool height',     2, 140, 1, '--spot-pool-h', 'vh'],
+    ['poolY',    'Pool Y',        -40, 100, 1, '--spot-pool-y', '%'],
+    ['wing',     'Wing darkness',   0,   2, 0.02, '--spot-wing', '']
+];
+
+let spotCalib = { ...SPOT_DEFAULTS };
+try {
+    const sv = JSON.parse(localStorage.getItem('jukebox-spot-calib'));
+    if (sv && typeof sv.width === 'number') spotCalib = { ...spotCalib, ...sv };
+} catch (e) { /* fresh */ }
+
+function applySpotVars() {
+    const root = document.documentElement.style;
+    spotSchema.forEach(([key, , , , , cssVar, unit]) => {
+        root.setProperty(cssVar, spotCalib[key] + unit);
+    });
+    try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
+}
+applySpotVars();
+
+const spotRowsEl = document.getElementById('spotRows');
+const spotInputs = {};
+if (spotRowsEl) {
+    spotSchema.forEach(([key, label, min, max, step]) => {
+        const row = document.createElement('div');
+        row.className = 'calib-row';
+        row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
+        const input = row.querySelector('input');
+        const out = row.querySelector('output');
+        input.value = spotCalib[key];
+        out.textContent = spotCalib[key];
+        input.addEventListener('input', () => {
+            spotCalib[key] = parseFloat(input.value);
+            out.textContent = input.value;
+            applySpotVars();
+        });
+        spotInputs[key] = { input, out };
+        spotRowsEl.appendChild(row);
+    });
+}
+function syncSpotPanel() {
+    spotSchema.forEach(([key]) => {
+        if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
+    });
+}
+
+const spotToggleBtn = document.getElementById('spotCalibToggle');
+if (spotToggleBtn) {
+    spotToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('spot-open');
+        spotToggleBtn.classList.toggle('active', document.body.classList.contains('spot-open'));
+    });
+}
+const spotJsonEl = document.getElementById('spotJson');
+const spotPrintBtn = document.getElementById('spotPrint');
+const spotApplyBtn = document.getElementById('spotApply');
+if (spotPrintBtn && spotJsonEl) {
+    spotPrintBtn.addEventListener('click', () => {
+        const json = JSON.stringify(spotCalib);
+        spotJsonEl.value = json;
+        spotJsonEl.select();
+        if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
+        console.log('[Spotlight calibration]', json);
+    });
+}
+if (spotApplyBtn && spotJsonEl) {
+    spotApplyBtn.addEventListener('click', () => {
+        try { Object.assign(spotCalib, JSON.parse(spotJsonEl.value)); syncSpotPanel(); applySpotVars(); }
+        catch (e) { spotJsonEl.value = 'Invalid JSON: ' + e.message; }
+    });
 }
 
 const s2BgDd = document.getElementById('s2BgDd');

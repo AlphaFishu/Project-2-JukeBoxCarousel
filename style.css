@@ -174,14 +174,16 @@ body.body-helix .backdrop-marquee {
    carries no animation here, so its opacity:0 actually holds in other modes.
    A single natural sun shaft (like light through a cave mouth): soft-edged
    beam, bright source, strong landing pool — no stripes. */
+/* All aspects are driven by CSS vars so the Spotlight calibration panel can
+   tune them live (defaults below match the tuned natural look). */
 .stage-spotlight {
     position: fixed;
     top: 0;
     left: 50%;
-    transform: translateX(-50%) rotate(4deg); /* subtle natural slant */
+    transform: translateX(calc(-50% + var(--spot-x, 0px))) rotate(var(--spot-slant, 4deg));
     transform-origin: 50% -20%;
-    width: 64vw;
-    height: 132vh;
+    width: var(--spot-width, 64vw);
+    height: var(--spot-height, 132vh);
     z-index: 3; /* in FRONT of the dimmed background lane (cards z2) */
     pointer-events: none;
     opacity: 0;
@@ -189,27 +191,26 @@ body.body-helix .backdrop-marquee {
     overflow: hidden;
     /* wide soft halo so the beam blooms into the dark instead of ending hard */
     background: radial-gradient(42% 68% at 50% 2%,
-        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.33)) 0%,
         rgba(255, 255, 255, 0) 72%);
 }
 
-/* The shaft: a bright lamp source feathering down into a soft converging beam.
-   Stacked radials of different widths give a natural, edge-soft falloff. */
+/* The shaft: a bright lamp source feathering down into a soft converging beam. */
 .stage-spotlight::before {
     content: '';
     position: absolute;
     inset: -6% 0 0 0;
     background:
-        radial-gradient(14vw 11vh at 50% 0%,
-            rgba(255, 255, 255, 0.85) 0%,
-            rgba(255, 255, 255, 0.30) 50%,
+        radial-gradient(var(--spot-source-size, 14vw) calc(var(--spot-source-size, 14vw) * 0.78) at 50% 0%,
+            rgba(255, 255, 255, var(--spot-source-alpha, 0.85)) 0%,
+            rgba(255, 255, 255, calc(var(--spot-source-alpha, 0.85) * 0.35)) 50%,
             rgba(255, 255, 255, 0) 76%),
         radial-gradient(20% 84% at 50% 0%,
-            rgba(255, 255, 255, 0.30) 0%,
-            rgba(255, 255, 255, 0.12) 42%,
-            rgba(var(--accent-rgb), 0.06) 62%,
+            rgba(255, 255, 255, var(--spot-beam-alpha, 0.30)) 0%,
+            rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.4)) 42%,
+            rgba(var(--accent-rgb), var(--spot-tint, 0.06)) 62%,
             rgba(255, 255, 255, 0) 82%);
-    filter: blur(18px);
+    filter: blur(var(--spot-blur, 18px));
 }
 
 /* The landing pool where the shaft meets the stage floor behind the card */
@@ -217,30 +218,29 @@ body.body-helix .backdrop-marquee {
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 3%;
+    bottom: var(--spot-pool-y, 3%);
     transform: translateX(-54%) rotate(-3deg);
-    width: 42vw;
-    height: 22vh;
+    width: var(--spot-pool-w, 42vw);
+    height: var(--spot-pool-h, 22vh);
     border-radius: 50%;
     background: radial-gradient(50% 50% at 50% 50%,
-        rgba(255, 255, 255, 0.24) 0%,
-        rgba(var(--accent-rgb), 0.10) 46%,
+        rgba(255, 255, 255, var(--spot-pool-alpha, 0.24)) 0%,
+        rgba(var(--accent-rgb), calc(var(--spot-tint, 0.06) * 1.6)) 46%,
         rgba(255, 255, 255, 0) 76%);
     filter: blur(22px);
 }
 
 body.body-dynamic .stage-spotlight {
-    opacity: 1;
-    animation: spot-breathe 7s ease-in-out infinite alternate;
+    opacity: var(--spot-opacity, 1);
 }
 
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
-   rays and the lit card stand out against the darkened wings */
+   beam and the lit card stand out against the darkened wings (var-tunable) */
 body.body-dynamic .vignette-overlay {
     background: radial-gradient(ellipse 44% 58% at 50% 44%,
         rgba(0, 0, 0, 0) 28%,
-        rgba(0, 0, 0, 0.55) 76%,
-        rgba(0, 0, 0, 0.78) 100%) !important;
+        rgba(0, 0, 0, var(--spot-wing, 0.55)) 76%,
+        rgba(0, 0, 0, calc(var(--spot-wing, 0.55) + 0.2)) 100%) !important;
     opacity: 1 !important;
 }
 
@@ -1114,6 +1114,39 @@ body.body-card2 .title-overlay {
     overflow-y: auto;
     scrollbar-width: thin;
 }
+
+body.body-dynamic.spot-open .spot-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+/* Spotlight calibration toggle (bottom-left, Spotlight mode only) */
+.spot-calib-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    display: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(19, 19, 26, 0.55);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.spot-calib-toggle:hover { background: rgba(40, 40, 50, 0.85); color: #fff; }
+
+body.body-dynamic .spot-calib-toggle { display: block; }
 
 body.body-shuffle.calib-open .calib-panel,
 body.body-shuffle2.calib-open .calib-panel {
