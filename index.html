@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=40">
+    <link rel="stylesheet" href="style.css?v=41">
 </head>
 
 <body>
@@ -48,43 +48,23 @@
             <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1"/><path d="m19 5-7 7"/></svg> Jukebox
         </button>
         <button class="mode-btn" data-mode="coverflow">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Vinyl Records
-        </button>
-        <button class="mode-btn active" data-mode="shuffle2">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M7.5 4v16M16.5 4v16"/></svg> Dynamic Motion
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Vinyl
         </button>
         <button class="mode-btn" data-mode="depth">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-8 4 8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></svg> Rolling Album
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-8 4 8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></svg> Page
         </button>
-        <button class="mode-btn" data-mode="helix">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H3"/><path d="M18 8H6"/><path d="M19 12H9"/><path d="M16 16h-6"/><path d="M11 20H9"/></svg> Helix
+        <button class="mode-btn active" data-mode="dynamic">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M7.5 4v16M16.5 4v16"/></svg> Dynamic
         </button>
-        <button class="mode-btn" data-mode="shuffle">
-            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg> Card 1
+        <button class="mode-btn" data-mode="elevated">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 9v12h16V9z"/><path d="M9 21v-6h6v6"/></svg> Elevated
+        </button>
+        <button class="mode-btn" data-mode="flipper">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 8c4-3 10-3 14 0"/><path d="M5 16c4 3 10 3 14 0"/></svg> Flipper
         </button>
     </div>
 
-    <!-- Camera angle presets for Card Shuffle: drops down below the mode selector -->
-    <div class="shuffle-angles" id="shuffleAngles">
-        <button class="angle-btn active" data-angle="0">Close-Up</button>
-        <button class="angle-btn" data-angle="1">Reverse</button>
-        <button class="angle-btn" data-angle="2">Overhead</button>
-        <button class="angle-btn" data-angle="3">Dutch</button>
-        <button class="angle-btn" data-angle="4">Front</button>
-        <button class="angle-btn" data-angle="5">Wide</button>
-        <button class="angle-btn angle-calib-toggle" id="calibToggle">&#9881; Calibrate</button>
-    </div>
-
-    <!-- Card 2 directed presets -->
-    <div class="shuffle-angles" id="shuffle2Angles">
-        <button class="angle-btn active" data-angle2="0">Cinematic</button>
-        <button class="angle-btn" data-angle2="1">Intro</button>
-        <button class="angle-btn" data-angle2="2">Maison</button>
-        <button class="angle-btn" data-angle2="3">Flip Up</button>
-        <button class="angle-btn angle-calib-toggle" id="calib2Toggle">&#9881; Calibrate</button>
-    </div>
-
-    <!-- Card 2 contextual panels: a screen-space mirror of the 3D rig (same
+    <!-- Card contextual panels: a screen-space mirror of the 3D rig (same
          perspective, same camera chain) so panels sit EXACTLY on the main
          card's plane while staying above the vignette -->
     <!-- Screen-space blur proxies: backdrop-filter is ignored inside a 3D
@@ -105,42 +85,38 @@
     <!-- Watermark -->
     <div class="watermark">Jukebox Effects<br><span>by Nino Ngamaharat</span></div>
 
-    <!-- Card 2: panel background style dropdown (opens upward) -->
-    <div class="s2-bg-dd" id="s2BgDd">
-        <div class="s2-bg-menu" id="s2BgMenu">
-            <button data-bg="none">No BG</button>
-            <button data-bg="blur" class="active">Blur BG</button>
-            <button data-bg="glass">Glass</button>
-        </div>
-        <button class="s2-blur-toggle" id="s2BgBtn">BG: Blur &#9652;</button>
-    </div>
-
-    <!-- Card Shuffle calibration panel (rows are generated by script.js) -->
-    <div class="calib-panel" id="calibPanel">
-        <div class="calib-title">Shuffle Calibration</div>
-        <div class="calib-rows" id="calibRows"></div>
-        <div class="calib-io">
-            <textarea id="calibJson" rows="3" spellcheck="false" placeholder="Calibration JSON appears here..."></textarea>
-            <div class="calib-io-btns">
-                <button id="calibPrint">Print values</button>
-                <button id="calibApply">Apply JSON</button>
-            </div>
+    <!-- Data source credits (bottom-right) + modal -->
+    <button class="credits-btn" id="creditsBtn">Data Source &amp; Credits</button>
+    <div class="credits-modal" id="creditsModal" aria-hidden="true">
+        <div class="credits-card">
+            <button class="credits-close" id="creditsClose" aria-label="Close">&times;</button>
+            <h2>Data Sources &amp; Credits</h2>
+            <p>This is a non-commercial, fan-made design demo. No profit is made from it. All music data and artwork belong to their respective owners; they are used here only to demonstrate UI/animation work.</p>
+            <ul>
+                <li><strong>Album artwork &amp; track info</strong> — Apple iTunes Search API (publicly available metadata &amp; cover images).</li>
+                <li><strong>Lyrics</strong> — short placeholder verses written for this demo; not the original copyrighted lyrics.</li>
+                <li><strong>Fonts</strong> — Outfit &amp; Bebas Neue via Google Fonts (Open Font License).</li>
+                <li><strong>Music, artists &amp; album covers</strong> — © their respective artists and labels.</li>
+            </ul>
+            <p class="credits-by">Jukebox Effects — design &amp; build by Nino Ngamaharat.</p>
         </div>
     </div>
 
     <!-- Now Playing dock: liquid glass console with controls, counter, and position bar -->
     <div class="now-playing-dock" id="nowPlayingDock">
-        <button class="dock-btn" id="dockPrev" aria-label="Previous album">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div class="dock-info">
-            <div class="dock-title" id="dockTitle">—</div>
-            <div class="dock-artist" id="dockArtist">—</div>
+        <div class="dock-top">
+            <button class="dock-btn" id="dockPrev" aria-label="Previous album">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="dock-info">
+                <div class="dock-title" id="dockTitle">—</div>
+                <div class="dock-artist" id="dockArtist">—</div>
+            </div>
+            <button class="dock-btn" id="dockNext" aria-label="Next album">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
         </div>
-        <button class="dock-btn" id="dockNext" aria-label="Next album">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-        <!-- Steps span the full row below (arrow-to-arrow), free of the title's width -->
+        <!-- Steps and the controls above share the same 80% width band -->
         <div class="dock-steps" id="dockSteps"></div>
     </div>
 
@@ -163,7 +139,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=40"></script>
+    <script src="script.js?v=41"></script>
 </body>
 
 </html>

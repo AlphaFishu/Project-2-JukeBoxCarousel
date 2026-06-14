@@ -149,7 +149,7 @@ body.body-coverflow .backdrop-marquee {
 
 /* Shuffle fills the screen with covers — clear the marquee out of the way */
 body.body-shuffle .backdrop-marquee,
-body.body-shuffle2 .backdrop-marquee {
+body.body-card2 .backdrop-marquee {
     opacity: 0;
 }
 
@@ -194,6 +194,118 @@ body.body-helix .backdrop-marquee {
     top: 86px;
 }
 
+/* --- Data source & credits (bottom-right) + modal --- */
+.credits-btn {
+    position: fixed;
+    right: 22px;
+    bottom: 24px;
+    z-index: 9999;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(19, 19, 26, 0.55);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.credits-btn:hover {
+    background: rgba(40, 40, 50, 0.85);
+    color: #fff;
+}
+
+.credits-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10002;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.credits-modal.open {
+    display: flex;
+}
+
+.credits-card {
+    position: relative;
+    width: min(460px, calc(100vw - 48px));
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 26px 28px;
+    border-radius: 16px;
+    background: #15151c;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.credits-card h2 {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.credits-card p {
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin: 0 0 12px;
+}
+
+.credits-card ul {
+    margin: 0 0 14px;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.credits-card li {
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.credits-card strong { color: #fff; }
+
+.credits-by {
+    font-size: 0.74rem !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin: 4px 0 0 !important;
+}
+
+.credits-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.credits-close:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
 /* --- Card 2 contextual panels (song list + lyrics in card perspective) --- */
 /* The overlay mirrors .scene exactly: same 960px perspective (origin synced in
    JS each frame), and .s2-rig sits at the carousel's origin with the same
@@ -207,7 +319,7 @@ body.body-helix .backdrop-marquee {
     perspective: 960px;
 }
 
-body.body-shuffle2 .shuffle2-overlay {
+body.body-card2 .shuffle2-overlay {
     display: block;
 }
 
@@ -315,7 +427,7 @@ body.body-shuffle2 .shuffle2-overlay {
     display: none;
 }
 
-body.body-shuffle2 .s2-proxy-layer {
+body.body-card2 .s2-proxy-layer {
     display: block;
 }
 
@@ -863,8 +975,7 @@ body.body-shuffle2 #shuffle2Angles {
 }
 
 /* The scroll hint would collide with the dropdown — hide it in Card modes */
-body.body-shuffle .title-overlay,
-body.body-shuffle2 .title-overlay {
+body.body-card2 .title-overlay {
     opacity: 0;
 }
 
@@ -1125,8 +1236,7 @@ body.body-shuffle2.calib-open .calib-panel {
 }
 
 /* --- Now Playing Dock (Liquid Glass console) --- */
-/* Two rows: [prev | info | next] on top, steps spanning the full arrow-to-arrow
-   width below — the 72 steps get the whole bar, not the title's column. */
+/* Flex column: controls row and the steps row share the same 80% width band */
 .now-playing-dock {
     position: fixed;
     bottom: 26px;
@@ -1134,13 +1244,9 @@ body.body-shuffle2.calib-open .calib-panel {
     transform: translateX(-50%);
     width: min(640px, calc(100vw - 32px));
     box-sizing: border-box;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-        "prev info next"
-        "steps steps steps";
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    column-gap: 10px;
     row-gap: 6px;
     padding: 7px 12px 9px; /* ~20% slimmer console */
     border-radius: 16px; /* rounded square, matching the top selector */
@@ -1234,38 +1340,38 @@ body.body-depth .now-playing-dock {
 
 /* Segmented step indicator: one rounded-rectangle step per album. The highlight
    skips from step to step as you scroll (carousel-style), and steps are clickable. */
-.dock-steps {
-    grid-area: steps;
+/* Controls row + steps row share one 80% width band */
+.dock-top {
     display: flex;
-    gap: 2px;
-    margin-top: 0;
-    width: 80%;        /* 20% narrower than the dock row */
-    justify-self: center;
+    align-items: center;
+    gap: 10px;
+    width: 80%;
 }
 
-#dockPrev { grid-area: prev; }
-#dockNext { grid-area: next; }
-.dock-info { grid-area: info; }
+.dock-steps {
+    display: flex;
+    gap: 2px;
+    width: 80%;
+}
 
+/* Segmented step indicator: one rounded-rectangle step per album. */
 .dock-step {
     flex: 1 1 0;
     height: 4px;
     border-radius: 2px;
-    /* Brighter floor + slow decay: fast scrolling leaves a visible glowing
-       trail behind the highlight instead of steps blinking out */
     background: rgba(255, 255, 255, 0.30);
     cursor: pointer;
-    transition: background-color 0.9s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    /* Quick decay so a fast swipe leaves a brief trail, not a solid white bar */
+    transition: background-color 0.35s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .dock-step.active {
     transition: background-color 0.12s ease, transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Instant white flash on every step the highlight passes; removing the class
-   lets the slow base transition fade it out — a persistent scrolling trail */
+/* Flash on each passed step; max 75% white (not full) and fades fast */
 .dock-step.flash {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.75);
     transition: none;
 }
 
@@ -1376,19 +1482,25 @@ body.body-coverflow .vinyl-record {
 /* --- Cover Flow Mode Specific Layout --- */
 body.body-coverflow .card,
 body.body-depth .card,
-body.body-shuffle .card,
-body.body-shuffle2 .card,
+body.body-card2 .card,
 body.body-helix .card {
     /* Disable transitions to prevent interpolation lag in requestAnimationFrame loops */
     transition: none !important;
 }
 
-/* Shuffle & Helix scale cards from their center so lane/spiral math stays exact */
-body.body-shuffle .card,
-body.body-shuffle2 .card,
+/* Card modes & Helix scale cards from their center so lane/spiral math stays exact */
+body.body-card2 .card,
 body.body-helix .card {
     transform-origin: center center;
 }
+
+/* Elevated: 1:1 square card with a tighter corner radius (this mode only) */
+body.body-elevated .card,
+body.body-elevated .card-content {
+    height: 224px;
+    border-radius: 7px;
+}
+body.body-elevated .card-content { inset: 3px; }
 
 /* Custom depth mode card corner and shadow per user request */
 body.body-depth .card,

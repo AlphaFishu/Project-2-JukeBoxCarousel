@@ -1,4 +1,20 @@
-# Walkthrough: Calibration UX + Main-Card Tilt + Motion Blur (v2.99)
+# Walkthrough: Pre-Vercel Cleanup — Final Nav + Credits (v2.996)
+
+Reorganized for public release on Vercel.
+
+**Navigation (6 modes):** Jukebox · Vinyl (was Vinyl Records) · Page (was Rolling Album) · **Dynamic** (was Cinematic) · **Elevated** (was Intro) · **Flipper** (was Flip Up). Removed: Helix, Card 1, Maison, and the "Dynamic Motion" wrapper mode with its sub-pill row. The three card presets are now top-level modes; **Dynamic** is the default landing.
+
+**Fixes in this pass:**
+1. Dynamic preset retuned to the latest printed JSON.
+2. **Elevated** uses a 1:1 square card with a tighter corner radius (that mode only).
+3. Dock controls row and step bar now share one centered 80% width band.
+4. Removed the BG-style dropdown and calibrate gears; Dynamic & Elevated always use the frosted (blur) panel background.
+5. The bottom-right control is now **Data Source & Credits** — opens a closeable modal citing the iTunes Search API (artwork/metadata), Google Fonts, placeholder lyrics, and artist/label ownership (non-commercial demo).
+6. Step trail dims fast (0.35s) and flashes to max 75% white, so a quick swipe leaves a brief comet trail instead of a solid white bar.
+
+---
+
+# Earlier: Calibration UX + Main-Card Tilt + Motion Blur (v2.99)
 
 1. **Clearer naming + grouping** — Layout tab is now split by `--- Main ---` / `--- Sub ---` dividers. "Highlight size" → **Main size**, "Plate X/Y" → **Main X / Main Y**. Camera tilts relabeled "Scene tilt X/Y/Z" to distinguish from the new main-card tilt.
 2. **Main-card tilt (X/Y/Z)** — a dedicated `--- Main tilt ---` section rotates ONLY the frozen highlight card (faded by 1−t so reel cards stay flat), for a custom hero pose. Its own **Reset tilt** button zeroes just those three.

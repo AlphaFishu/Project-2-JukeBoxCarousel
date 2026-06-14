@@ -1005,8 +1005,8 @@ const carousel = document.getElementById('carousel');
 const totalCards = tracks.length;
 
 // Layout State
-let currentMode = 'shuffle2';
-document.body.classList.add('body-shuffle2');
+let currentMode = 'dynamic';
+document.body.classList.add('body-dynamic', 'body-card2');
 
 // Details Panel State
 let lastActiveIndex = -1;
@@ -1128,18 +1128,19 @@ modeButtons.forEach(btn => {
         updateSliderPosition(btn);
 
         // Remove previous body mode classes
-        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-shuffle', 'body-shuffle2', 'body-helix');
+        document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-dynamic', 'body-elevated', 'body-flipper', 'body-card2');
 
         // Update mode state
         currentMode = btn.dataset.mode;
         document.body.classList.add(`body-${currentMode}`);
+        if (isCard2(currentMode)) document.body.classList.add('body-card2');
 
         // Calibrated vignette applies only in the Card modes; others use the default
         applyVignette();
 
-        // Card 2 panels follow mode changes
+        // Card panels follow mode changes
         stopS2Lyrics();
-        if (currentMode === 'shuffle2') {
+        if (isCard2(currentMode)) {
             updateShuffle2Overlay(lastActiveCardIndex >= 0 ? lastActiveCardIndex : 0);
         }
 
@@ -1260,8 +1261,8 @@ const vignetteEl = document.querySelector('.vignette-overlay');
 // is transparent at the center, so the highlighted card is never darkened.
 function applyVignette() {
     if (!vignetteEl) return;
-    if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
-        const sc = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
+    if (currentMode === 'shuffle' || isCard2(currentMode)) {
+        const sc = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
         const r = Math.min(0.95, 0.42 * sc.vignette);
         const sAlpha = Math.min(0.92, 0.5 * sc.vignetteSides);
         const reach = Math.min(48, Math.max(5, sc.vignetteReach || 22));
@@ -1463,28 +1464,34 @@ if (calibApplyBtn && calibJsonEl) {
 const shuffle2Presets = [
     {
         name: 'Dynamic',
-        calib: { "mainTiltX": -3, "mainTiltY": 16, "mainTiltZ": -17, "motionBlur": 0, "motionBlurAmt": 8, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.3, "lockX": 162, "lockY": -92, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 0.88, "vignetteReach": 26 },
+        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -78, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
         // Song list right, anchored at the main card's top; lyrics at its bottom-left
         ui: { songs: { anchor: 'right-top', w: 330 }, lyrics: { anchor: 'left-bottom', w: 380 } }
     },
     {
-        name: 'Intro',
+        name: 'Elevated',
+        square: true, // 1:1 card, less rounded (Elevated only)
         calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics
         ui: { songs: { anchor: 'left-top', w: 320 } }
     },
     {
-        name: 'Maison',
+        name: 'Maison', // retired preset (kept for index stability), not in the nav
         calib: { "mainTiltX": -18, "mainTiltY": 21, "mainTiltZ": 15, "motionBlur": 0, "motionBlurAmt": 9.5, "zoom": 142, "camX": -68, "camY": 0, "tiltX": 15, "tiltY": -15, "tiltZ": -10, "lanes": 5, "laneGap": 228, "mainPad": 0, "mainCardGap": 18, "subCardGap": 18, "mainScale": 0.94, "subScale": 0.84, "lockScale": 0.94, "lockX": 74, "lockY": -4, "subSpeed": 1.5, "snap": 0.62, "vignette": 0, "vignetteSides": 2, "vignetteReach": 32 },
         ui: {}
     },
     {
-        name: 'Flip Up',
+        name: 'Flipper',
         calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75 },
         ui: {}
     }
 ];
 shuffle2Presets.forEach(p => { p.calib = { ...CALIB_EXTRA_DEFAULTS, ...p.calib }; });
+
+// Each nav mode maps to a preset index (Maison index 2 is retired/unused)
+const CARD2_MODE_IDX = { dynamic: 0, elevated: 1, flipper: 3 };
+function isCard2(m) { return Object.prototype.hasOwnProperty.call(CARD2_MODE_IDX, m); }
+function card2Idx() { return CARD2_MODE_IDX[currentMode] ?? 0; }
 
 let shuffle2Idx = 0;
 
@@ -1508,7 +1515,7 @@ const s2OverlayEl = document.getElementById('shuffle2Overlay');
 // the main card's plate transform (position + main tilt) plus an in-plane
 // offset to its anchor corner — so position AND perspective match the card.
 function applyShuffle2Layout() {
-    const p = shuffle2Presets[shuffle2Idx];
+    const p = shuffle2Presets[card2Idx()];
     const c = p.calib;
     if (s2RigEl) {
         s2RigEl.style.transform =
@@ -1516,8 +1523,8 @@ function applyShuffle2Layout() {
     }
 
     const s = c.lockScale || 1;
-    const halfW = 112 * s; // card is 224x320, scaled by the plate size
-    const halfH = 160 * s;
+    const halfW = 112 * s; // card is 224 wide, scaled by the plate size
+    const halfH = (p.square ? 112 : 160) * s; // square presets are 224 tall
     const gap = 16; // tight to the card — no long-distance drift
     const plate = `translate3d(${112 + c.lockX}px, ${160 + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
@@ -1556,7 +1563,7 @@ function checkWatermarkOverlap() {
 checkWatermarkOverlap();
 window.addEventListener('resize', () => {
     checkWatermarkOverlap();
-    if (currentMode === 'shuffle2') applyShuffle2Layout();
+    if (isCard2(currentMode)) applyShuffle2Layout();
 });
 
 // Rolling-Album behavior: while the reels are moving fast the panels fade out
@@ -1579,9 +1586,23 @@ function requestShuffle2Overlay(index) {
     }
 }
 
-// BG style dropdown: None / Blur / Glass (default Blur). Opens upward.
+// Card panels always use the frosted (blur) background now.
 let s2BgMode = 'blur';
 document.body.classList.add('s2bg-blur');
+
+// Data source & credits modal
+const creditsBtn = document.getElementById('creditsBtn');
+const creditsModal = document.getElementById('creditsModal');
+const creditsClose = document.getElementById('creditsClose');
+if (creditsBtn && creditsModal) {
+    const openC = () => creditsModal.classList.add('open');
+    const closeC = () => creditsModal.classList.remove('open');
+    creditsBtn.addEventListener('click', openC);
+    if (creditsClose) creditsClose.addEventListener('click', closeC);
+    creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) closeC(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeC(); });
+}
+
 const s2BgDd = document.getElementById('s2BgDd');
 const s2BgBtn = document.getElementById('s2BgBtn');
 const s2BgMenu = document.getElementById('s2BgMenu');
@@ -1635,10 +1656,10 @@ function syncS2Proxies() {
 }
 
 function updateShuffle2Overlay(index) {
-    if (currentMode !== 'shuffle2') return;
+    if (!isCard2(currentMode)) return;
     const track = tracks[index];
     if (!track) return;
-    const p = shuffle2Presets[shuffle2Idx];
+    const p = shuffle2Presets[card2Idx()];
     applyShuffle2Layout();
 
     if (p.ui && p.ui.songs && s2SongsEl) {
@@ -2208,8 +2229,8 @@ function updateCarousel() {
     // In Card Shuffle, the snap calibration magnetizes the target to the
     // nearest card and stiffens the follow speed for a crisper landing.
     let lerpFactor = 0.08;
-    if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
-        const sc = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
+    if (currentMode === 'shuffle' || isCard2(currentMode)) {
+        const sc = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
         if (sc.snap > 0) {
             const snapTarget = Math.round(targetRotation / rotationAngle) * rotationAngle;
             targetRotation = lerp(targetRotation, snapTarget, sc.snap * 0.18);
@@ -2543,11 +2564,11 @@ function updateCarousel() {
             updateDetailsPanel(activeIndex);
         }
 
-    } else if (currentMode === 'shuffle' || currentMode === 'shuffle2') {
+    } else if (currentMode === 'shuffle' || isCard2(currentMode)) {
         // Card 1 / Card 2: film reels on a tilted product-shot plane. Card 1 is
         // driven by the live calibration; Card 2 by its directed preset JSONs.
         // The highlighted card is captured and FROZEN at the plate while reels roll.
-        const c = currentMode === 'shuffle2' ? shuffle2Presets[shuffle2Idx].calib : shuffleCalib;
+        const c = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
@@ -2579,7 +2600,9 @@ function updateCarousel() {
             // per-card step = scaled card height + gap (equal gaps regardless of size)
             const laneScale = lane === midLane ? c.mainScale : Math.max(0.25, c.subScale * (1 - 0.08 * (laneDist - 1)));
             const cardGap = lane === midLane ? c.mainCardGap : c.subCardGap;
-            const stepY = 320 * laneScale + cardGap;
+            // Square presets (Elevated) use a 224px-tall card; others 320px
+            const cardH = (isCard2(currentMode) && shuffle2Presets[card2Idx()].square) ? 224 : 320;
+            const stepY = cardH * laneScale + cardGap;
 
             // Sub-lane speed = phase drift: the lane's whole content scrolls
             // faster/slower (wrapping within the lane) while spacing stays put.
@@ -2715,7 +2738,7 @@ function updateCarousel() {
     if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
     // Keep the Card 2 panel rig's vanishing point identical to the scene's,
     // and track the flat blur proxies onto the panels' projected footprints
-    if (currentMode === 'shuffle2' && s2OverlayEl) {
+    if (isCard2(currentMode) && s2OverlayEl) {
         s2OverlayEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
         syncS2Proxies();
     }
@@ -2853,7 +2876,7 @@ function updateNowPlaying(index) {
 
     // Card 2 contextual panels follow the active album like Rolling Album does
     // (skeleton-gated: data hides during fast scroll, eases back in on settle)
-    if (currentMode === 'shuffle2') requestShuffle2Overlay(index);
+    if (isCard2(currentMode)) requestShuffle2Overlay(index);
 
     // Crossfade the giant marquee to the new artist (fast — landing should pop)
     if (backdropMarqueeEl && marqueeTextEl) {
