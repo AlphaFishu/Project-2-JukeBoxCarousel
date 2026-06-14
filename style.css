@@ -175,23 +175,23 @@ body.body-helix .backdrop-marquee {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 70vw;
-    height: 116vh;
-    z-index: 1; /* behind the 3D stage (z2), above the page background */
+    width: 56vw;
+    height: 124vh;
+    z-index: 3; /* in FRONT of the dimmed background lane (cards z2) */
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease;
     mix-blend-mode: screen;
-    /* Volumetric beam: a vertical light gradient clipped to a cone (narrow at
-       the lamp, fanning down to the stage). Heavy blur softens the clip into a
-       soft-edged shaft of light instead of a hard triangle. */
-    background: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.30) 0%,
-        rgba(255, 255, 255, 0.16) 30%,
-        rgba(var(--accent-rgb), 0.08) 60%,
-        rgba(255, 255, 255, 0) 88%);
-    clip-path: polygon(43% 0%, 57% 0%, 82% 100%, 18% 100%);
-    filter: blur(26px);
+    /* A tall ellipse blooming from a lamp just above the stage: brightest at the
+       top, fanning down and out with a soft accent-tinted falloff. No hard
+       edges — reads as a real shaft of light, not a flat triangle. */
+    background:
+        radial-gradient(34% 88% at 50% -3%,
+            rgba(255, 255, 255, 0.34) 0%,
+            rgba(255, 255, 255, 0.13) 26%,
+            rgba(var(--accent-rgb), 0.07) 52%,
+            rgba(255, 255, 255, 0) 80%);
+    filter: blur(16px);
     animation: spot-breathe 7s ease-in-out infinite alternate;
 }
 
@@ -199,31 +199,31 @@ body.body-helix .backdrop-marquee {
 .stage-spotlight::before {
     content: '';
     position: absolute;
-    top: -4vh;
+    top: -5vh;
     left: 50%;
     transform: translateX(-50%);
-    width: 22vw;
-    height: 18vh;
+    width: 16vw;
+    height: 16vh;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
-    filter: blur(8px);
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%);
+    filter: blur(6px);
 }
 
-/* Warm elliptical pool where the beam lands behind the card */
+/* Warm elliptical pool where the beam lands on the stage behind the card */
 .stage-spotlight::after {
     content: '';
     position: absolute;
-    top: 34%;
+    top: 40%;
     left: 50%;
     transform: translateX(-50%);
-    width: 64vw;
-    height: 60vh;
+    width: 58vw;
+    height: 46vh;
     border-radius: 50%;
     background: radial-gradient(50% 50% at 50% 50%,
-        rgba(255, 255, 255, 0.16) 0%,
-        rgba(var(--accent-rgb), 0.10) 40%,
-        rgba(255, 255, 255, 0) 72%);
-    filter: blur(18px);
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(var(--accent-rgb), 0.09) 42%,
+        rgba(255, 255, 255, 0) 74%);
+    filter: blur(20px);
 }
 
 body.body-dynamic .stage-spotlight {
