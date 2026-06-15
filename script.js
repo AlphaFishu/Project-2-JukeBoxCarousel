@@ -1130,6 +1130,9 @@ modeButtons.forEach(btn => {
         // Remove previous body mode classes
         document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-dynamic', 'body-elevated', 'body-flipper', 'body-card2');
 
+        // Clear any curved cards from the previous mode
+        document.querySelectorAll('.card.is-curved').forEach(cc => { cc.classList.remove('is-curved'); cc._curveBend = 0; });
+
         // Update mode state
         currentMode = btn.dataset.mode;
         document.body.classList.add(`body-${currentMode}`);
@@ -1527,6 +1530,43 @@ const s2HeroImg = s2HeroEl ? s2HeroEl.querySelector('img') : null;
 const s2HeroTitle = document.getElementById('s2HeroTitle');
 const s2HeroArtist = document.getElementById('s2HeroArtist');
 
+// Real card curvature: slice the cover into vertical strips on a cylinder so the
+// card surface genuinely bends (like a flexed plate), not a flat tilt. Built
+// once per card per bend value and cached; the captured main card stays flat.
+function ensureCardCurve(card, cover, bendDeg, square) {
+    if (!bendDeg) {
+        if (card.classList.contains('is-curved')) card.classList.remove('is-curved');
+        card._curveBend = 0;
+        return;
+    }
+    if (card._curveBend === bendDeg && card._curveCover === cover) {
+        card.classList.add('is-curved');
+        return;
+    }
+    card._curveBend = bendDeg;
+    card._curveCover = cover;
+    let cw = card.querySelector('.card-curve');
+    if (!cw) { cw = document.createElement('div'); cw.className = 'card-curve'; card.appendChild(cw); }
+    const N = 10;
+    const W = 218, H = square ? 218 : 314; // card-content box (card minus 3px inset)
+    const sliceW = W / N;
+    const dDeg = bendDeg / N;
+    const dRad = Math.abs(dDeg) * Math.PI / 180;
+    const R = dRad > 0.0002 ? (sliceW / 2) / Math.tan(dRad / 2) : 1e6;
+    let html = '';
+    for (let i = 0; i < N; i++) {
+        const th = (i - (N - 1) / 2) * dDeg;
+        const thR = th * Math.PI / 180;
+        const x = R * Math.sin(thR);
+        const z = R * Math.cos(thR) - R; // center forward, edges recede (convex flex)
+        html += `<div class="curve-slice" style="width:${(sliceW + 0.6).toFixed(2)}px;margin-left:${-sliceW / 2}px;left:50%;` +
+            `background-image:url('${cover}');background-size:${W}px ${H}px;background-position:${(-i * sliceW).toFixed(2)}px 0;` +
+            `transform:translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${th.toFixed(2)}deg)"></div>`;
+    }
+    cw.innerHTML = html;
+    card.classList.add('is-curved');
+}
+
 // Panels live in a mirror of the real 3D rig: the overlay shares the scene's
 // perspective, the rig carries the exact camera transform, and each panel gets
 // the main card's plate transform (position + main tilt) plus an in-plane
@@ -1669,8 +1709,7 @@ function applySpotVars() {
     spotSchema.forEach(([key, , , , , cssVar, unit]) => {
         root.setProperty(cssVar, spotCalib[key] + unit);
     });
-    // Card-vs-light layering + master on/off
-    document.body.classList.toggle('spot-cardfront', !!spotCalib.cardFront);
+    // Master on/off (the beam always sits behind the cards now — no layering toggle)
     document.body.classList.toggle('spot-off', !spotCalib.on);
     try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
 }
@@ -1696,23 +1735,21 @@ if (spotRowsEl) {
         spotRowsEl.appendChild(row);
     });
 
-    // Boolean toggles: master on/off + card-in-front-of-beam
-    [['on', 'Spotlight on'], ['cardFront', 'Card in front of beam']].forEach(([key, label]) => {
-        const chkRow = document.createElement('label');
-        chkRow.className = 'calib-check';
-        chkRow.innerHTML = `<input type="checkbox"><span>${label}</span>`;
-        const chk = chkRow.querySelector('input');
-        chk.checked = !!spotCalib[key];
-        chk.addEventListener('change', () => { spotCalib[key] = chk.checked ? 1 : 0; applySpotVars(); });
-        spotInputs[key] = { check: chk };
-        spotRowsEl.appendChild(chkRow);
-    });
+    // Master on/off toggle (card is always in front of the beam now)
+    const chkRow = document.createElement('label');
+    chkRow.className = 'calib-check';
+    chkRow.innerHTML = `<input type="checkbox"><span>Spotlight on</span>`;
+    const chk = chkRow.querySelector('input');
+    chk.checked = !!spotCalib.on;
+    chk.addEventListener('change', () => { spotCalib.on = chk.checked ? 1 : 0; applySpotVars(); });
+    spotInputs.on = { check: chk };
+    spotRowsEl.appendChild(chkRow);
 }
 function syncSpotPanel() {
     spotSchema.forEach(([key]) => {
         if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
     });
-    ['on', 'cardFront'].forEach(k => { if (spotInputs[k] && spotInputs[k].check) spotInputs[k].check.checked = !!spotCalib[k]; });
+    if (spotInputs.on && spotInputs.on.check) spotInputs.on.check.checked = !!spotCalib.on;
 }
 
 const spotToggleBtn = document.getElementById('spotCalibToggle');
@@ -2726,7 +2763,8 @@ function updateCarousel() {
         // Card 1 / Card 2: film reels on a tilted product-shot plane. Card 1 is
         // driven by the live calibration; Card 2 by its directed preset JSONs.
         // The highlighted card is captured and FROZEN at the plate while reels roll.
-        const c = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
+        const cardPreset = isCard2(currentMode) ? shuffle2Presets[card2Idx()] : null;
+        const c = cardPreset ? cardPreset.calib : shuffleCalib;
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
@@ -2829,13 +2867,10 @@ function updateCarousel() {
                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
                 : '';
             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
-            // Card bend: rotate each NON-main card progressively by its position
-            // along the lane, so the whole reel curls like a drum/circle. Faded by
-            // capture t so the captured main card stays flat.
-            const cardBendStr = (c.cardBend && !isActive)
-                ? ` rotateX(${(c.cardBend * (local - laneLen / 2) * t).toFixed(2)}deg)`
-                : '';
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${cardBendStr}${tiltStr} scale(${scale})`;
+            // Card bend = REAL surface curvature (sliced cylinder), non-main cards
+            // only; the captured main card stays flat.
+            if (cardPreset) ensureCardCurve(card, tracks[index].cover, isActive ? 0 : c.cardBend, cardPreset.square);
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
 

@@ -184,7 +184,7 @@ body.body-helix .backdrop-marquee {
     transform-origin: 50% -20%;
     width: var(--spot-width, 64vw);
     height: var(--spot-height, 132vh);
-    z-index: 3; /* in FRONT of the dimmed background lane (cards z2) */
+    z-index: 1; /* BEHIND the cards (z2) — the card always reads in front of the light */
     pointer-events: none;
     opacity: 0;
     mix-blend-mode: screen;
@@ -234,45 +234,36 @@ body.body-dynamic .stage-spotlight {
     opacity: var(--spot-opacity, 1);
 }
 
-/* Card-vs-light layering: the beam always sits in front of the dimmed sub lane
-   (z3 > cards z2). When .spot-cardfront is on, a crisp clone of the MAIN card is
-   drawn ABOVE the beam (in the panel rig, z9998), so only the main card reads in
-   front of the light while the sub lane stays behind it. */
-.s2-hero {
+.s2-hero { display: none !important; } /* retired */
+
+/* --- Curved card (Flipper "Card bend") — genuine cylinder bend ---
+   The cover is sliced into vertical strips arranged on an arc. A LOCAL
+   perspective on the container is essential: without it the strips' translateZ
+   collapses and the card just looks flat. */
+.card-curve {
     position: absolute;
-    left: 0;
-    top: 0;
-    transform-origin: 0 0;
+    inset: 3px;
+    perspective: 680px;
+    transform-style: preserve-3d;
     display: none;
-    overflow: hidden;
-    border-radius: 13px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    z-index: 5;
 }
 
-.s2-hero img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+.card.is-curved .card-curve { display: block; }
+.card.is-curved .card-content { opacity: 0; }
 
-.s2-hero-info {
+.curve-slice {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 16px 18px;
-    background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
+    top: 0;
+    height: 100%;
+    background-repeat: no-repeat;
+    backface-visibility: hidden;
+    transform-origin: center center;
 }
-
-.s2-hero-title { font-size: 1.05rem; font-weight: 800; color: #fff; }
-.s2-hero-artist { font-size: 0.74rem; color: rgba(255,255,255,0.72); }
-
-body.body-dynamic.spot-cardfront .s2-hero { display: block; }
 
 /* Master on/off for the spotlight (and its stage darkening) */
 body.spot-off .stage-spotlight { opacity: 0 !important; }
-body.spot-off .s2-hero { display: none !important; }
 body.body-dynamic.spot-off .vignette-overlay { opacity: 0 !important; }
 
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
