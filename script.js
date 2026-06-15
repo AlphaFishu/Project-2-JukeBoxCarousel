@@ -1195,7 +1195,7 @@ function laneDirection(laneDist) {
 }
 
 // Defaults for newer calibration keys not present in older presets/saved state
-const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0 };
+const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0, cardBend: 0 };
 
 // Live calibration state (persisted in localStorage, edited via the panel)
 let shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[0] };
@@ -1244,6 +1244,7 @@ const calibPages = {
         { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
         { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
         { slider: 'laneBend', label: 'Lane curve', min: 0, max: 100, step: 1 },
+        { slider: 'cardBend', label: 'Card bend', min: -25, max: 25, step: 0.5 },
         { divider: 'Vignette' },
         { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
         { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
@@ -1432,6 +1433,17 @@ if (calib2ToggleBtn) {
     });
 }
 
+// Flipper calibrate gear → edits the Flipper preset's calib live
+const flipperCalibToggleBtn = document.getElementById('flipperCalibToggle');
+if (flipperCalibToggleBtn) {
+    flipperCalibToggleBtn.addEventListener('click', () => {
+        calibTarget = shuffle2Presets[3].calib; // Flipper
+        syncCalibPanel();
+        document.body.classList.toggle('calib-open');
+        flipperCalibToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
+    });
+}
+
 const calibJsonEl = document.getElementById('calibJson');
 const calibPrintBtn = document.getElementById('calibPrint');
 const calibApplyBtn = document.getElementById('calibApply');
@@ -1510,6 +1522,10 @@ function stopS2Lyrics() {
 
 const s2RigEl = document.getElementById('s2Rig');
 const s2OverlayEl = document.getElementById('shuffle2Overlay');
+const s2HeroEl = document.getElementById('s2Hero');
+const s2HeroImg = s2HeroEl ? s2HeroEl.querySelector('img') : null;
+const s2HeroTitle = document.getElementById('s2HeroTitle');
+const s2HeroArtist = document.getElementById('s2HeroArtist');
 
 // Panels live in a mirror of the real 3D rig: the overlay shares the scene's
 // perspective, the rig carries the exact camera transform, and each panel gets
@@ -1530,6 +1546,15 @@ function applyShuffle2Layout() {
     const gap = 16; // tight to the card — no long-distance drift
     const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
+
+    // Hero clone of the main card (Spotlight "card in front of beam" mode): a
+    // crisp copy on the same plate, sized to the scaled card, drawn above the beam
+    if (s2HeroEl) {
+        const hw = 224 * s, hh = (p.square ? 224 : 320) * s;
+        s2HeroEl.style.width = hw + 'px';
+        s2HeroEl.style.height = hh + 'px';
+        s2HeroEl.style.transform = `${plate} translateX(${-hw / 2}px) translateY(${-hh / 2}px)`;
+    }
 
     [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
         if (!el) return;
@@ -1613,7 +1638,7 @@ if (creditsBtn && creditsModal) {
 // Spotlight calibration — every aspect of the followspot, generous ranges.
 // Each control writes a CSS var the .stage-spotlight reads live.
 // ============================================================================
-const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0 };
+const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0, on: 1 };
 // [key, label, min, max, step, cssVar, unit]
 const spotSchema = [
     ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
@@ -1644,8 +1669,9 @@ function applySpotVars() {
     spotSchema.forEach(([key, , , , , cssVar, unit]) => {
         root.setProperty(cssVar, spotCalib[key] + unit);
     });
-    // Card-vs-light layering: card in front of the beam (beam as backdrop) or behind it
+    // Card-vs-light layering + master on/off
     document.body.classList.toggle('spot-cardfront', !!spotCalib.cardFront);
+    document.body.classList.toggle('spot-off', !spotCalib.on);
     try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
 }
 applySpotVars();
@@ -1670,21 +1696,23 @@ if (spotRowsEl) {
         spotRowsEl.appendChild(row);
     });
 
-    // Card-in-front-of-beam toggle
-    const chkRow = document.createElement('label');
-    chkRow.className = 'calib-check';
-    chkRow.innerHTML = `<input type="checkbox" id="spotCardFront"><span>Card in front of beam</span>`;
-    const chk = chkRow.querySelector('input');
-    chk.checked = !!spotCalib.cardFront;
-    chk.addEventListener('change', () => { spotCalib.cardFront = chk.checked ? 1 : 0; applySpotVars(); });
-    spotInputs.cardFront = { check: chk };
-    spotRowsEl.appendChild(chkRow);
+    // Boolean toggles: master on/off + card-in-front-of-beam
+    [['on', 'Spotlight on'], ['cardFront', 'Card in front of beam']].forEach(([key, label]) => {
+        const chkRow = document.createElement('label');
+        chkRow.className = 'calib-check';
+        chkRow.innerHTML = `<input type="checkbox"><span>${label}</span>`;
+        const chk = chkRow.querySelector('input');
+        chk.checked = !!spotCalib[key];
+        chk.addEventListener('change', () => { spotCalib[key] = chk.checked ? 1 : 0; applySpotVars(); });
+        spotInputs[key] = { check: chk };
+        spotRowsEl.appendChild(chkRow);
+    });
 }
 function syncSpotPanel() {
     spotSchema.forEach(([key]) => {
         if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
     });
-    if (spotInputs.cardFront) spotInputs.cardFront.check.checked = !!spotCalib.cardFront;
+    ['on', 'cardFront'].forEach(k => { if (spotInputs[k] && spotInputs[k].check) spotInputs[k].check.checked = !!spotCalib[k]; });
 }
 
 const spotToggleBtn = document.getElementById('spotCalibToggle');
@@ -1786,6 +1814,11 @@ function updateShuffle2Overlay(index) {
     const key = currentMode + ':' + index;
     if (key === lastS2Render) return;
     lastS2Render = key;
+
+    // Hero clone artwork (used by Spotlight "card in front of beam")
+    if (s2HeroImg) s2HeroImg.src = track.cover;
+    if (s2HeroTitle) s2HeroTitle.textContent = track.title;
+    if (s2HeroArtist) s2HeroArtist.textContent = track.artist;
 
     if (p.ui && p.ui.songs && s2SongsEl) {
         s2SongsEl.innerHTML = track.songs.map((song, i) => `
@@ -2796,7 +2829,13 @@ function updateCarousel() {
                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
                 : '';
             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
+            // Card bend: rotate each NON-main card progressively by its position
+            // along the lane, so the whole reel curls like a drum/circle. Faded by
+            // capture t so the captured main card stays flat.
+            const cardBendStr = (c.cardBend && !isActive)
+                ? ` rotateX(${(c.cardBend * (local - laneLen / 2) * t).toFixed(2)}deg)`
+                : '';
+            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${cardBendStr}${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
 

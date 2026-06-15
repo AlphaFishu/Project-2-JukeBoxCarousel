@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=47">
+    <link rel="stylesheet" href="style.css?v=49">
 </head>
 
 <body>
@@ -80,6 +80,7 @@
 
     <div class="shuffle2-overlay" id="shuffle2Overlay" aria-hidden="true">
         <div class="s2-rig" id="s2Rig">
+            <div class="s2-hero" id="s2Hero"><img alt=""><div class="s2-hero-info"><div class="s2-hero-title" id="s2HeroTitle"></div><div class="s2-hero-artist" id="s2HeroArtist"></div></div></div>
             <div class="s2-panel s2-songs" id="s2Songs"></div>
             <div class="s2-panel s2-lyrics" id="s2Lyrics"></div>
         </div>
@@ -99,6 +100,20 @@
                 <button id="spotReset">Reset</button>
                 <button id="spotPrint">Print values</button>
                 <button id="spotApply">Apply JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flipper calibration (Flipper mode only) -->
+    <button class="flipper-calib-toggle" id="flipperCalibToggle">&#9881; Calibrate</button>
+    <div class="calib-panel" id="calibPanel">
+        <div class="calib-title">Flipper Calibration</div>
+        <div class="calib-rows" id="calibRows"></div>
+        <div class="calib-io">
+            <textarea id="calibJson" rows="3" spellcheck="false" placeholder="Calibration JSON appears here..."></textarea>
+            <div class="calib-io-btns">
+                <button id="calibPrint">Print values</button>
+                <button id="calibApply">Apply JSON</button>
             </div>
         </div>
     </div>
@@ -157,7 +172,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=47"></script>
+    <script src="script.js?v=49"></script>
 </body>
 
 </html>
