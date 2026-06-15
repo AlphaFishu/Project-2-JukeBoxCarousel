@@ -1247,7 +1247,7 @@ const calibPages = {
         { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
         { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
         { slider: 'laneBend', label: 'Lane curve', min: 0, max: 100, step: 1 },
-        { slider: 'cardBend', label: 'Card bend', min: -25, max: 25, step: 0.5 },
+        { slider: 'cardBend', label: 'Card bend', min: -60, max: 60, step: 0.5 },
         { divider: 'Vignette' },
         { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
         { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
@@ -1479,14 +1479,14 @@ if (calibApplyBtn && calibJsonEl) {
 const shuffle2Presets = [
     {
         name: 'Spotlight',
-        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -83, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
+        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -126, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
         // Song list right, anchored at the main card's top; lyrics at its bottom-left
         ui: { songs: { anchor: 'right-top', w: 330 }, lyrics: { anchor: 'left-bottom', w: 380 } }
     },
     {
         name: 'Elevated',
         square: true, // 1:1 card, less rounded (Elevated only)
-        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
+        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -193, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics.
         // dy pulls it up to sit flush at the card top (offset from the 50° tilt).
         ui: { songs: { anchor: 'left-top', w: 260, dy: -28 } }
@@ -1498,7 +1498,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flipper',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 86, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75, "cardBend": 15 },
         ui: {}
     }
 ];
@@ -1587,7 +1587,7 @@ function applyShuffle2Layout() {
     const cardCenterY = p.square ? 112 : 160; // square presets are 224 tall
     const halfH = cardCenterY * s;
     const gap = 16; // tight to the card — no long-distance drift
-    const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
+    const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY * s + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
 
     // Hero clone of the main card (Spotlight "card in front of beam" mode): a
@@ -2788,6 +2788,19 @@ function updateCarousel() {
         const c = cardPreset ? cardPreset.calib : shuffleCalib;
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
+
+        // Spotlight tracks the active card horizontally and vertically to remain aligned
+        const spotEl = carousel.querySelector('.stage-spotlight');
+        if (spotEl) {
+            if (currentMode === 'dynamic') {
+                const sx = spotCalib.x || 0;
+                const sz = spotCalib.z ?? 80;
+                const slant = spotCalib.slant || 4;
+                spotEl.style.transform = `translate3d(calc(-50% + ${c.lockX}px + ${sx}px), calc(-50% + ${c.lockY}px), ${sz}px) rotate(${slant}deg)`;
+            } else {
+                spotEl.style.transform = '';
+            }
+        }
 
         // Live scroll speed drives the optional sub-lane motion blur
         const shuffleSpeed = Math.abs(targetRotation - currentRotation);

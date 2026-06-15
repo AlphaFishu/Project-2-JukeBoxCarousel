@@ -1648,8 +1648,8 @@ body.body-helix .card {
 /* Elevated: 1:1 square card with a tighter corner radius (this mode only) */
 body.body-elevated .card,
 body.body-elevated .card-content {
-    height: 224px;
-    border-radius: 7px;
+    height: 224px !important;
+    border-radius: 7px !important;
 }
 body.body-elevated .card-content { inset: 3px; }
 
