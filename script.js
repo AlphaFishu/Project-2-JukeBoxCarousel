@@ -1530,8 +1530,8 @@ const s2HeroImg = s2HeroEl ? s2HeroEl.querySelector('img') : null;
 const s2HeroTitle = document.getElementById('s2HeroTitle');
 const s2HeroArtist = document.getElementById('s2HeroArtist');
 
-// Real card curvature: slice the cover into vertical strips on a cylinder so the
-// card surface genuinely bends (like a flexed plate), not a flat tilt. Built
+// Real card curvature: slice the cover into horizontal strips on a cylinder so the
+// card surface genuinely bends vertically (like a barrel stave), not a flat tilt. Built
 // once per card per bend value and cached; the captured main card stays flat.
 function ensureCardCurve(card, cover, bendDeg, square) {
     if (!bendDeg) {
@@ -1547,21 +1547,24 @@ function ensureCardCurve(card, cover, bendDeg, square) {
     card._curveCover = cover;
     let cw = card.querySelector('.card-curve');
     if (!cw) { cw = document.createElement('div'); cw.className = 'card-curve'; card.appendChild(cw); }
-    const N = 10;
+    const N = 12; // 12 slices for a smoother vertical bend
     const W = 218, H = square ? 218 : 314; // card-content box (card minus 3px inset)
-    const sliceW = W / N;
+    const sliceH = H / N;
     const dDeg = bendDeg / N;
-    const dRad = Math.abs(dDeg) * Math.PI / 180;
-    const R = dRad > 0.0002 ? (sliceW / 2) / Math.tan(dRad / 2) : 1e6;
+    const absDDeg = Math.abs(dDeg);
+    const dRad = absDDeg * Math.PI / 180;
+    const R = dRad > 0.0002 ? (sliceH / 2) / Math.tan(dRad / 2) : 1e6;
+    const sign = Math.sign(bendDeg);
     let html = '';
     for (let i = 0; i < N; i++) {
-        const th = (i - (N - 1) / 2) * dDeg;
-        const thR = th * Math.PI / 180;
-        const x = R * Math.sin(thR);
-        const z = R * Math.cos(thR) - R; // center forward, edges recede (convex flex)
-        html += `<div class="curve-slice" style="width:${(sliceW + 0.6).toFixed(2)}px;margin-left:${-sliceW / 2}px;left:50%;` +
-            `background-image:url('${cover}');background-size:${W}px ${H}px;background-position:${(-i * sliceW).toFixed(2)}px 0;` +
-            `transform:translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${th.toFixed(2)}deg)"></div>`;
+        const phi = (i - (N - 1) / 2) * absDDeg;
+        const phiR = phi * Math.PI / 180;
+        const y = R * Math.sin(phiR);
+        const z = (R * Math.cos(phiR) - R) * sign; // center forward, top/bottom recede
+        const rotX = -phi * sign;
+        html += `<div class="curve-slice" style="width:100%;left:0;height:${(sliceH + 0.6).toFixed(2)}px;margin-top:${-sliceH / 2}px;top:50%;` +
+            `background-image:url('${cover}');background-size:${W}px ${H}px;background-position:0 ${(-i * sliceH).toFixed(2)}px;` +
+            `transform:translateY(${y.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateX(${rotX.toFixed(2)}deg)"></div>`;
     }
     cw.innerHTML = html;
     card.classList.add('is-curved');
@@ -1678,11 +1681,12 @@ if (creditsBtn && creditsModal) {
 // Spotlight calibration — every aspect of the followspot, generous ranges.
 // Each control writes a CSS var the .stage-spotlight reads live.
 // ============================================================================
-const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0, on: 1 };
+const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0, on: 1, z: 80, useAlbumColor: 1 };
 // [key, label, min, max, step, cssVar, unit]
 const spotSchema = [
     ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
     ['x',        'Beam X',      -1000, 1000, 5, '--spot-x', 'px'],
+    ['z',        'Beam Z (Depth)', -300, 300, 5, '--spot-z', 'px'],
     ['width',    'Beam width',      4, 200, 1, '--spot-width', 'vw'],
     ['height',   'Beam length',    20, 260, 1, '--spot-height', 'vh'],
     ['slant',    'Slant',         -90,  90, 1, '--spot-slant', 'deg'],
@@ -1709,6 +1713,12 @@ function applySpotVars() {
     spotSchema.forEach(([key, , , , , cssVar, unit]) => {
         root.setProperty(cssVar, spotCalib[key] + unit);
     });
+    // Spotlight color tint: active album accent color vs default white
+    if (spotCalib.useAlbumColor) {
+        root.setProperty('--spot-tint-rgb', 'var(--accent-rgb)');
+    } else {
+        root.setProperty('--spot-tint-rgb', '255, 255, 255');
+    }
     // Master on/off (the beam always sits behind the cards now — no layering toggle)
     document.body.classList.toggle('spot-off', !spotCalib.on);
     try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
@@ -1744,12 +1754,23 @@ if (spotRowsEl) {
     chk.addEventListener('change', () => { spotCalib.on = chk.checked ? 1 : 0; applySpotVars(); });
     spotInputs.on = { check: chk };
     spotRowsEl.appendChild(chkRow);
+
+    // Album color toggle
+    const chkRow2 = document.createElement('label');
+    chkRow2.className = 'calib-check';
+    chkRow2.innerHTML = `<input type="checkbox"><span>Use album color</span>`;
+    const chk2 = chkRow2.querySelector('input');
+    chk2.checked = !!spotCalib.useAlbumColor;
+    chk2.addEventListener('change', () => { spotCalib.useAlbumColor = chk2.checked ? 1 : 0; applySpotVars(); });
+    spotInputs.useAlbumColor = { check: chk2 };
+    spotRowsEl.appendChild(chkRow2);
 }
 function syncSpotPanel() {
     spotSchema.forEach(([key]) => {
         if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
     });
     if (spotInputs.on && spotInputs.on.check) spotInputs.on.check.checked = !!spotCalib.on;
+    if (spotInputs.useAlbumColor && spotInputs.useAlbumColor.check) spotInputs.useAlbumColor.check.checked = !!spotCalib.useAlbumColor;
 }
 
 const spotToggleBtn = document.getElementById('spotCalibToggle');
@@ -2868,8 +2889,9 @@ function updateCarousel() {
                 : '';
             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
             // Card bend = REAL surface curvature (sliced cylinder), non-main cards
-            // only; the captured main card stays flat.
-            if (cardPreset) ensureCardCurve(card, tracks[index].cover, isActive ? 0 : c.cardBend, cardPreset.square);
+            // only; the captured main card stays flat. Curvature is only applied in Flipper mode.
+            const bendVal = (currentMode === 'flipper' && !isActive) ? c.cardBend : 0;
+            if (cardPreset) ensureCardCurve(card, tracks[index].cover, bendVal, cardPreset.square);
             card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;

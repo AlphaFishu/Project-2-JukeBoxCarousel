@@ -177,14 +177,14 @@ body.body-helix .backdrop-marquee {
 /* All aspects are driven by CSS vars so the Spotlight calibration panel can
    tune them live (defaults below match the tuned natural look). */
 .stage-spotlight {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: 50%;
     left: 50%;
-    transform: translateX(calc(-50% + var(--spot-x, 0px))) rotate(var(--spot-slant, 4deg));
+    transform: translate3d(calc(-50% + var(--spot-x, 0px)), -50%, var(--spot-z, 80px)) rotate(var(--spot-slant, 4deg));
     transform-origin: 50% -20%;
     width: var(--spot-width, 64vw);
     height: var(--spot-height, 132vh);
-    z-index: 1; /* BEHIND the cards (z2) — the card always reads in front of the light */
+    z-index: 30; /* Between active card (z40) and sub lane cards (z<=25) */
     pointer-events: none;
     opacity: 0;
     mix-blend-mode: screen;
@@ -208,7 +208,7 @@ body.body-helix .backdrop-marquee {
         radial-gradient(20% 84% at 50% 0%,
             rgba(255, 255, 255, var(--spot-beam-alpha, 0.30)) 0%,
             rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.4)) 42%,
-            rgba(var(--accent-rgb), var(--spot-tint, 0.06)) 62%,
+            rgba(var(--spot-tint-rgb, var(--accent-rgb)), var(--spot-tint, 0.06)) 62%,
             rgba(255, 255, 255, 0) 82%);
     filter: blur(var(--spot-blur, 18px));
 }
@@ -225,7 +225,7 @@ body.body-helix .backdrop-marquee {
     border-radius: 50%;
     background: radial-gradient(50% 50% at 50% 50%,
         rgba(255, 255, 255, var(--spot-pool-alpha, 0.24)) 0%,
-        rgba(var(--accent-rgb), calc(var(--spot-tint, 0.06) * 1.6)) 46%,
+        rgba(var(--spot-tint-rgb, var(--accent-rgb)), calc(var(--spot-tint, 0.06) * 1.6)) 46%,
         rgba(255, 255, 255, 0) 76%);
     filter: blur(22px);
 }
@@ -255,8 +255,6 @@ body.body-dynamic .stage-spotlight {
 
 .curve-slice {
     position: absolute;
-    top: 0;
-    height: 100%;
     background-repeat: no-repeat;
     backface-visibility: hidden;
     transform-origin: center center;
@@ -786,6 +784,7 @@ body.has-scrolled .title-overlay {
     background-color: transparent;
     border-radius: 13px;
     box-sizing: border-box;
+    transform-style: preserve-3d;
 
     /* Transition transform/opacity by default (for cylinder snapping and clean pop-ups) */
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
