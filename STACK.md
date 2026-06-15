@@ -1,4 +1,4 @@
-# Jukebox Effects — Technical Stack (v3.0)
+# Jukebox Effects — Technical Stack (v3.1)
 
 Single-page, dependency-free web app. Vanilla **HTML + CSS + JS**, no build step, no
 framework, no `node_modules`. Deploys as static files (Vercel: import repo, no build
@@ -50,15 +50,17 @@ Modes 4–6 share one engine: **`shuffle2Presets[]`** (index 0 Spotlight, 1 Elev
   not spacing), snap (scroll magnet), motionBlur(+Amt), laneBend, cardBend, vignette(+Sides+Reach).
 - **Lane curve** (`laneBend`, 0–100): bends the lane *path* into a drum arc.
 - **Card bend** (`cardBend`): genuine per-card surface curvature — `ensureCardCurve()`
-  slices the cover into 10 vertical strips placed on a cylinder; the slice container has a
-  **local `perspective`** (without it the strips collapse and look flat). Main card stays
-  flat. Curves are cleared on mode switch.
+  slices the cover into 12 horizontal strips placed on a cylinder to bend along the card's
+  height (barrel stave style); the slice container has a local `perspective` (without it the
+  strips collapse and look flat). Main card stays flat. Curves are cleared on mode switch.
+  Curving is restricted to Flipper mode only.
 
 ## Spotlight (mode `dynamic`)
 - `.stage-spotlight` (+`::before` source flare, `::after` landing pool): a single natural
   sun shaft (soft radial bloom, slight slant) — NOT conic stripes. `mix-blend-mode: screen`.
-- **`z-index: 1`** → sits *behind* the cards, so the album always reads in front of the
-  light (light = backdrop highlight). Darkened wing vignette via `body.body-dynamic .vignette-overlay`.
+- **3D Depth Sorting**: Nested inside the 3D `.carousel` container with a `z-index: 30` and dynamic
+  `--spot-z` variable, so it naturally sits behind the active card (z40) but in front of background
+  sublanes (z<=25). Darkened wing vignette via `body.body-dynamic .vignette-overlay`.
 - Fully **CSS-var driven** (`--spot-*`) so the calibration panel tunes it live.
 - **Calibration panel** (`✦ Light`, Spotlight only): 15 sliders (generous ranges) + a
   "Spotlight on" master toggle + Reset + Print/Apply JSON; persisted to `localStorage`
