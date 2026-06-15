@@ -1613,7 +1613,7 @@ if (creditsBtn && creditsModal) {
 // Spotlight calibration — every aspect of the followspot, generous ranges.
 // Each control writes a CSS var the .stage-spotlight reads live.
 // ============================================================================
-const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1 };
+const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0 };
 // [key, label, min, max, step, cssVar, unit]
 const spotSchema = [
     ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
@@ -1644,6 +1644,8 @@ function applySpotVars() {
     spotSchema.forEach(([key, , , , , cssVar, unit]) => {
         root.setProperty(cssVar, spotCalib[key] + unit);
     });
+    // Card-vs-light layering: card in front of the beam (beam as backdrop) or behind it
+    document.body.classList.toggle('spot-cardfront', !!spotCalib.cardFront);
     try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
 }
 applySpotVars();
@@ -1667,11 +1669,22 @@ if (spotRowsEl) {
         spotInputs[key] = { input, out };
         spotRowsEl.appendChild(row);
     });
+
+    // Card-in-front-of-beam toggle
+    const chkRow = document.createElement('label');
+    chkRow.className = 'calib-check';
+    chkRow.innerHTML = `<input type="checkbox" id="spotCardFront"><span>Card in front of beam</span>`;
+    const chk = chkRow.querySelector('input');
+    chk.checked = !!spotCalib.cardFront;
+    chk.addEventListener('change', () => { spotCalib.cardFront = chk.checked ? 1 : 0; applySpotVars(); });
+    spotInputs.cardFront = { check: chk };
+    spotRowsEl.appendChild(chkRow);
 }
 function syncSpotPanel() {
     spotSchema.forEach(([key]) => {
         if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
     });
+    if (spotInputs.cardFront) spotInputs.cardFront.check.checked = !!spotCalib.cardFront;
 }
 
 const spotToggleBtn = document.getElementById('spotCalibToggle');
@@ -1679,6 +1692,14 @@ if (spotToggleBtn) {
     spotToggleBtn.addEventListener('click', () => {
         document.body.classList.toggle('spot-open');
         spotToggleBtn.classList.toggle('active', document.body.classList.contains('spot-open'));
+    });
+}
+const spotResetBtn = document.getElementById('spotReset');
+if (spotResetBtn) {
+    spotResetBtn.addEventListener('click', () => {
+        spotCalib = { ...SPOT_DEFAULTS };
+        syncSpotPanel();
+        applySpotVars();
     });
 }
 const spotJsonEl = document.getElementById('spotJson');

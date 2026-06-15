@@ -234,6 +234,13 @@ body.body-dynamic .stage-spotlight {
     opacity: var(--spot-opacity, 1);
 }
 
+/* Card-vs-light layering toggle: default the beam sits in FRONT of the cards
+   (the ray falls over the album). With .spot-cardfront the beam drops behind
+   the whole stage, becoming a glowing backdrop the crisp card sits in front of. */
+body.spot-cardfront .stage-spotlight {
+    z-index: 1;
+}
+
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
    beam and the lit card stand out against the darkened wings (var-tunable) */
 body.body-dynamic .vignette-overlay {
