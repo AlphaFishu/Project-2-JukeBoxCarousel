@@ -1004,12 +1004,6 @@ const tracks = [
 const carousel = document.getElementById('carousel');
 const totalCards = tracks.length;
 
-// Cached DOM references to prevent layout thrashing and lag
-let cachedCards = [];
-let stageSpotlight = null;
-let themeColorMeta = null;
-let coverflowBgGradient = null;
-
 // Layout State
 let currentMode = 'dynamic';
 document.body.classList.add('body-dynamic', 'body-card2');
@@ -1092,18 +1086,6 @@ tracks.forEach((track, index) => {
     carousel.appendChild(card);
 });
 
-// Initialize cached DOM elements to prevent layout thrashing and lag
-cachedCards = Array.from(carousel.querySelectorAll('.card'));
-cachedCards.forEach(card => {
-    card._fogOverlay = card.querySelector('.fog-overlay');
-    card._vinylWrapper = card.querySelector('.vinyl-wrapper');
-    card._titleEl = card.querySelector('.title');
-    card._artistEl = card.querySelector('.artist');
-});
-stageSpotlight = document.querySelector('.stage-spotlight');
-themeColorMeta = document.getElementById('themeColorMeta');
-coverflowBgGradient = document.getElementById('coverflowBgGradient');
-
 // 1.5 Mode Switcher Event Listeners & Sliding Pill Animations
 const modeButtons = document.querySelectorAll('.mode-btn');
 
@@ -1147,9 +1129,6 @@ modeButtons.forEach(btn => {
 
         // Remove previous body mode classes
         document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-dynamic', 'body-elevated', 'body-flipper', 'body-card2');
-
-        // Clear any curved cards from the previous mode
-        document.querySelectorAll('.card.is-curved').forEach(cc => { cc.classList.remove('is-curved'); cc._curveBend = 0; });
 
         // Update mode state
         currentMode = btn.dataset.mode;
@@ -1216,7 +1195,7 @@ function laneDirection(laneDist) {
 }
 
 // Defaults for newer calibration keys not present in older presets/saved state
-const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0, cardBend: 0 };
+const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0 };
 
 // Live calibration state (persisted in localStorage, edited via the panel)
 let shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[0] };
@@ -1265,7 +1244,6 @@ const calibPages = {
         { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
         { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
         { slider: 'laneBend', label: 'Lane curve', min: 0, max: 100, step: 1 },
-        { slider: 'cardBend', label: 'Card bend', min: -60, max: 60, step: 0.5 },
         { divider: 'Vignette' },
         { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
         { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
@@ -1454,17 +1432,6 @@ if (calib2ToggleBtn) {
     });
 }
 
-// Flipper calibrate gear → edits the Flipper preset's calib live
-const flipperCalibToggleBtn = document.getElementById('flipperCalibToggle');
-if (flipperCalibToggleBtn) {
-    flipperCalibToggleBtn.addEventListener('click', () => {
-        calibTarget = shuffle2Presets[3].calib; // Flipper
-        syncCalibPanel();
-        document.body.classList.toggle('calib-open');
-        flipperCalibToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
-    });
-}
-
 const calibJsonEl = document.getElementById('calibJson');
 const calibPrintBtn = document.getElementById('calibPrint');
 const calibApplyBtn = document.getElementById('calibApply');
@@ -1497,7 +1464,7 @@ if (calibApplyBtn && calibJsonEl) {
 const shuffle2Presets = [
     {
         name: 'Spotlight',
-        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -126, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
+        calib: { "mainTiltX": -2, "mainTiltY": 9, "mainTiltZ": -18, "motionBlur": 0, "motionBlurAmt": 8, "laneBend": 0, "zoom": -100, "camX": -146, "camY": 0, "tiltX": 12, "tiltY": -17, "tiltZ": 19, "lanes": 7, "laneGap": 294, "mainPad": 52, "mainCardGap": 34, "subCardGap": 18, "mainScale": 1.21, "subScale": 1.09, "lockScale": 1.27, "lockX": 146, "lockY": -83, "subSpeed": 0.65, "snap": 0.74, "vignette": 1, "vignetteSides": 1.1, "vignetteReach": 25 },
         // Song list right, anchored at the main card's top; lyrics at its bottom-left
         ui: { songs: { anchor: 'right-top', w: 330 }, lyrics: { anchor: 'left-bottom', w: 380 } }
     },
@@ -1516,7 +1483,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flipper',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75, "cardBend": 15 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75 },
         ui: {}
     }
 ];
@@ -1543,50 +1510,6 @@ function stopS2Lyrics() {
 
 const s2RigEl = document.getElementById('s2Rig');
 const s2OverlayEl = document.getElementById('shuffle2Overlay');
-const s2HeroEl = document.getElementById('s2Hero');
-const s2HeroImg = s2HeroEl ? s2HeroEl.querySelector('img') : null;
-const s2HeroTitle = document.getElementById('s2HeroTitle');
-const s2HeroArtist = document.getElementById('s2HeroArtist');
-
-// Real card curvature: slice the cover into horizontal strips on a cylinder so the
-// card surface genuinely bends vertically (like a barrel stave), not a flat tilt. Built
-// once per card per bend value and cached; the captured main card stays flat.
-function ensureCardCurve(card, cover, bendDeg, square) {
-    if (!bendDeg) {
-        if (card.classList.contains('is-curved')) card.classList.remove('is-curved');
-        card._curveBend = 0;
-        return;
-    }
-    if (card._curveBend === bendDeg && card._curveCover === cover) {
-        card.classList.add('is-curved');
-        return;
-    }
-    card._curveBend = bendDeg;
-    card._curveCover = cover;
-    let cw = card.querySelector('.card-curve');
-    if (!cw) { cw = document.createElement('div'); cw.className = 'card-curve'; card.appendChild(cw); }
-    const N = 12; // 12 slices for a smoother vertical bend
-    const W = 218, H = square ? 218 : 314; // card-content box (card minus 3px inset)
-    const sliceH = H / N;
-    const dDeg = bendDeg / N;
-    const absDDeg = Math.abs(dDeg);
-    const dRad = absDDeg * Math.PI / 180;
-    const R = dRad > 0.0002 ? (sliceH / 2) / Math.tan(dRad / 2) : 1e6;
-    const sign = Math.sign(bendDeg);
-    let html = '';
-    for (let i = 0; i < N; i++) {
-        const phi = (i - (N - 1) / 2) * absDDeg;
-        const phiR = phi * Math.PI / 180;
-        const y = R * Math.sin(phiR);
-        const z = (R * Math.cos(phiR) - R) * sign; // center forward, top/bottom recede
-        const rotX = -phi * sign;
-        html += `<div class="curve-slice" style="width:100%;left:0;height:${(sliceH + 0.6).toFixed(2)}px;margin-top:${-sliceH / 2}px;top:50%;` +
-            `background-image:url('${cover}');background-size:${W}px ${H}px;background-position:0 ${(-i * sliceH).toFixed(2)}px;` +
-            `transform:translateY(${y.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateX(${rotX.toFixed(2)}deg)"></div>`;
-    }
-    cw.innerHTML = html;
-    card.classList.add('is-curved');
-}
 
 // Panels live in a mirror of the real 3D rig: the overlay shares the scene's
 // perspective, the rig carries the exact camera transform, and each panel gets
@@ -1607,15 +1530,6 @@ function applyShuffle2Layout() {
     const gap = 16; // tight to the card — no long-distance drift
     const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
-
-    // Hero clone of the main card (Spotlight "card in front of beam" mode): a
-    // crisp copy on the same plate, sized to the scaled card, drawn above the beam
-    if (s2HeroEl) {
-        const hw = 224 * s, hh = (p.square ? 224 : 320) * s;
-        s2HeroEl.style.width = hw + 'px';
-        s2HeroEl.style.height = hh + 'px';
-        s2HeroEl.style.transform = `${plate} translateX(${-hw / 2}px) translateY(${-hh / 2}px)`;
-    }
 
     [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
         if (!el) return;
@@ -1695,135 +1609,7 @@ if (creditsBtn && creditsModal) {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeC(); });
 }
 
-// ============================================================================
-// Spotlight calibration — every aspect of the followspot, generous ranges.
-// Each control writes a CSS var the .stage-spotlight reads live.
-// ============================================================================
-const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0, on: 1, z: 80, useAlbumColor: 1 };
-// [key, label, min, max, step, cssVar, unit]
-const spotSchema = [
-    ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
-    ['x',        'Beam X',      -1000, 1000, 5, '--spot-x', 'px'],
-    ['z',        'Beam Z (Depth)', -300, 300, 5, '--spot-z', 'px'],
-    ['width',    'Beam width',      4, 200, 1, '--spot-width', 'vw'],
-    ['height',   'Beam length',    20, 260, 1, '--spot-height', 'vh'],
-    ['slant',    'Slant',         -90,  90, 1, '--spot-slant', 'deg'],
-    ['srcAlpha', 'Source bright',   0,   3, 0.02, '--spot-source-alpha', ''],
-    ['srcSize',  'Source size',     1,  90, 1, '--spot-source-size', 'vw'],
-    ['beamAlpha','Beam bright',     0,   3, 0.02, '--spot-beam-alpha', ''],
-    ['blur',     'Softness',        0, 120, 1, '--spot-blur', 'px'],
-    ['tint',     'Accent tint',     0, 1.5, 0.01, '--spot-tint', ''],
-    ['poolAlpha','Pool bright',     0,   3, 0.02, '--spot-pool-alpha', ''],
-    ['poolW',    'Pool width',      2, 160, 1, '--spot-pool-w', 'vw'],
-    ['poolH',    'Pool height',     2, 140, 1, '--spot-pool-h', 'vh'],
-    ['poolY',    'Pool Y',        -40, 100, 1, '--spot-pool-y', '%'],
-    ['wing',     'Wing darkness',   0,   2, 0.02, '--spot-wing', '']
-];
 
-let spotCalib = { ...SPOT_DEFAULTS };
-try {
-    const sv = JSON.parse(localStorage.getItem('jukebox-spot-calib'));
-    if (sv && typeof sv.width === 'number') spotCalib = { ...spotCalib, ...sv };
-} catch (e) { /* fresh */ }
-
-function applySpotVars() {
-    const root = document.documentElement.style;
-    spotSchema.forEach(([key, , , , , cssVar, unit]) => {
-        root.setProperty(cssVar, spotCalib[key] + unit);
-    });
-    // Spotlight color tint: active album accent color vs default white
-    if (spotCalib.useAlbumColor) {
-        root.setProperty('--spot-tint-rgb', 'var(--accent-rgb)');
-    } else {
-        root.setProperty('--spot-tint-rgb', '255, 255, 255');
-    }
-    // Master on/off (the beam always sits behind the cards now — no layering toggle)
-    document.body.classList.toggle('spot-off', !spotCalib.on);
-    try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
-}
-applySpotVars();
-
-const spotRowsEl = document.getElementById('spotRows');
-const spotInputs = {};
-if (spotRowsEl) {
-    spotSchema.forEach(([key, label, min, max, step]) => {
-        const row = document.createElement('div');
-        row.className = 'calib-row';
-        row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
-        const input = row.querySelector('input');
-        const out = row.querySelector('output');
-        input.value = spotCalib[key];
-        out.textContent = spotCalib[key];
-        input.addEventListener('input', () => {
-            spotCalib[key] = parseFloat(input.value);
-            out.textContent = input.value;
-            applySpotVars();
-        });
-        spotInputs[key] = { input, out };
-        spotRowsEl.appendChild(row);
-    });
-
-    // Master on/off toggle (card is always in front of the beam now)
-    const chkRow = document.createElement('label');
-    chkRow.className = 'calib-check';
-    chkRow.innerHTML = `<input type="checkbox"><span>Spotlight on</span>`;
-    const chk = chkRow.querySelector('input');
-    chk.checked = !!spotCalib.on;
-    chk.addEventListener('change', () => { spotCalib.on = chk.checked ? 1 : 0; applySpotVars(); });
-    spotInputs.on = { check: chk };
-    spotRowsEl.appendChild(chkRow);
-
-    // Album color toggle
-    const chkRow2 = document.createElement('label');
-    chkRow2.className = 'calib-check';
-    chkRow2.innerHTML = `<input type="checkbox"><span>Use album color</span>`;
-    const chk2 = chkRow2.querySelector('input');
-    chk2.checked = !!spotCalib.useAlbumColor;
-    chk2.addEventListener('change', () => { spotCalib.useAlbumColor = chk2.checked ? 1 : 0; applySpotVars(); });
-    spotInputs.useAlbumColor = { check: chk2 };
-    spotRowsEl.appendChild(chkRow2);
-}
-function syncSpotPanel() {
-    spotSchema.forEach(([key]) => {
-        if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
-    });
-    if (spotInputs.on && spotInputs.on.check) spotInputs.on.check.checked = !!spotCalib.on;
-    if (spotInputs.useAlbumColor && spotInputs.useAlbumColor.check) spotInputs.useAlbumColor.check.checked = !!spotCalib.useAlbumColor;
-}
-
-const spotToggleBtn = document.getElementById('spotCalibToggle');
-if (spotToggleBtn) {
-    spotToggleBtn.addEventListener('click', () => {
-        document.body.classList.toggle('spot-open');
-        spotToggleBtn.classList.toggle('active', document.body.classList.contains('spot-open'));
-    });
-}
-const spotResetBtn = document.getElementById('spotReset');
-if (spotResetBtn) {
-    spotResetBtn.addEventListener('click', () => {
-        spotCalib = { ...SPOT_DEFAULTS };
-        syncSpotPanel();
-        applySpotVars();
-    });
-}
-const spotJsonEl = document.getElementById('spotJson');
-const spotPrintBtn = document.getElementById('spotPrint');
-const spotApplyBtn = document.getElementById('spotApply');
-if (spotPrintBtn && spotJsonEl) {
-    spotPrintBtn.addEventListener('click', () => {
-        const json = JSON.stringify(spotCalib);
-        spotJsonEl.value = json;
-        spotJsonEl.select();
-        if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
-        console.log('[Spotlight calibration]', json);
-    });
-}
-if (spotApplyBtn && spotJsonEl) {
-    spotApplyBtn.addEventListener('click', () => {
-        try { Object.assign(spotCalib, JSON.parse(spotJsonEl.value)); syncSpotPanel(); applySpotVars(); }
-        catch (e) { spotJsonEl.value = 'Invalid JSON: ' + e.message; }
-    });
-}
 
 const s2BgDd = document.getElementById('s2BgDd');
 const s2BgBtn = document.getElementById('s2BgBtn');
@@ -1890,11 +1676,6 @@ function updateShuffle2Overlay(index) {
     const key = currentMode + ':' + index;
     if (key === lastS2Render) return;
     lastS2Render = key;
-
-    // Hero clone artwork (used by Spotlight "card in front of beam")
-    if (s2HeroImg) s2HeroImg.src = track.cover;
-    if (s2HeroTitle) s2HeroTitle.textContent = track.title;
-    if (s2HeroArtist) s2HeroArtist.textContent = track.artist;
 
     if (p.ui && p.ui.songs && s2SongsEl) {
         s2SongsEl.innerHTML = track.songs.map((song, i) => `
@@ -2200,7 +1981,7 @@ function adjustSaturation(rgb, saturationFactor) {
 let currentGradLayer = 1;
 
 function updateThemeColor(colorStr) {
-    const meta = themeColorMeta;
+    const meta = document.getElementById('themeColorMeta');
     if (meta) {
         meta.setAttribute('content', colorStr);
     }
@@ -2226,7 +2007,7 @@ function applyInterpolatedCoverflowBackground(rgbColor) {
     const darkB = Math.max(18, Math.floor(b * 0.12));
     const darkBase = `rgb(${Math.round(darkR)}, ${Math.round(darkG)}, ${Math.round(darkB)})`;
     
-    const bgContainer = coverflowBgGradient;
+    const bgContainer = document.getElementById('coverflowBgGradient');
     if (bgContainer) {
         bgContainer.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
     }
@@ -2440,10 +2221,10 @@ function applyLoopingText(el) {
 }
 
 function updateActiveCardMarquees(activeIndex) {
-    const cards = cachedCards;
+    const cards = document.querySelectorAll('.card');
     cards.forEach((card, idx) => {
-        const titleEl = card._titleEl;
-        const artistEl = card._artistEl;
+        const titleEl = card.querySelector('.title');
+        const artistEl = card.querySelector('.artist');
 
         if (idx === activeIndex) {
             // Measure after this frame's layout settles
@@ -2517,7 +2298,7 @@ function updateCarousel() {
         updateNowPlaying(activeIndex);
     }
 
-    const cards = cachedCards;
+    const cards = document.querySelectorAll('.card');
 
     if (currentMode === 'cylinder') {
         // Rotate the entire carousel container around the center of the ring
@@ -2530,7 +2311,7 @@ function updateCarousel() {
                 distance = totalCards - distance;
             }
 
-            const fog = card._fogOverlay;
+            const fog = card.querySelector('.fog-overlay');
             card.style.visibility = 'visible';
 
             // Scaled all translateY/translateZ parameters to 80% to reverse engineer zoom proportion
@@ -2539,28 +2320,28 @@ function updateCarousel() {
                 updateAmbientBackground(card);
                 
                 card.style.opacity = '1';
-                card.style.setProperty('--card-filter', 'brightness(1) saturate(1.2)');
+                card.style.filter = 'brightness(1) saturate(1.2)';
                 if (fog) fog.style.opacity = '0';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 64}px) translateY(-40px) scale(1.30)`;
             } else if (distance === 1) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.setProperty('--card-filter', 'brightness(0.9) saturate(1.0)');
+                card.style.filter = 'brightness(0.9) saturate(1.0)';
                 if (fog) fog.style.opacity = '0.35';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 32}px) translateY(16px) rotateY(45deg) scale(1.15)`;
             } else if (distance === 2) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.setProperty('--card-filter', 'brightness(0.8) saturate(0.9)');
+                card.style.filter = 'brightness(0.8) saturate(0.9)';
                 if (fog) fog.style.opacity = '0.65';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 8}px) translateY(56px) rotateY(65deg) scale(1.05)`;
             } else if (distance === 3) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.setProperty('--card-filter', 'brightness(0.7) saturate(0.8)');
+                card.style.filter = 'brightness(0.7) saturate(0.8)';
                 if (fog) fog.style.opacity = '0.85';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
@@ -2569,7 +2350,6 @@ function updateCarousel() {
                 card.style.opacity = '0';
                 card.style.visibility = 'hidden';
                 if (fog) fog.style.opacity = '1';
-                card.style.setProperty('--card-filter', 'none');
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             }
 
@@ -2617,7 +2397,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card._fogOverlay;
+            const fog = card.querySelector('.fog-overlay');
             let rotateY = 0;
             let apparentX = 0; // Desired on-screen X; converted to translateX once Z is known
             let translateX = 0;
@@ -2673,7 +2453,7 @@ function updateCarousel() {
             }
 
             // Real-time proportional vinyl sliding animation linked directly to scroll progress
-            const vinylWrapper = card._vinylWrapper;
+            const vinylWrapper = card.querySelector('.vinyl-wrapper');
             if (vinylWrapper) {
                 let discX = 0;
                 if (absOffset < 1) {
@@ -2694,7 +2474,7 @@ function updateCarousel() {
 
             card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
             card.style.opacity = opacity;
-            card.style.setProperty('--card-filter', filter);
+            card.style.filter = filter;
             if (fog) fog.style.opacity = fogOpacity;
         });
 
@@ -2726,7 +2506,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card._fogOverlay;
+            const fog = card.querySelector('.fog-overlay');
             card.style.visibility = 'visible';
 
             // Active coloring update
@@ -2789,7 +2569,7 @@ function updateCarousel() {
 
             card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
             card.style.opacity = opacity;
-            card.style.setProperty('--card-filter', filter);
+            card.style.filter = filter;
             if (fog) fog.style.opacity = fogOpacity;
         });
 
@@ -2803,23 +2583,9 @@ function updateCarousel() {
         // Card 1 / Card 2: film reels on a tilted product-shot plane. Card 1 is
         // driven by the live calibration; Card 2 by its directed preset JSONs.
         // The highlighted card is captured and FROZEN at the plate while reels roll.
-        const cardPreset = isCard2(currentMode) ? shuffle2Presets[card2Idx()] : null;
-        const c = cardPreset ? cardPreset.calib : shuffleCalib;
+        const c = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
         carousel.style.transform =
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
-
-        // Spotlight tracks the active card horizontally and vertically to remain aligned
-        const spotEl = stageSpotlight;
-        if (spotEl) {
-            if (currentMode === 'dynamic') {
-                const sx = spotCalib.x || 0;
-                const sz = spotCalib.z ?? 80;
-                const slant = spotCalib.slant || 4;
-                spotEl.style.transform = `translate3d(calc(-50% + ${c.lockX}px + ${sx}px), calc(-50% + ${c.lockY}px), ${sz}px) rotate(${slant}deg)`;
-            } else {
-                spotEl.style.transform = '';
-            }
-        }
 
         // Live scroll speed drives the optional sub-lane motion blur
         const shuffleSpeed = Math.abs(targetRotation - currentRotation);
@@ -2902,7 +2668,7 @@ function updateCarousel() {
             const scale = lerp(c.lockScale, laneScale, t);
             const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
-            const fog = card._fogOverlay;
+            const fog = card.querySelector('.fog-overlay');
             if (Math.abs(y) > yLimit + 340) {
                 card.style.visibility = 'hidden';
                 card.style.opacity = 0;
@@ -2920,10 +2686,6 @@ function updateCarousel() {
                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
                 : '';
             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
-            // Card bend = REAL surface curvature (sliced cylinder), non-main cards
-            // only; the captured main card stays flat. Curvature is only applied in Flipper mode.
-            const bendVal = (currentMode === 'flipper' && !isActive) ? c.cardBend : 0;
-            if (cardPreset) ensureCardCurve(card, tracks[index].cover, bendVal, cardPreset.square);
             card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
@@ -2935,7 +2697,7 @@ function updateCarousel() {
                 const blurPx = Math.min(c.motionBlurAmt, shuffleSpeed * 0.06);
                 if (blurPx > 0.3) blurStr = ` blur(${blurPx.toFixed(1)}px)`;
             }
-            card.style.setProperty('--card-filter', `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`);
+            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
             card.style.zIndex = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
             if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
         });
@@ -2956,7 +2718,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card._fogOverlay;
+            const fog = card.querySelector('.fog-overlay');
 
             if (absOffset > 6.5) {
                 card.style.visibility = 'hidden';
@@ -2978,7 +2740,7 @@ function updateCarousel() {
                 `translateY(${offset * stepY - 30}px) scale(${scale})`;
 
             card.style.opacity = absOffset > 5.5 ? 1 - (absOffset - 5.5) : 1;
-            card.style.setProperty('--card-filter', `brightness(${Math.max(0.45, 1 - absOffset * 0.13)}) saturate(${isActive ? 1.15 : 0.9})`);
+            card.style.filter = `brightness(${Math.max(0.45, 1 - absOffset * 0.13)}) saturate(${isActive ? 1.15 : 0.9})`;
             card.style.zIndex = Math.round(20 - absOffset * 2);
             if (fog) fog.style.opacity = Math.min(0.6, absOffset * 0.11);
         });

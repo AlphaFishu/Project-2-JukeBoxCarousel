@@ -166,117 +166,14 @@ body.body-helix .backdrop-marquee {
     left: 3vw;
 }
 
-/* --- Spotlight mode: a single top-down opera-house followspot --- */
-/* Layered soft light: a wide cone from a point above the stage, a bright source
-   flare at the very top, and an elliptical pool that lands behind the card.
-   All screen-blended and blurred so there are no hard edges. */
-/* Hidden by default — ONLY shown in Spotlight mode (body-dynamic). The element
-   carries no animation here, so its opacity:0 actually holds in other modes.
-   A single natural sun shaft (like light through a cave mouth): soft-edged
-   beam, bright source, strong landing pool — no stripes. */
-/* All aspects are driven by CSS vars so the Spotlight calibration panel can
-   tune them live (defaults below match the tuned natural look). */
-.stage-spotlight {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate3d(calc(-50% + var(--spot-x, 0px)), -50%, var(--spot-z, 80px)) rotate(var(--spot-slant, 4deg));
-    transform-origin: 50% -20%;
-    width: var(--spot-width, 64vw);
-    height: var(--spot-height, 132vh);
-    z-index: 30; /* Between active card (z40) and sub lane cards (z<=25) */
-    pointer-events: none;
-    opacity: 0;
-    mix-blend-mode: screen;
-    overflow: hidden;
-    /* wide soft halo so the beam blooms into the dark instead of ending hard */
-    background: radial-gradient(42% 68% at 50% 2%,
-        rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.33)) 0%,
-        rgba(255, 255, 255, 0) 72%);
-}
-
-/* The shaft: a bright lamp source feathering down into a soft converging beam. */
-.stage-spotlight::before {
-    content: '';
-    position: absolute;
-    inset: -6% 0 0 0;
-    background:
-        radial-gradient(var(--spot-source-size, 14vw) calc(var(--spot-source-size, 14vw) * 0.78) at 50% 0%,
-            rgba(255, 255, 255, var(--spot-source-alpha, 0.85)) 0%,
-            rgba(255, 255, 255, calc(var(--spot-source-alpha, 0.85) * 0.35)) 50%,
-            rgba(255, 255, 255, 0) 76%),
-        radial-gradient(20% 84% at 50% 0%,
-            rgba(255, 255, 255, var(--spot-beam-alpha, 0.30)) 0%,
-            rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.4)) 42%,
-            rgba(var(--spot-tint-rgb, var(--accent-rgb)), var(--spot-tint, 0.06)) 62%,
-            rgba(255, 255, 255, 0) 82%);
-    filter: blur(var(--spot-blur, 18px));
-}
-
-/* The landing pool where the shaft meets the stage floor behind the card */
-.stage-spotlight::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: var(--spot-pool-y, 3%);
-    transform: translateX(-54%) rotate(-3deg);
-    width: var(--spot-pool-w, 42vw);
-    height: var(--spot-pool-h, 22vh);
-    border-radius: 50%;
-    background: radial-gradient(50% 50% at 50% 50%,
-        rgba(255, 255, 255, var(--spot-pool-alpha, 0.24)) 0%,
-        rgba(var(--spot-tint-rgb, var(--accent-rgb)), calc(var(--spot-tint, 0.06) * 1.6)) 46%,
-        rgba(255, 255, 255, 0) 76%);
-    filter: blur(22px);
-}
-
-body.body-dynamic .stage-spotlight {
-    opacity: var(--spot-opacity, 1);
-}
-
-.s2-hero { display: none !important; } /* retired */
-
-/* --- Curved card (Flipper "Card bend") — genuine cylinder bend ---
-   The cover is sliced into vertical strips arranged on an arc. A LOCAL
-   perspective on the container is essential: without it the strips' translateZ
-   collapses and the card just looks flat. */
-.card-curve {
-    position: absolute;
-    inset: 3px;
-    perspective: 680px;
-    transform-style: preserve-3d;
-    display: none;
-    pointer-events: none;
-    z-index: 5;
-}
-
-.card.is-curved .card-curve { display: block; }
-.card.is-curved .card-content { opacity: 0; }
-
-.curve-slice {
-    position: absolute;
-    background-repeat: no-repeat;
-    backface-visibility: hidden;
-    transform-origin: center center;
-}
-
-/* Master on/off for the spotlight (and its stage darkening) */
-body.spot-off .stage-spotlight { opacity: 0 !important; }
-body.body-dynamic.spot-off .vignette-overlay { opacity: 0 !important; }
-
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
-   beam and the lit card stand out against the darkened wings (var-tunable) */
+   active card stands out against the darkened wings */
 body.body-dynamic .vignette-overlay {
     background: radial-gradient(ellipse 44% 58% at 50% 44%,
         rgba(0, 0, 0, 0) 28%,
-        rgba(0, 0, 0, var(--spot-wing, 0.55)) 76%,
-        rgba(0, 0, 0, calc(var(--spot-wing, 0.55) + 0.2)) 100%) !important;
+        rgba(0, 0, 0, 0.55) 76%,
+        rgba(0, 0, 0, 0.75) 100%) !important;
     opacity: 1 !important;
-}
-
-@keyframes spot-breathe {
-    from { opacity: 0.9; }
-    to   { opacity: 1; }
 }
 
 /* --- Watermark --- */
@@ -784,7 +681,6 @@ body.has-scrolled .title-overlay {
     background-color: transparent;
     border-radius: 13px;
     box-sizing: border-box;
-    transform-style: preserve-3d;
 
     /* Transition transform/opacity by default (for cylinder snapping and clean pop-ups) */
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -819,14 +715,9 @@ body.has-scrolled .title-overlay {
     cursor: pointer;
 }
 
-/* Avoid flattening 3D context by applying filter to children instead of the card container */
-.card-content,
-.vinyl-wrapper,
-.curve-slice {
-    filter: var(--card-filter, none);
-}
+/* Subtle hover lift on the artwork itself (card transform is owned by JS) */
 .card:hover .card-content {
-    filter: var(--card-filter, none) brightness(1.08);
+    filter: brightness(1.08);
 }
 
 /* Drop shadow for standard (inactive) cards (increased by 30% from baseline) */
@@ -1151,45 +1042,9 @@ body.body-card2 .title-overlay {
     scrollbar-width: thin;
 }
 
-body.body-dynamic.spot-open .spot-panel {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
-}
-
-/* Calibration toggle FAB (bottom-left), shared styling for Spotlight & Flipper */
-.spot-calib-toggle,
-.flipper-calib-toggle {
-    position: fixed;
-    left: 24px;
-    bottom: 24px;
-    z-index: 9999;
-    display: none;
-    padding: 8px 14px;
-    border-radius: 10px;
-    background: rgba(19, 19, 26, 0.55);
-    backdrop-filter: blur(16px) saturate(1.4);
-    -webkit-backdrop-filter: blur(16px) saturate(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: rgba(255, 255, 255, 0.8);
-    font-family: inherit;
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: background 0.25s ease, color 0.25s ease;
-}
-
-.spot-calib-toggle:hover,
-.flipper-calib-toggle:hover { background: rgba(40, 40, 50, 0.85); color: #fff; }
-
-body.body-dynamic .spot-calib-toggle { display: block; }
-body.body-flipper .flipper-calib-toggle { display: block; }
 
 body.body-shuffle.calib-open .calib-panel,
-body.body-shuffle2.calib-open .calib-panel,
-body.body-flipper.calib-open .calib-panel {
+body.body-shuffle2.calib-open .calib-panel {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(0);
@@ -1653,8 +1508,8 @@ body.body-helix .card {
 /* Elevated: 1:1 square card with a tighter corner radius (this mode only) */
 body.body-elevated .card,
 body.body-elevated .card-content {
-    height: 224px !important;
-    border-radius: 7px !important;
+    height: 224px;
+    border-radius: 7px;
 }
 body.body-elevated .card-content { inset: 3px; }
 

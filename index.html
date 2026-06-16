@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=53">
+    <link rel="stylesheet" href="style.css?v=54">
 </head>
 
 <body>
@@ -34,8 +34,6 @@
         <div class="aurora-blob blob-2"></div>
         <div class="aurora-blob blob-3"></div>
     </div>
-
-
 
     <!-- Giant kinetic marquee: the artist's name projected behind the stage -->
     <div class="backdrop-marquee" id="backdropMarquee" aria-hidden="true">
@@ -79,7 +77,6 @@
 
     <div class="shuffle2-overlay" id="shuffle2Overlay" aria-hidden="true">
         <div class="s2-rig" id="s2Rig">
-            <div class="s2-hero" id="s2Hero"><img alt=""><div class="s2-hero-info"><div class="s2-hero-title" id="s2HeroTitle"></div><div class="s2-hero-artist" id="s2HeroArtist"></div></div></div>
             <div class="s2-panel s2-songs" id="s2Songs"></div>
             <div class="s2-panel s2-lyrics" id="s2Lyrics"></div>
         </div>
@@ -87,35 +84,6 @@
 
     <!-- Watermark -->
     <div class="watermark">Jukebox Effects<br><span>by Nino Ngamaharat</span></div>
-
-    <!-- Spotlight calibration (Spotlight mode only) -->
-    <button class="spot-calib-toggle" id="spotCalibToggle">&#10022; Light</button>
-    <div class="calib-panel spot-panel" id="spotPanel">
-        <div class="calib-title">Spotlight Calibration</div>
-        <div class="calib-rows" id="spotRows"></div>
-        <div class="calib-io">
-            <textarea id="spotJson" rows="3" spellcheck="false" placeholder="Spotlight JSON appears here..."></textarea>
-            <div class="calib-io-btns">
-                <button id="spotReset">Reset</button>
-                <button id="spotPrint">Print values</button>
-                <button id="spotApply">Apply JSON</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Flipper calibration (Flipper mode only) -->
-    <button class="flipper-calib-toggle" id="flipperCalibToggle">&#9881; Calibrate</button>
-    <div class="calib-panel" id="calibPanel">
-        <div class="calib-title">Flipper Calibration</div>
-        <div class="calib-rows" id="calibRows"></div>
-        <div class="calib-io">
-            <textarea id="calibJson" rows="3" spellcheck="false" placeholder="Calibration JSON appears here..."></textarea>
-            <div class="calib-io-btns">
-                <button id="calibPrint">Print values</button>
-                <button id="calibApply">Apply JSON</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Data source credits (bottom-right) + modal -->
     <button class="credits-btn" id="creditsBtn">Data Source &amp; Credits</button>
@@ -129,6 +97,7 @@
                 <li><strong>Lyrics</strong> — short placeholder verses written for this demo; not the original copyrighted lyrics.</li>
                 <li><strong>Fonts</strong> — Outfit &amp; Bebas Neue via Google Fonts (Open Font License).</li>
                 <li><strong>Music, artists &amp; album covers</strong> — © their respective artists and labels.</li>
+                <li><strong>Album colors</strong> — dynamically extracted via Canvas average-color checks (client-side).</li>
             </ul>
             <p class="credits-by">Jukebox Effects — design &amp; build by Nino Ngamaharat.</p>
         </div>
@@ -161,8 +130,6 @@
         <div class="scene">
             <!-- The 3D rotating carousel -->
             <div class="carousel" id="carousel">
-                <!-- Spotlight mode: a single top-down opera-house stage light between sublane and main card -->
-                <div class="stage-spotlight" aria-hidden="true"></div>
                 <!-- Cards will be injected by JavaScript -->
             </div>
         </div>
@@ -173,7 +140,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=53"></script>
+    <script src="script.js?v=54"></script>
 </body>
 
 </html>
