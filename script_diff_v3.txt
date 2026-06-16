@@ -1,0 +1,201 @@
+diff --git a/script.js b/script.js
+index dfae001..b8cca17 100644
+--- a/script.js
++++ b/script.js
+@@ -1130,6 +1130,9 @@ modeButtons.forEach(btn => {
+         // Remove previous body mode classes
+         document.body.classList.remove('body-cylinder', 'body-coverflow', 'body-depth', 'body-dynamic', 'body-elevated', 'body-flipper', 'body-card2');
+ 
++        // Clear any curved cards from the previous mode
++        document.querySelectorAll('.card.is-curved').forEach(cc => { cc.classList.remove('is-curved'); cc._curveBend = 0; });
++
+         // Update mode state
+         currentMode = btn.dataset.mode;
+         document.body.classList.add(`body-${currentMode}`);
+@@ -1195,7 +1198,7 @@ function laneDirection(laneDist) {
+ }
+ 
+ // Defaults for newer calibration keys not present in older presets/saved state
+-const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0 };
++const CALIB_EXTRA_DEFAULTS = { mainTiltX: 0, mainTiltY: 0, mainTiltZ: 0, motionBlur: 0, motionBlurAmt: 8, laneBend: 0, cardBend: 0 };
+ 
+ // Live calibration state (persisted in localStorage, edited via the panel)
+ let shuffleCalib = { ...CALIB_EXTRA_DEFAULTS, ...shufflePresets[0] };
+@@ -1244,6 +1247,7 @@ const calibPages = {
+         { slider: 'subSpeed', label: 'Sub lane speed', min: 0.2, max: 2, step: 0.05 },
+         { slider: 'snap',     label: 'Scroll snap', min: 0, max: 1, step: 0.02 },
+         { slider: 'laneBend', label: 'Lane curve', min: 0, max: 100, step: 1 },
++        { slider: 'cardBend', label: 'Card bend', min: -25, max: 25, step: 0.5 },
+         { divider: 'Vignette' },
+         { slider: 'vignette',      label: 'Vignette radial', min: 0, max: 2, step: 0.02 },
+         { slider: 'vignetteSides', label: 'Side strength', min: 0, max: 2, step: 0.02 },
+@@ -1432,6 +1436,17 @@ if (calib2ToggleBtn) {
+     });
+ }
+ 
++// Flipper calibrate gear → edits the Flipper preset's calib live
++const flipperCalibToggleBtn = document.getElementById('flipperCalibToggle');
++if (flipperCalibToggleBtn) {
++    flipperCalibToggleBtn.addEventListener('click', () => {
++        calibTarget = shuffle2Presets[3].calib; // Flipper
++        syncCalibPanel();
++        document.body.classList.toggle('calib-open');
++        flipperCalibToggleBtn.classList.toggle('active', document.body.classList.contains('calib-open'));
++    });
++}
++
+ const calibJsonEl = document.getElementById('calibJson');
+ const calibPrintBtn = document.getElementById('calibPrint');
+ const calibApplyBtn = document.getElementById('calibApply');
+@@ -1510,6 +1525,47 @@ function stopS2Lyrics() {
+ 
+ const s2RigEl = document.getElementById('s2Rig');
+ const s2OverlayEl = document.getElementById('shuffle2Overlay');
++const s2HeroEl = document.getElementById('s2Hero');
++const s2HeroImg = s2HeroEl ? s2HeroEl.querySelector('img') : null;
++const s2HeroTitle = document.getElementById('s2HeroTitle');
++const s2HeroArtist = document.getElementById('s2HeroArtist');
++
++// Real card curvature: slice the cover into vertical strips on a cylinder so the
++// card surface genuinely bends (like a flexed plate), not a flat tilt. Built
++// once per card per bend value and cached; the captured main card stays flat.
++function ensureCardCurve(card, cover, bendDeg, square) {
++    if (!bendDeg) {
++        if (card.classList.contains('is-curved')) card.classList.remove('is-curved');
++        card._curveBend = 0;
++        return;
++    }
++    if (card._curveBend === bendDeg && card._curveCover === cover) {
++        card.classList.add('is-curved');
++        return;
++    }
++    card._curveBend = bendDeg;
++    card._curveCover = cover;
++    let cw = card.querySelector('.card-curve');
++    if (!cw) { cw = document.createElement('div'); cw.className = 'card-curve'; card.appendChild(cw); }
++    const N = 10;
++    const W = 218, H = square ? 218 : 314; // card-content box (card minus 3px inset)
++    const sliceW = W / N;
++    const dDeg = bendDeg / N;
++    const dRad = Math.abs(dDeg) * Math.PI / 180;
++    const R = dRad > 0.0002 ? (sliceW / 2) / Math.tan(dRad / 2) : 1e6;
++    let html = '';
++    for (let i = 0; i < N; i++) {
++        const th = (i - (N - 1) / 2) * dDeg;
++        const thR = th * Math.PI / 180;
++        const x = R * Math.sin(thR);
++        const z = R * Math.cos(thR) - R; // center forward, edges recede (convex flex)
++        html += `<div class="curve-slice" style="width:${(sliceW + 0.6).toFixed(2)}px;margin-left:${-sliceW / 2}px;left:50%;` +
++            `background-image:url('${cover}');background-size:${W}px ${H}px;background-position:${(-i * sliceW).toFixed(2)}px 0;` +
++            `transform:translateX(${x.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${th.toFixed(2)}deg)"></div>`;
++    }
++    cw.innerHTML = html;
++    card.classList.add('is-curved');
++}
+ 
+ // Panels live in a mirror of the real 3D rig: the overlay shares the scene's
+ // perspective, the rig carries the exact camera transform, and each panel gets
+@@ -1531,6 +1587,15 @@ function applyShuffle2Layout() {
+     const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
+         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
+ 
++    // Hero clone of the main card (Spotlight "card in front of beam" mode): a
++    // crisp copy on the same plate, sized to the scaled card, drawn above the beam
++    if (s2HeroEl) {
++        const hw = 224 * s, hh = (p.square ? 224 : 320) * s;
++        s2HeroEl.style.width = hw + 'px';
++        s2HeroEl.style.height = hh + 'px';
++        s2HeroEl.style.transform = `${plate} translateX(${-hw / 2}px) translateY(${-hh / 2}px)`;
++    }
++
+     [['songs', s2SongsEl], ['lyrics', s2LyricsEl]].forEach(([key, el]) => {
+         if (!el) return;
+         const cfg = p.ui && p.ui[key];
+@@ -1613,7 +1678,7 @@ if (creditsBtn && creditsModal) {
+ // Spotlight calibration — every aspect of the followspot, generous ranges.
+ // Each control writes a CSS var the .stage-spotlight reads live.
+ // ============================================================================
+-const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1 };
++const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1, cardFront: 0, on: 1 };
+ // [key, label, min, max, step, cssVar, unit]
+ const spotSchema = [
+     ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
+@@ -1644,6 +1709,8 @@ function applySpotVars() {
+     spotSchema.forEach(([key, , , , , cssVar, unit]) => {
+         root.setProperty(cssVar, spotCalib[key] + unit);
+     });
++    // Master on/off (the beam always sits behind the cards now — no layering toggle)
++    document.body.classList.toggle('spot-off', !spotCalib.on);
+     try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
+ }
+ applySpotVars();
+@@ -1667,11 +1734,22 @@ if (spotRowsEl) {
+         spotInputs[key] = { input, out };
+         spotRowsEl.appendChild(row);
+     });
++
++    // Master on/off toggle (card is always in front of the beam now)
++    const chkRow = document.createElement('label');
++    chkRow.className = 'calib-check';
++    chkRow.innerHTML = `<input type="checkbox"><span>Spotlight on</span>`;
++    const chk = chkRow.querySelector('input');
++    chk.checked = !!spotCalib.on;
++    chk.addEventListener('change', () => { spotCalib.on = chk.checked ? 1 : 0; applySpotVars(); });
++    spotInputs.on = { check: chk };
++    spotRowsEl.appendChild(chkRow);
+ }
+ function syncSpotPanel() {
+     spotSchema.forEach(([key]) => {
+         if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
+     });
++    if (spotInputs.on && spotInputs.on.check) spotInputs.on.check.checked = !!spotCalib.on;
+ }
+ 
+ const spotToggleBtn = document.getElementById('spotCalibToggle');
+@@ -1681,6 +1759,14 @@ if (spotToggleBtn) {
+         spotToggleBtn.classList.toggle('active', document.body.classList.contains('spot-open'));
+     });
+ }
++const spotResetBtn = document.getElementById('spotReset');
++if (spotResetBtn) {
++    spotResetBtn.addEventListener('click', () => {
++        spotCalib = { ...SPOT_DEFAULTS };
++        syncSpotPanel();
++        applySpotVars();
++    });
++}
+ const spotJsonEl = document.getElementById('spotJson');
+ const spotPrintBtn = document.getElementById('spotPrint');
+ const spotApplyBtn = document.getElementById('spotApply');
+@@ -1766,6 +1852,11 @@ function updateShuffle2Overlay(index) {
+     if (key === lastS2Render) return;
+     lastS2Render = key;
+ 
++    // Hero clone artwork (used by Spotlight "card in front of beam")
++    if (s2HeroImg) s2HeroImg.src = track.cover;
++    if (s2HeroTitle) s2HeroTitle.textContent = track.title;
++    if (s2HeroArtist) s2HeroArtist.textContent = track.artist;
++
+     if (p.ui && p.ui.songs && s2SongsEl) {
+         s2SongsEl.innerHTML = track.songs.map((song, i) => `
+             <div class="s2-track">
+@@ -2672,7 +2763,8 @@ function updateCarousel() {
+         // Card 1 / Card 2: film reels on a tilted product-shot plane. Card 1 is
+         // driven by the live calibration; Card 2 by its directed preset JSONs.
+         // The highlighted card is captured and FROZEN at the plate while reels roll.
+-        const c = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
++        const cardPreset = isCard2(currentMode) ? shuffle2Presets[card2Idx()] : null;
++        const c = cardPreset ? cardPreset.calib : shuffleCalib;
+         carousel.style.transform =
+             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
+ 
+@@ -2775,6 +2867,9 @@ function updateCarousel() {
+                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
+                 : '';
+             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
++            // Card bend = REAL surface curvature (sliced cylinder), non-main cards
++            // only; the captured main card stays flat.
++            if (cardPreset) ensureCardCurve(card, tracks[index].cover, isActive ? 0 : c.cardBend, cardPreset.square);
+             card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
+             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
+             card.style.opacity = isActive ? 1 : edgeFade * wrapFade;

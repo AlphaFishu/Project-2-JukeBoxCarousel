@@ -74,7 +74,7 @@ body {
     width: 58vw;
     aspect-ratio: 1;
     border-radius: 50%;
-    filter: blur(48px);
+    filter: blur(90px);
     mix-blend-mode: screen;
     opacity: 0.5;
     transition: background-color 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -166,14 +166,87 @@ body.body-helix .backdrop-marquee {
     left: 3vw;
 }
 
+/* --- Spotlight mode: a single top-down opera-house followspot --- */
+/* Layered soft light: a wide cone from a point above the stage, a bright source
+   flare at the very top, and an elliptical pool that lands behind the card.
+   All screen-blended and blurred so there are no hard edges. */
+/* Hidden by default — ONLY shown in Spotlight mode (body-dynamic). The element
+   carries no animation here, so its opacity:0 actually holds in other modes.
+   A single natural sun shaft (like light through a cave mouth): soft-edged
+   beam, bright source, strong landing pool — no stripes. */
+/* All aspects are driven by CSS vars so the Spotlight calibration panel can
+   tune them live (defaults below match the tuned natural look). */
+.stage-spotlight {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(calc(-50% + var(--spot-x, 0px))) rotate(var(--spot-slant, 4deg));
+    transform-origin: 50% -20%;
+    width: var(--spot-width, 64vw);
+    height: var(--spot-height, 132vh);
+    z-index: 3; /* in FRONT of the dimmed background lane (cards z2) */
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+    overflow: hidden;
+    /* wide soft halo so the beam blooms into the dark instead of ending hard */
+    background: radial-gradient(42% 68% at 50% 2%,
+        rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.33)) 0%,
+        rgba(255, 255, 255, 0) 72%);
+}
+
+/* The shaft: a bright lamp source feathering down into a soft converging beam. */
+.stage-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -6% 0 0 0;
+    background:
+        radial-gradient(var(--spot-source-size, 14vw) calc(var(--spot-source-size, 14vw) * 0.78) at 50% 0%,
+            rgba(255, 255, 255, var(--spot-source-alpha, 0.85)) 0%,
+            rgba(255, 255, 255, calc(var(--spot-source-alpha, 0.85) * 0.35)) 50%,
+            rgba(255, 255, 255, 0) 76%),
+        radial-gradient(20% 84% at 50% 0%,
+            rgba(255, 255, 255, var(--spot-beam-alpha, 0.30)) 0%,
+            rgba(255, 255, 255, calc(var(--spot-beam-alpha, 0.30) * 0.4)) 42%,
+            rgba(var(--accent-rgb), var(--spot-tint, 0.06)) 62%,
+            rgba(255, 255, 255, 0) 82%);
+    filter: blur(var(--spot-blur, 18px));
+}
+
+/* The landing pool where the shaft meets the stage floor behind the card */
+.stage-spotlight::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: var(--spot-pool-y, 3%);
+    transform: translateX(-54%) rotate(-3deg);
+    width: var(--spot-pool-w, 42vw);
+    height: var(--spot-pool-h, 22vh);
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%,
+        rgba(255, 255, 255, var(--spot-pool-alpha, 0.24)) 0%,
+        rgba(var(--accent-rgb), calc(var(--spot-tint, 0.06) * 1.6)) 46%,
+        rgba(255, 255, 255, 0) 76%);
+    filter: blur(22px);
+}
+
+body.body-dynamic .stage-spotlight {
+    opacity: var(--spot-opacity, 1);
+}
+
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
-   active card stands out against the darkened wings */
+   beam and the lit card stand out against the darkened wings (var-tunable) */
 body.body-dynamic .vignette-overlay {
     background: radial-gradient(ellipse 44% 58% at 50% 44%,
         rgba(0, 0, 0, 0) 28%,
-        rgba(0, 0, 0, 0.55) 76%,
-        rgba(0, 0, 0, 0.75) 100%) !important;
+        rgba(0, 0, 0, var(--spot-wing, 0.55)) 76%,
+        rgba(0, 0, 0, calc(var(--spot-wing, 0.55) + 0.2)) 100%) !important;
     opacity: 1 !important;
+}
+
+@keyframes spot-breathe {
+    from { opacity: 0.9; }
+    to   { opacity: 1; }
 }
 
 /* --- Watermark --- */
@@ -849,8 +922,8 @@ body.has-scrolled .title-overlay {
     transform: translateX(-50%);
     display: inline-flex;
     background: rgba(18, 18, 24, 0.18);
-    backdrop-filter: blur(16px) saturate(1.6);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.7);
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
     border: 1px solid rgba(255, 255, 255, 0.14);
     padding: 4px;
     border-radius: 16px; /* rounded square, matching the dock below */
@@ -1042,6 +1115,38 @@ body.body-card2 .title-overlay {
     scrollbar-width: thin;
 }
 
+body.body-dynamic.spot-open .spot-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+/* Spotlight calibration toggle (bottom-left, Spotlight mode only) */
+.spot-calib-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    display: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(19, 19, 26, 0.55);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.spot-calib-toggle:hover { background: rgba(40, 40, 50, 0.85); color: #fff; }
+
+body.body-dynamic .spot-calib-toggle { display: block; }
 
 body.body-shuffle.calib-open .calib-panel,
 body.body-shuffle2.calib-open .calib-panel {
@@ -1262,8 +1367,8 @@ body.body-shuffle2.calib-open .calib-panel {
     padding: 7px 12px 9px; /* ~20% slimmer console */
     border-radius: 16px; /* rounded square, matching the top selector */
     background: rgba(18, 18, 24, 0.18);
-    backdrop-filter: blur(16px) saturate(1.6);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.7);
+    -webkit-backdrop-filter: blur(24px) saturate(1.7);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow:
         inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.50),

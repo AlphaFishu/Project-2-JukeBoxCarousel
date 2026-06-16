@@ -1609,7 +1609,96 @@ if (creditsBtn && creditsModal) {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeC(); });
 }
 
+// ============================================================================
+// Spotlight calibration — every aspect of the followspot, generous ranges.
+// Each control writes a CSS var the .stage-spotlight reads live.
+// ============================================================================
+const SPOT_DEFAULTS = { x: 0, width: 64, height: 132, slant: 4, srcAlpha: 0.85, srcSize: 14, beamAlpha: 0.30, blur: 18, tint: 0.06, poolAlpha: 0.24, poolW: 42, poolH: 22, poolY: 3, wing: 0.55, opacity: 1 };
+// [key, label, min, max, step, cssVar, unit]
+const spotSchema = [
+    ['opacity',  'Master opacity', 0, 2.5, 0.02, '--spot-opacity', ''],
+    ['x',        'Beam X',      -1000, 1000, 5, '--spot-x', 'px'],
+    ['width',    'Beam width',      4, 200, 1, '--spot-width', 'vw'],
+    ['height',   'Beam length',    20, 260, 1, '--spot-height', 'vh'],
+    ['slant',    'Slant',         -90,  90, 1, '--spot-slant', 'deg'],
+    ['srcAlpha', 'Source bright',   0,   3, 0.02, '--spot-source-alpha', ''],
+    ['srcSize',  'Source size',     1,  90, 1, '--spot-source-size', 'vw'],
+    ['beamAlpha','Beam bright',     0,   3, 0.02, '--spot-beam-alpha', ''],
+    ['blur',     'Softness',        0, 120, 1, '--spot-blur', 'px'],
+    ['tint',     'Accent tint',     0, 1.5, 0.01, '--spot-tint', ''],
+    ['poolAlpha','Pool bright',     0,   3, 0.02, '--spot-pool-alpha', ''],
+    ['poolW',    'Pool width',      2, 160, 1, '--spot-pool-w', 'vw'],
+    ['poolH',    'Pool height',     2, 140, 1, '--spot-pool-h', 'vh'],
+    ['poolY',    'Pool Y',        -40, 100, 1, '--spot-pool-y', '%'],
+    ['wing',     'Wing darkness',   0,   2, 0.02, '--spot-wing', '']
+];
 
+let spotCalib = { ...SPOT_DEFAULTS };
+try {
+    const sv = JSON.parse(localStorage.getItem('jukebox-spot-calib'));
+    if (sv && typeof sv.width === 'number') spotCalib = { ...spotCalib, ...sv };
+} catch (e) { /* fresh */ }
+
+function applySpotVars() {
+    const root = document.documentElement.style;
+    spotSchema.forEach(([key, , , , , cssVar, unit]) => {
+        root.setProperty(cssVar, spotCalib[key] + unit);
+    });
+    try { localStorage.setItem('jukebox-spot-calib', JSON.stringify(spotCalib)); } catch (e) {}
+}
+applySpotVars();
+
+const spotRowsEl = document.getElementById('spotRows');
+const spotInputs = {};
+if (spotRowsEl) {
+    spotSchema.forEach(([key, label, min, max, step]) => {
+        const row = document.createElement('div');
+        row.className = 'calib-row';
+        row.innerHTML = `<label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
+        const input = row.querySelector('input');
+        const out = row.querySelector('output');
+        input.value = spotCalib[key];
+        out.textContent = spotCalib[key];
+        input.addEventListener('input', () => {
+            spotCalib[key] = parseFloat(input.value);
+            out.textContent = input.value;
+            applySpotVars();
+        });
+        spotInputs[key] = { input, out };
+        spotRowsEl.appendChild(row);
+    });
+}
+function syncSpotPanel() {
+    spotSchema.forEach(([key]) => {
+        if (spotInputs[key]) { spotInputs[key].input.value = spotCalib[key]; spotInputs[key].out.textContent = spotCalib[key]; }
+    });
+}
+
+const spotToggleBtn = document.getElementById('spotCalibToggle');
+if (spotToggleBtn) {
+    spotToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('spot-open');
+        spotToggleBtn.classList.toggle('active', document.body.classList.contains('spot-open'));
+    });
+}
+const spotJsonEl = document.getElementById('spotJson');
+const spotPrintBtn = document.getElementById('spotPrint');
+const spotApplyBtn = document.getElementById('spotApply');
+if (spotPrintBtn && spotJsonEl) {
+    spotPrintBtn.addEventListener('click', () => {
+        const json = JSON.stringify(spotCalib);
+        spotJsonEl.value = json;
+        spotJsonEl.select();
+        if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
+        console.log('[Spotlight calibration]', json);
+    });
+}
+if (spotApplyBtn && spotJsonEl) {
+    spotApplyBtn.addEventListener('click', () => {
+        try { Object.assign(spotCalib, JSON.parse(spotJsonEl.value)); syncSpotPanel(); applySpotVars(); }
+        catch (e) { spotJsonEl.value = 'Invalid JSON: ' + e.message; }
+    });
+}
 
 const s2BgDd = document.getElementById('s2BgDd');
 const s2BgBtn = document.getElementById('s2BgBtn');
@@ -2746,22 +2835,15 @@ function updateCarousel() {
         });
     }
 
-    // Cursor parallax: skip entirely on touch (no pointer + saves a per-frame
-    // style write); otherwise only write when the origin actually moved.
-    perfFrame++;
-    if (!isCoarsePointer) {
-        povX = lerp(povX, 50 + mouseNX * 5, 0.06);
-        povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
-        if (Math.abs(povX - lastPovX) > 0.015 || Math.abs(povY - lastPovY) > 0.015) {
-            lastPovX = povX; lastPovY = povY;
-            const po = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
-            if (sceneEl) sceneEl.style.perspectiveOrigin = po;
-            if (isCard2(currentMode) && s2OverlayEl) s2OverlayEl.style.perspectiveOrigin = po;
-        }
-    }
-    // Blur proxies use getBoundingClientRect (forces layout) — throttle to every
-    // 4th frame; panels only drift slowly so it stays visually smooth.
-    if (isCard2(currentMode) && s2OverlayEl && !s2OverlayEl.classList.contains('s2-hidden') && (perfFrame & 3) === 0) {
+    // Cursor parallax: ease the perspective origin toward the mouse so the whole
+    // 3D stage subtly re-angles itself toward the viewer
+    povX = lerp(povX, 50 + mouseNX * 5, 0.06);
+    povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
+    if (sceneEl) sceneEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
+    // Keep the Card 2 panel rig's vanishing point identical to the scene's,
+    // and track the flat blur proxies onto the panels' projected footprints
+    if (isCard2(currentMode) && s2OverlayEl) {
+        s2OverlayEl.style.perspectiveOrigin = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
         syncS2Proxies();
     }
 
@@ -2919,8 +3001,6 @@ if (dockNextBtn) dockNextBtn.addEventListener('click', () => { targetRotation +=
 
 // Cursor parallax: the 3D camera gently follows the mouse (lerped in the rAF loop)
 let mouseNX = 0, mouseNY = 0, povX = 50, povY = 50;
-let lastPovX = -1, lastPovY = -1, perfFrame = 0;
-const isCoarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 window.addEventListener('mousemove', (e) => {
     mouseNX = (e.clientX / window.innerWidth - 0.5) * 2;
     mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
