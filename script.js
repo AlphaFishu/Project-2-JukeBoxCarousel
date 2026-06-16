@@ -2001,22 +2001,31 @@ function applyInterpolatedCoverflowBackground(rgbColor) {
         b = Math.floor(b * factor);
     }
     
-    const accentColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+    // Coarse-round (nearest 3) + dirty-check: a full-screen gradient repaint per
+    // frame is the big coverflow cost. Skip the DOM writes when the color hasn't
+    // visibly changed, so a settled background costs nothing.
+    r = Math.round(r / 3) * 3; g = Math.round(g / 3) * 3; b = Math.round(b / 3) * 3;
+    const key = r + ',' + g + ',' + b;
+    if (key === _lastCoverBgKey) return;
+    _lastCoverBgKey = key;
+
+    const accentColor = `rgb(${r}, ${g}, ${b})`;
     const darkR = Math.max(18, Math.floor(r * 0.12));
     const darkG = Math.max(18, Math.floor(g * 0.12));
     const darkB = Math.max(18, Math.floor(b * 0.12));
-    const darkBase = `rgb(${Math.round(darkR)}, ${Math.round(darkG)}, ${Math.round(darkB)})`;
-    
+    const darkBase = `rgb(${darkR}, ${darkG}, ${darkB})`;
+
     const bgContainer = document.getElementById('coverflowBgGradient');
     if (bgContainer) {
         bgContainer.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
     }
-    
+
     document.documentElement.style.backgroundColor = accentColor;
     document.body.style.backgroundColor = darkBase;
     document.documentElement.style.setProperty('--dynamic-bg', darkBase);
     updateThemeColor(accentColor);
 }
+let _lastCoverBgKey = '';
 
 function updateAmbientBackground(card) {
     if (card && card.dataset.domR) {

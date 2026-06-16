@@ -1618,6 +1618,14 @@ body.body-coverflow .card-reflection {
     border-radius: 12px;
 }
 
+/* The fog opacity is driven every frame in JS in these modes — the 0.6s
+   transition only fights those writes and adds cost, so disable it there. */
+body.body-coverflow .fog-overlay,
+body.body-card2 .fog-overlay,
+body.body-helix .fog-overlay {
+    transition: none;
+}
+
 /* Smooth ambient body color transitions handled at the root level */
 
 /* --- Rolling Album Mode Refinements --- */
