@@ -2926,6 +2926,16 @@ const dockNextBtn = document.getElementById('dockNext');
 if (dockPrevBtn) dockPrevBtn.addEventListener('click', () => { targetRotation -= rotationAngle; });
 if (dockNextBtn) dockNextBtn.addEventListener('click', () => { targetRotation += rotationAngle; });
 
+// Keyboard ← / → step exactly one card (same as the dock arrows). Ignored while
+// typing in the calibration JSON fields.
+window.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    e.preventDefault();
+    targetRotation += (e.key === 'ArrowRight' ? rotationAngle : -rotationAngle);
+    document.body.classList.add('has-scrolled');
+});
+
 // Cursor parallax: the 3D camera gently follows the mouse (lerped in the rAF loop)
 let mouseNX = 0, mouseNY = 0, povX = 50, povY = 50;
 let lastPovX = -1, lastPovY = -1, perfFrame = 0;
