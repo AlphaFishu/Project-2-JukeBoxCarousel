@@ -1004,6 +1004,12 @@ const tracks = [
 const carousel = document.getElementById('carousel');
 const totalCards = tracks.length;
 
+// Cached DOM references to prevent layout thrashing and lag
+let cachedCards = [];
+let stageSpotlight = null;
+let themeColorMeta = null;
+let coverflowBgGradient = null;
+
 // Layout State
 let currentMode = 'dynamic';
 document.body.classList.add('body-dynamic', 'body-card2');
@@ -1085,6 +1091,18 @@ tracks.forEach((track, index) => {
 
     carousel.appendChild(card);
 });
+
+// Initialize cached DOM elements to prevent layout thrashing and lag
+cachedCards = Array.from(carousel.querySelectorAll('.card'));
+cachedCards.forEach(card => {
+    card._fogOverlay = card.querySelector('.fog-overlay');
+    card._vinylWrapper = card.querySelector('.vinyl-wrapper');
+    card._titleEl = card.querySelector('.title');
+    card._artistEl = card.querySelector('.artist');
+});
+stageSpotlight = document.querySelector('.stage-spotlight');
+themeColorMeta = document.getElementById('themeColorMeta');
+coverflowBgGradient = document.getElementById('coverflowBgGradient');
 
 // 1.5 Mode Switcher Event Listeners & Sliding Pill Animations
 const modeButtons = document.querySelectorAll('.mode-btn');
@@ -1486,7 +1504,7 @@ const shuffle2Presets = [
     {
         name: 'Elevated',
         square: true, // 1:1 card, less rounded (Elevated only)
-        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -193, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
+        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics.
         // dy pulls it up to sit flush at the card top (offset from the 50° tilt).
         ui: { songs: { anchor: 'left-top', w: 260, dy: -28 } }
@@ -1498,7 +1516,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flipper',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 86, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75, "cardBend": 15 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75, "cardBend": 15 },
         ui: {}
     }
 ];
@@ -1587,7 +1605,7 @@ function applyShuffle2Layout() {
     const cardCenterY = p.square ? 112 : 160; // square presets are 224 tall
     const halfH = cardCenterY * s;
     const gap = 16; // tight to the card — no long-distance drift
-    const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY * s + c.lockY}px, 150px) ` +
+    const plate = `translate3d(${112 + c.lockX}px, ${cardCenterY + c.lockY}px, 150px) ` +
         `rotateX(${c.mainTiltX}deg) rotateY(${c.mainTiltY}deg) rotateZ(${c.mainTiltZ}deg)`;
 
     // Hero clone of the main card (Spotlight "card in front of beam" mode): a
@@ -2182,7 +2200,7 @@ function adjustSaturation(rgb, saturationFactor) {
 let currentGradLayer = 1;
 
 function updateThemeColor(colorStr) {
-    const meta = document.getElementById('themeColorMeta');
+    const meta = themeColorMeta;
     if (meta) {
         meta.setAttribute('content', colorStr);
     }
@@ -2208,7 +2226,7 @@ function applyInterpolatedCoverflowBackground(rgbColor) {
     const darkB = Math.max(18, Math.floor(b * 0.12));
     const darkBase = `rgb(${Math.round(darkR)}, ${Math.round(darkG)}, ${Math.round(darkB)})`;
     
-    const bgContainer = document.getElementById('coverflowBgGradient');
+    const bgContainer = coverflowBgGradient;
     if (bgContainer) {
         bgContainer.style.backgroundImage = `linear-gradient(to bottom, ${accentColor} 0%, ${accentColor} 30%, ${darkBase} 100%)`;
     }
@@ -2422,10 +2440,10 @@ function applyLoopingText(el) {
 }
 
 function updateActiveCardMarquees(activeIndex) {
-    const cards = document.querySelectorAll('.card');
+    const cards = cachedCards;
     cards.forEach((card, idx) => {
-        const titleEl = card.querySelector('.title');
-        const artistEl = card.querySelector('.artist');
+        const titleEl = card._titleEl;
+        const artistEl = card._artistEl;
 
         if (idx === activeIndex) {
             // Measure after this frame's layout settles
@@ -2499,7 +2517,7 @@ function updateCarousel() {
         updateNowPlaying(activeIndex);
     }
 
-    const cards = document.querySelectorAll('.card');
+    const cards = cachedCards;
 
     if (currentMode === 'cylinder') {
         // Rotate the entire carousel container around the center of the ring
@@ -2512,7 +2530,7 @@ function updateCarousel() {
                 distance = totalCards - distance;
             }
 
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fogOverlay;
             card.style.visibility = 'visible';
 
             // Scaled all translateY/translateZ parameters to 80% to reverse engineer zoom proportion
@@ -2521,28 +2539,28 @@ function updateCarousel() {
                 updateAmbientBackground(card);
                 
                 card.style.opacity = '1';
-                card.style.filter = 'brightness(1) saturate(1.2)';
+                card.style.setProperty('--card-filter', 'brightness(1) saturate(1.2)');
                 if (fog) fog.style.opacity = '0';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 64}px) translateY(-40px) scale(1.30)`;
             } else if (distance === 1) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.filter = 'brightness(0.9) saturate(1.0)';
+                card.style.setProperty('--card-filter', 'brightness(0.9) saturate(1.0)');
                 if (fog) fog.style.opacity = '0.35';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 32}px) translateY(16px) rotateY(45deg) scale(1.15)`;
             } else if (distance === 2) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.filter = 'brightness(0.8) saturate(0.9)';
+                card.style.setProperty('--card-filter', 'brightness(0.8) saturate(0.9)');
                 if (fog) fog.style.opacity = '0.65';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate + 8}px) translateY(56px) rotateY(65deg) scale(1.05)`;
             } else if (distance === 3) {
                 card.classList.remove('active');
                 card.style.opacity = '1';
-                card.style.filter = 'brightness(0.7) saturate(0.8)';
+                card.style.setProperty('--card-filter', 'brightness(0.7) saturate(0.8)');
                 if (fog) fog.style.opacity = '0.85';
                 
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
@@ -2551,6 +2569,7 @@ function updateCarousel() {
                 card.style.opacity = '0';
                 card.style.visibility = 'hidden';
                 if (fog) fog.style.opacity = '1';
+                card.style.setProperty('--card-filter', 'none');
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             }
 
@@ -2598,7 +2617,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fogOverlay;
             let rotateY = 0;
             let apparentX = 0; // Desired on-screen X; converted to translateX once Z is known
             let translateX = 0;
@@ -2654,7 +2673,7 @@ function updateCarousel() {
             }
 
             // Real-time proportional vinyl sliding animation linked directly to scroll progress
-            const vinylWrapper = card.querySelector('.vinyl-wrapper');
+            const vinylWrapper = card._vinylWrapper;
             if (vinylWrapper) {
                 let discX = 0;
                 if (absOffset < 1) {
@@ -2675,7 +2694,7 @@ function updateCarousel() {
 
             card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
             card.style.opacity = opacity;
-            card.style.filter = filter;
+            card.style.setProperty('--card-filter', filter);
             if (fog) fog.style.opacity = fogOpacity;
         });
 
@@ -2707,7 +2726,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fogOverlay;
             card.style.visibility = 'visible';
 
             // Active coloring update
@@ -2770,7 +2789,7 @@ function updateCarousel() {
 
             card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
             card.style.opacity = opacity;
-            card.style.filter = filter;
+            card.style.setProperty('--card-filter', filter);
             if (fog) fog.style.opacity = fogOpacity;
         });
 
@@ -2790,7 +2809,7 @@ function updateCarousel() {
             `translate3d(${c.camX || 0}px, ${c.camY || 0}px, ${c.zoom}px) rotateX(${c.tiltX}deg) rotateY(${c.tiltY}deg) rotateZ(${c.tiltZ}deg)`;
 
         // Spotlight tracks the active card horizontally and vertically to remain aligned
-        const spotEl = carousel.querySelector('.stage-spotlight');
+        const spotEl = stageSpotlight;
         if (spotEl) {
             if (currentMode === 'dynamic') {
                 const sx = spotCalib.x || 0;
@@ -2883,7 +2902,7 @@ function updateCarousel() {
             const scale = lerp(c.lockScale, laneScale, t);
             const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fogOverlay;
             if (Math.abs(y) > yLimit + 340) {
                 card.style.visibility = 'hidden';
                 card.style.opacity = 0;
@@ -2916,7 +2935,7 @@ function updateCarousel() {
                 const blurPx = Math.min(c.motionBlurAmt, shuffleSpeed * 0.06);
                 if (blurPx > 0.3) blurStr = ` blur(${blurPx.toFixed(1)}px)`;
             }
-            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
+            card.style.setProperty('--card-filter', `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`);
             card.style.zIndex = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
             if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
         });
@@ -2937,7 +2956,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fogOverlay;
 
             if (absOffset > 6.5) {
                 card.style.visibility = 'hidden';
@@ -2959,7 +2978,7 @@ function updateCarousel() {
                 `translateY(${offset * stepY - 30}px) scale(${scale})`;
 
             card.style.opacity = absOffset > 5.5 ? 1 - (absOffset - 5.5) : 1;
-            card.style.filter = `brightness(${Math.max(0.45, 1 - absOffset * 0.13)}) saturate(${isActive ? 1.15 : 0.9})`;
+            card.style.setProperty('--card-filter', `brightness(${Math.max(0.45, 1 - absOffset * 0.13)}) saturate(${isActive ? 1.15 : 0.9})`);
             card.style.zIndex = Math.round(20 - absOffset * 2);
             if (fog) fog.style.opacity = Math.min(0.6, absOffset * 0.11);
         });

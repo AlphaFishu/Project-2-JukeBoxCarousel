@@ -819,9 +819,14 @@ body.has-scrolled .title-overlay {
     cursor: pointer;
 }
 
-/* Subtle hover lift on the artwork itself (card transform is owned by JS) */
+/* Avoid flattening 3D context by applying filter to children instead of the card container */
+.card-content,
+.vinyl-wrapper,
+.curve-slice {
+    filter: var(--card-filter, none);
+}
 .card:hover .card-content {
-    filter: brightness(1.08);
+    filter: var(--card-filter, none) brightness(1.08);
 }
 
 /* Drop shadow for standard (inactive) cards (increased by 30% from baseline) */
