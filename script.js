@@ -1047,7 +1047,7 @@ tracks.forEach((track, index) => {
             </div>
         </div>
         <div class="card-content">
-            <img src="${track.cover}" alt="${track.title} Cover" class="cover-bg">
+            <img src="${track.cover}" alt="${track.title} Cover" class="cover-bg" decoding="async">
             <div class="overlay"></div>
             <div class="fog-overlay"></div>
             <div class="info">
@@ -1056,7 +1056,7 @@ tracks.forEach((track, index) => {
             </div>
         </div>
         <div class="card-reflection">
-            <img src="${track.cover}" alt="" class="reflection-bg">
+            <img src="${track.cover}" alt="" class="reflection-bg" loading="lazy" decoding="async">
             <div class="reflection-overlay"></div>
             <div class="reflection-info">
                 <h2 class="reflection-title">${track.title}</h2>
@@ -1084,6 +1084,13 @@ tracks.forEach((track, index) => {
     applyColorTheory(track, card);
 
     carousel.appendChild(card);
+});
+
+// Mark each cover "loaded" once its image is decoded so it fades in smoothly,
+// instead of popping in one-by-one and flickering the cards during load.
+carousel.querySelectorAll('.card-content .cover-bg').forEach(img => {
+    if (img.complete) img.classList.add('loaded');
+    else img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
 });
 
 // 1.5 Mode Switcher Event Listeners & Sliding Pill Animations
@@ -1148,6 +1155,14 @@ modeButtons.forEach(btn => {
         lastActiveIndex = -1;
         lastActiveCardIndex = -1;
         lastCoverflowIndex = -1;
+
+        // Other modes write transform/filter directly, so the card2 dirty-check
+        // caches go stale on a switch — clear them so the first frame writes fresh.
+        cards.forEach(card => {
+            card._t = card._f = card._o = card._z = card._vis = undefined;
+            const fog = card.querySelector('.fog-overlay');
+            if (fog) fog._o = undefined;
+        });
 
         // Clean up lyrics animations and intervals when changing modes
         if (lyricsInterval) {
@@ -2026,12 +2041,16 @@ function applyInterpolatedCoverflowBackground(rgbColor) {
     updateThemeColor(accentColor);
 }
 let _lastCoverBgKey = '';
+// Background darkness, set by the Shadow calibration panel. Cached here so the
+// per-frame updateAmbientBackground() never does a getComputedStyle() flush.
+let shadowBgDim = 0.25;
 
 function updateAmbientBackground(card) {
     if (card && card.dataset.domR) {
-        const bgR = Math.floor(parseInt(card.dataset.domR) * 0.25); // ~25% brightness for rich color
-        const bgG = Math.floor(parseInt(card.dataset.domG) * 0.25);
-        const bgB = Math.floor(parseInt(card.dataset.domB) * 0.25);
+        const dim = shadowBgDim; // calibratable bg darkness (cached — no per-frame style flush)
+        const bgR = Math.floor(parseInt(card.dataset.domR) * dim);
+        const bgG = Math.floor(parseInt(card.dataset.domG) * dim);
+        const bgB = Math.floor(parseInt(card.dataset.domB) * dim);
         const bgStr = `rgb(${bgR}, ${bgG}, ${bgB})`;
         document.documentElement.style.backgroundColor = bgStr;
         document.body.style.backgroundColor = bgStr;
@@ -2679,12 +2698,11 @@ function updateCarousel() {
 
             const fog = card.querySelector('.fog-overlay');
             if (Math.abs(y) > yLimit + 340) {
-                card.style.visibility = 'hidden';
-                card.style.opacity = 0;
+                if (card._vis !== 'hidden') { card.style.visibility = 'hidden'; card.style.opacity = 0; card._vis = 'hidden'; card._o = 0; }
                 return;
             }
 
-            card.style.visibility = 'visible';
+            if (card._vis !== 'visible') { card.style.visibility = 'visible'; card._vis = 'visible'; }
             card.classList.toggle('active', isActive);
             if (isActive) updateAmbientBackground(card);
 
@@ -2695,9 +2713,17 @@ function updateCarousel() {
                 ? ` rotateX(${(c.mainTiltX * mt).toFixed(2)}deg) rotateY(${(c.mainTiltY * mt).toFixed(2)}deg) rotateZ(${(c.mainTiltZ * mt).toFixed(2)}deg)`
                 : '';
             const bendStr = bendRX ? ` rotateX(${(bendRX * t).toFixed(2)}deg)` : '';
-            card.style.transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
+
+            // Dirty-check every style write. Rewriting an unchanged transform/filter
+            // still forces the GPU to re-rasterize the (600px) cover layer — that's
+            // the Elevation re-render cost on lane changes and the wasted work every
+            // idle frame. Only touch the DOM when a value actually moves.
+            const transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
+            if (card._t !== transform) { card.style.transform = transform; card._t = transform; }
+
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
-            card.style.opacity = isActive ? 1 : edgeFade * wrapFade;
+            const op = isActive ? 1 : edgeFade * wrapFade;
+            if (card._o !== op) { card.style.opacity = op; card._o = op; }
 
             // Optional motion blur: sub-lane cards blur with scroll speed (off by
             // default; strength sets the ceiling). Main lane stays sharp.
@@ -2706,9 +2732,16 @@ function updateCarousel() {
                 const blurPx = Math.min(c.motionBlurAmt, shuffleSpeed * 0.06);
                 if (blurPx > 0.3) blurStr = ` blur(${blurPx.toFixed(1)}px)`;
             }
-            card.style.filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
-            card.style.zIndex = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
-            if (fog) fog.style.opacity = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
+            const filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
+            if (card._f !== filter) { card.style.filter = filter; card._f = filter; }
+
+            const zi = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
+            if (card._z !== zi) { card.style.zIndex = zi; card._z = zi; }
+
+            if (fog) {
+                const fo = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
+                if (fog._o !== fo) { fog.style.opacity = fo; fog._o = fo; }
+            }
         });
 
     } else if (currentMode === 'helix') {
@@ -3063,3 +3096,110 @@ if (supportsLensRefraction) {
     }
     refreshLiquidGlass();
 }
+
+
+
+/* --- Shadow calibration (Infinite & Elevation only) --- */
+(function shadowCalib() {
+    const NAMES = { dynamic: 'Infinite', elevated: 'Elevation' };
+    const DEF = {
+        dynamic:  { dim: 0.53, w: 45, h: 76, cx: 50, cy: 43, inner: 80, mid: 92, midop: 0.34, outer: 0.43 },
+        elevated: { dim: 0.29, w: 48, h: 114, cx: 52, cy: 54, inner: 62, mid: 74, midop: 0.22, outer: 0.38 },
+    };
+    // [key, label, min, max, step, isPercent]
+    const FIELDS = [
+        ['dim',   'BG dim',       0,   0.6, 0.01, false],
+        ['w',     'Ellipse W',    10,  120, 1,    true],
+        ['h',     'Ellipse H',    10,  120, 1,    true],
+        ['cx',    'Center X',     0,   100, 1,    true],
+        ['cy',    'Center Y',     0,   100, 1,    true],
+        ['inner', 'Clear radius', 0,   90,  1,    true],
+        ['mid',   'Mid stop',     0,   100, 1,    true],
+        ['midop', 'Mid opacity',  0,   1,   0.01, false],
+        ['outer', 'Edge opacity', 0,   1,   0.01, false],
+    ];
+    const load = m => { try { return Object.assign({}, DEF[m], JSON.parse(localStorage.getItem('jukebox-shadow-' + m))); } catch (e) { return Object.assign({}, DEF[m]); } };
+    const save = (m, v) => localStorage.setItem('jukebox-shadow-' + m, JSON.stringify(v));
+    const mode = () => document.body.classList.contains('body-dynamic') ? 'dynamic'
+        : document.body.classList.contains('body-elevated') ? 'elevated' : null;
+
+    function apply(v) {
+        const b = document.body.style;
+        b.setProperty('--vig-w', v.w + '%');
+        b.setProperty('--vig-h', v.h + '%');
+        b.setProperty('--vig-cx', v.cx + '%');
+        b.setProperty('--vig-cy', v.cy + '%');
+        b.setProperty('--vig-inner', v.inner + '%');
+        b.setProperty('--vig-mid', v.mid + '%');
+        b.setProperty('--vig-midop', v.midop);
+        b.setProperty('--vig-outer', v.outer);
+        shadowBgDim = v.dim;
+        if (typeof cards !== 'undefined' && lastActiveCardIndex >= 0 && cards[lastActiveCardIndex]) {
+            updateAmbientBackground(cards[lastActiveCardIndex]);
+        }
+    }
+
+    // Menu is hidden in production — values are baked into DEF (and CSS defaults).
+    // Flip to true to re-expose the calibration panel for tuning.
+    const SHOW_MENU = false;
+
+    // Toggle button
+    const toggle = document.createElement('button');
+    toggle.className = 'shadow-calib-toggle';
+    toggle.innerHTML = '✦ Shadow';
+    if (SHOW_MENU) document.body.appendChild(toggle);
+
+    // Panel (reuses the original .calib-panel chrome)
+    const panel = document.createElement('div');
+    panel.className = 'calib-panel';
+    let rowsHtml = '';
+    FIELDS.forEach(([k, label, min, max, step]) => {
+        rowsHtml += '<div class="calib-row"><label>' + label + '</label>' +
+            '<input type="range" id="sc_' + k + '" min="' + min + '" max="' + max + '" step="' + step + '">' +
+            '<output id="scv_' + k + '"></output></div>';
+    });
+    panel.innerHTML =
+        '<div class="calib-title" id="scTitle">Shadow</div>' +
+        rowsHtml +
+        '<div class="calib-io">' +
+        '<textarea id="scJson" rows="3" spellcheck="false" placeholder="Shadow JSON appears here..."></textarea>' +
+        '<div class="calib-io-btns"><button id="scPrint">Print values</button><button id="scApply">Apply JSON</button></div>' +
+        '</div>';
+    if (SHOW_MENU) document.body.appendChild(panel);
+
+    const $ = id => panel.querySelector('#' + id);
+    let cur = null, val = null;
+
+    function syncOutputs() {
+        FIELDS.forEach(([k, , , , , pct]) => {
+            $('sc_' + k).value = val[k];
+            $('scv_' + k).textContent = pct ? val[k] + '%' : Number(val[k]).toFixed(2);
+        });
+        $('scTitle').textContent = NAMES[cur] + ' Shadow';
+    }
+    function onInput() {
+        val = {};
+        FIELDS.forEach(([k, , , , , pct]) => { val[k] = pct ? parseInt($('sc_' + k).value) : parseFloat($('sc_' + k).value); });
+        apply(val); save(cur, val); syncOutputs();
+    }
+    FIELDS.forEach(([k]) => $('sc_' + k).addEventListener('input', onInput));
+
+    $('scPrint').addEventListener('click', () => { $('scJson').value = JSON.stringify(val); });
+    $('scApply').addEventListener('click', () => {
+        try {
+            val = Object.assign({}, DEF[cur], val, JSON.parse($('scJson').value));
+            apply(val); save(cur, val); syncOutputs();
+        } catch (e) { $('scJson').value = 'Invalid JSON'; }
+    });
+    toggle.addEventListener('click', () => panel.classList.toggle('shadow-open'));
+
+    function refresh() {
+        const m = mode();
+        if (!m) { shadowBgDim = 0.25; toggle.style.display = 'none'; panel.classList.remove('shadow-open'); return; }
+        cur = m; val = load(m);
+        apply(val); syncOutputs();
+        if (SHOW_MENU) toggle.style.display = 'block';
+    }
+    new MutationObserver(refresh).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    refresh();
+})();

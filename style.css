@@ -168,13 +168,40 @@ body.body-helix .backdrop-marquee {
 
 /* Spotlight reads best with darker surroundings — deepen the vignette so the
    active card stands out against the darkened wings */
-body.body-dynamic .vignette-overlay {
-    background: radial-gradient(ellipse 44% 58% at 50% 44%,
-        rgba(0, 0, 0, 0) 28%,
-        rgba(0, 0, 0, 0.55) 76%,
-        rgba(0, 0, 0, 0.75) 100%) !important;
+/* Per-mode shadow defaults (overridden live by the Shadow calibration panel) */
+body.body-dynamic  { --vig-w: 45%; --vig-h: 76%; --vig-cx: 50%; --vig-cy: 43%; --vig-inner: 80%; --vig-mid: 92%; --vig-midop: 0.34; --vig-outer: 0.43; }
+body.body-elevated { --vig-w: 48%; --vig-h: 114%; --vig-cx: 52%; --vig-cy: 54%; --vig-inner: 62%; --vig-mid: 74%; --vig-midop: 0.22; --vig-outer: 0.38; }
+
+body.body-dynamic .vignette-overlay,
+body.body-elevated .vignette-overlay {
+    background: radial-gradient(ellipse var(--vig-w) var(--vig-h) at var(--vig-cx) var(--vig-cy),
+        rgba(0, 0, 0, 0) var(--vig-inner),
+        rgba(0, 0, 0, var(--vig-midop)) var(--vig-mid),
+        rgba(0, 0, 0, var(--vig-outer)) 100%) !important;
     opacity: 1 !important;
 }
+
+/* --- Shadow calibration (Infinite & Elevation only) --- */
+.shadow-calib-toggle {
+    position: fixed;
+    top: 88px;
+    right: 18px;
+    z-index: 9999;
+    padding: 7px 13px;
+    border-radius: 9px;
+    background: #17171d;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    display: none;
+}
+.shadow-calib-toggle:hover { color: #fff; }
+.calib-panel.shadow-open { opacity: 1; pointer-events: auto; transform: translateX(0); }
 
 /* --- Watermark --- */
 .watermark {
@@ -760,7 +787,12 @@ body.has-scrolled .title-overlay {
     height: 100%;
     object-fit: cover;
     z-index: 0;
+    /* Fade each cover in once decoded so staggered image decodes during load
+       become a smooth fade, not a per-card flash ("stuttering lights"). */
+    opacity: 0;
+    transition: opacity 0.45s ease;
 }
+.card-content .cover-bg.loaded { opacity: 1; }
 
 /* Gradient Overlay for Text Contrast */
 .card-content .overlay {
