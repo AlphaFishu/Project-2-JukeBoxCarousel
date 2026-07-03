@@ -761,23 +761,23 @@ body.has-scrolled .title-overlay {
    eviction churn (cards blank out to dark boxes and pop back at random =
    the Chrome-only flicker). Let Chrome manage layer lifetimes itself. */
 
-/* ONE whole-screen shadow instead of 72 per-card fog layers: a dark plane
-   inside the 3D scene, placed at a depth BETWEEN the sub lanes (z <= 20) and
-   the captured main plate (z = 150). Sub cards dim as a group, the main card
-   rides above it unshadowed, and there are no per-card opacity layers left
-   to flicker when Chrome sheds GPU memory. */
-.card2-shadow-plane {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 300vmax;
-    height: 300vmax;
+/* ONE whole-screen shadow instead of 72 per-card fog layers — screen-space,
+   with a feathered hole over the main plate. (A 3D plane was tried first but
+   it intersects the tilted main card: Elevation's 50° tilt dips the card's
+   top edge behind any plane depth = visible shadow band across the card.)
+   The hole is re-measured on settle after mode/calib/resize changes. */
+.card2-shadow-screen {
+    position: fixed;
+    inset: 0;
     background: rgba(0, 0, 0, var(--card2-shadow, 0.44));
-    transform: translate(-50%, -50%) translateZ(85px);
     pointer-events: none;
+    z-index: 3; /* above the 3D scene (sticky-container z:2), below all UI */
     display: none;
+    /* sane default hole until the first measurement lands */
+    -webkit-mask-image: radial-gradient(ellipse 300px 330px at 50% 46%, transparent 52%, #000 88%);
+    mask-image: radial-gradient(ellipse 300px 330px at 50% 46%, transparent 52%, #000 88%);
 }
-body.body-card2 .card2-shadow-plane { display: block; }
+body.body-card2 .card2-shadow-screen { display: block; }
 
 /* Drop shadow for standard (inactive) cards (increased by 30% from baseline) */
 .card:not(.active) .card-content {

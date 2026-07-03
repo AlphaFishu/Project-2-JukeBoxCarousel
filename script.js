@@ -1165,6 +1165,7 @@ if (activeBtn) {
     window.addEventListener('load', initSlider);
     window.addEventListener('resize', () => {
         atRestPainted = false; // viewport changed — repaint card layout at rest
+        shadowHoleDirty = true;
         const currentActive = document.querySelector('.mode-btn.active');
         if (currentActive) updateSliderPosition(currentActive);
     });
@@ -1208,6 +1209,7 @@ modeButtons.forEach(btn => {
 
         // New mode must paint even if rotation is already settled
         atRestPainted = false;
+        shadowHoleDirty = true;
 
         // Other modes write transform/filter directly, so the card2 dirty-check
         // caches go stale on a switch — clear them so the first frame writes fresh.
@@ -1354,6 +1356,7 @@ function applyVignette() {
 
 function applyCalibSideEffects() {
     atRestPainted = false; // calib edits change card layout — repaint at rest
+    shadowHoleDirty = true;
     applyVignette();
     if (calibTarget === shuffleCalib) {
         try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
@@ -1818,12 +1821,24 @@ let atRestPainted = false;
 // doesn't run a fresh querySelectorAll('.card') (72 nodes) every frame.
 const allCardEls = Array.from(document.querySelectorAll('.card'));
 
-// The single whole-screen shadow plane for Card-2 modes (see style.css):
-// lives inside the 3D carousel so true depth sorting puts it above every
-// sub card (z <= 20) and below the captured main plate (z = 150).
-const card2ShadowPlane = document.createElement('div');
-card2ShadowPlane.className = 'card2-shadow-plane';
-carousel.appendChild(card2ShadowPlane);
+// The single whole-screen shadow for Card-2 modes (see style.css): a fixed
+// overlay with a feathered hole punched over the main plate. The plate is
+// screen-stable per mode, so the hole is measured once per settle after a
+// mode/calib/resize change — not per frame.
+const card2Shadow = document.createElement('div');
+card2Shadow.className = 'card2-shadow-screen';
+document.body.appendChild(card2Shadow);
+let shadowHoleDirty = true;
+function updateShadowHole() {
+    if (!isCard2(currentMode)) return;
+    const act = document.querySelector('.card.active');
+    if (!act) return;
+    const r = act.getBoundingClientRect();
+    if (!r.width) return;
+    const m = `radial-gradient(ellipse ${Math.round(r.width * 0.85)}px ${Math.round(r.height * 0.85)}px at ${Math.round(r.left + r.width / 2)}px ${Math.round(r.top + r.height / 2)}px, transparent 52%, #000 88%)`;
+    card2Shadow.style.webkitMaskImage = m;
+    card2Shadow.style.maskImage = m;
+}
 
 // Swap the landed card's cover up to the 600px original, but only after the
 // HD file is fully decoded (preload → swap = one synchronized repaint of one
@@ -2400,6 +2415,8 @@ function updateCarousel() {
     if (isSettled && pendingCoverReveals.length) {
         pendingCoverReveals.splice(0).forEach(revealCover);
     }
+    // Re-punch the shadow hole once the plate is stable (mode/calib/resize).
+    if (isSettled && shadowHoleDirty) { shadowHoleDirty = false; updateShadowHole(); }
 
     if (currentMode === 'coverflow') {
         // Calculate dynamic desaturation & darkening based on rotation scroll speed
