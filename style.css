@@ -488,11 +488,13 @@ body.body-card2 .s2-proxy-layer {
     mask-composite: intersect;
 }
 
-/* Mode: Blur — frost only */
+/* Mode: Blur — was backdrop-filter: blur(16px), but a live backdrop-filter
+   re-rasterizes the whole moving scene behind it every frame. That is the
+   Elevation "shadow blob" + the per-card async re-render. A translucent scrim
+   keeps the panel readable with zero per-frame re-raster cost. */
 body.s2bg-blur .s2-blur-proxy {
     opacity: 1;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(8, 8, 12, 0.5);
 }
 
 /* Mode: Glass — frost + saturated brightness lift + faint film, no outline */
@@ -713,7 +715,10 @@ body.has-scrolled .title-overlay {
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
         opacity 0.6s ease,
         filter 0.6s ease;
-    will-change: transform, opacity;
+    /* NO will-change here: pinning all 72 cards as permanent GPU layers blows
+       Chrome's tile budget — it evicts textures under pressure and cards
+       blank out to dark boxes at random (the async flicker). Chrome promotes
+       layers on demand during animation and demotes them after; let it. */
 
     /* Initial state: drowned and leaning back */
     transform-origin: bottom center;
@@ -730,7 +735,11 @@ body.has-scrolled .title-overlay {
     /* The gap for the neon running line */
     border-radius: 10px;
     overflow: hidden;
-    background-color: var(--card-bg);
+    /* Skeleton = the album's own dominant color, dimmed but fully OPAQUE — a
+       translucent tint lets the cards behind bleed through, which reads as
+       colored "ghost" overlays in dense modes like Elevation. */
+    background-color: #131318;
+    background-color: color-mix(in srgb, rgb(var(--amb-r, 18), var(--amb-g, 18), var(--amb-b, 18)) 45%, #0c0c10);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -746,6 +755,29 @@ body.has-scrolled .title-overlay {
 .card:hover .card-content {
     filter: brightness(1.08);
 }
+
+/* NOTE: will-change: transform on all cards was tried here and REVERTED —
+   pinning ~70 card layers exceeds Chrome's GPU tile budget and causes texture
+   eviction churn (cards blank out to dark boxes and pop back at random =
+   the Chrome-only flicker). Let Chrome manage layer lifetimes itself. */
+
+/* ONE whole-screen shadow instead of 72 per-card fog layers: a dark plane
+   inside the 3D scene, placed at a depth BETWEEN the sub lanes (z <= 20) and
+   the captured main plate (z = 150). Sub cards dim as a group, the main card
+   rides above it unshadowed, and there are no per-card opacity layers left
+   to flicker when Chrome sheds GPU memory. */
+.card2-shadow-plane {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300vmax;
+    height: 300vmax;
+    background: rgba(0, 0, 0, var(--card2-shadow, 0.44));
+    transform: translate(-50%, -50%) translateZ(85px);
+    pointer-events: none;
+    display: none;
+}
+body.body-card2 .card2-shadow-plane { display: block; }
 
 /* Drop shadow for standard (inactive) cards (increased by 30% from baseline) */
 .card:not(.active) .card-content {
@@ -793,6 +825,11 @@ body.has-scrolled .title-overlay {
     transition: opacity 0.45s ease;
 }
 .card-content .cover-bg.loaded { opacity: 1; }
+/* While fading in, the image gets its own compositor layer so the 0.45s fade
+   does NOT re-rasterize the whole card (cover + text + box-shadow) every
+   frame — that per-card repaint storm is the "shadow/text flicker" on
+   arriving covers. The layer is dropped again after transitionend. */
+.card-content .cover-bg.fading { will-change: opacity; }
 
 /* Gradient Overlay for Text Contrast */
 .card-content .overlay {
@@ -833,6 +870,13 @@ body.has-scrolled .title-overlay {
     text-overflow: ellipsis;
     display: inline-block;
     transform: translateX(0);
+}
+
+/* Only the active card's text actually marquees — pinning title/artist on
+   all 72 cards was 144 permanently-promoted text layers feeding Chrome's
+   texture-eviction flicker. */
+.card.active .card-content .title,
+.card.active .card-content .artist {
     will-change: transform;
 }
 
@@ -1648,6 +1692,16 @@ body.body-coverflow .card-reflection {
     z-index: 4; /* Above cover art, below metadata text */
     pointer-events: none;
     border-radius: 12px;
+}
+
+/* Card modes: the fog now carries ALL of the dimming (brightness() was folded
+   into fog opacity to stop per-frame re-rasters). The old look was mostly a
+   NEUTRAL darken with only a light album tint — reproduce that ratio by mixing
+   the tint down to ~70% over black, instead of full album color at 0.8 alpha
+   (which washed every card with the active album's hue). */
+body.body-card2 .fog-overlay {
+    background-color: rgba(10, 10, 12, 0.96); /* fallback: neutral shadow */
+    background-color: color-mix(in srgb, var(--dynamic-bg, #000) 70%, black);
 }
 
 /* The fog opacity is driven every frame in JS in these modes — the 0.6s

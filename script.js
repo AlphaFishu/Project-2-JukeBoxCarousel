@@ -1026,6 +1026,13 @@ const rotationAngle = 360 / totalCards;
 const cardWidthApproximation = 272; // Scaled from 340
 const zTranslate = Math.round((cardWidthApproximation / 2) / Math.tan(Math.PI / totalCards));
 
+// Resolution strategy: the grid renders 300px covers (72 × 600px ≈ 100MB of
+// GPU texture and 4× the raster cost — the phone/Safari killer). The active
+// card upgrades to the 600px original on landing (see upgradeActiveCover).
+// Everything downstream (color extraction, caches, panels) keys off the SD
+// URL so nothing double-downloads.
+tracks.forEach(t => { t.coverHD = t.cover; t.cover = t.cover.replace('600x600', '300x300'); });
+
 // 1. Generate Cards
 tracks.forEach((track, index) => {
     const card = document.createElement('div');
@@ -1086,11 +1093,53 @@ tracks.forEach((track, index) => {
     carousel.appendChild(card);
 });
 
+// Reveal an arrived cover WITHOUT stuttering the scene:
+// - if the user is mid-scroll, queue it — the reveal (a full card re-raster)
+//   would land on an already-busy frame; the queue flushes on settle.
+// - promote the <img> to its own compositor layer only for the fade
+//   ('fading'), then drop the layer, so the 0.45s fade never repaints the
+//   card's text/box-shadow.
+const pendingCoverReveals = [];
+function revealCover(img) {
+    if (img.classList.contains('loaded')) return;
+    if (currentRotation !== targetRotation) { pendingCoverReveals.push(img); return; }
+    img.classList.add('fading');
+    img.classList.add('loaded');
+    const drop = () => img.classList.remove('fading');
+    img.addEventListener('transitionend', drop, { once: true });
+    setTimeout(drop, 700); // fallback if transitionend never fires (hidden card)
+}
+
 // Mark each cover "loaded" once its image is decoded so it fades in smoothly,
 // instead of popping in one-by-one and flickering the cards during load.
 carousel.querySelectorAll('.card-content .cover-bg').forEach(img => {
     if (img.complete) img.classList.add('loaded');
-    else img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+    else {
+        img.addEventListener('load', () => revealCover(img), { once: true });
+        // A failed/stalled fetch must never leave a permanently invisible cover —
+        // reveal whatever the <img> has (or the tinted skeleton behind it).
+        img.addEventListener('error', () => revealCover(img), { once: true });
+    }
+});
+// Belt-and-braces: after the window settles, force-reveal any cover whose load
+// event never reached us (dropped listener, CDN hiccup) so no card stays dark.
+window.addEventListener('load', () => setTimeout(() => {
+    carousel.querySelectorAll('.card-content .cover-bg:not(.loaded)').forEach(img => revealCover(img));
+}, 3000));
+
+// Force-decode every cover shortly after load (4 at a time, spaced out) so
+// all 72 are rastered up-front — no skeleton ghosts left to pop in later
+// when a card scrolls or fades into view.
+window.addEventListener('load', () => {
+    const imgs = Array.from(carousel.querySelectorAll('.card-content .cover-bg'));
+    let i = 0;
+    (function decodeNext() {
+        const batch = [];
+        for (let n = 0; n < 4 && i < imgs.length; n++, i++) {
+            if (imgs[i].decode) batch.push(imgs[i].decode().catch(() => {}));
+        }
+        if (batch.length) Promise.all(batch).then(() => setTimeout(decodeNext, 50));
+    })();
 });
 
 // 1.5 Mode Switcher Event Listeners & Sliding Pill Animations
@@ -1115,6 +1164,7 @@ if (activeBtn) {
     // Trigger on different load checkpoints to ensure accuracy
     window.addEventListener('load', initSlider);
     window.addEventListener('resize', () => {
+        atRestPainted = false; // viewport changed — repaint card layout at rest
         const currentActive = document.querySelector('.mode-btn.active');
         if (currentActive) updateSliderPosition(currentActive);
     });
@@ -1156,11 +1206,14 @@ modeButtons.forEach(btn => {
         lastActiveCardIndex = -1;
         lastCoverflowIndex = -1;
 
+        // New mode must paint even if rotation is already settled
+        atRestPainted = false;
+
         // Other modes write transform/filter directly, so the card2 dirty-check
         // caches go stale on a switch — clear them so the first frame writes fresh.
         cards.forEach(card => {
             card._t = card._f = card._o = card._z = card._vis = undefined;
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
             if (fog) fog._o = undefined;
         });
 
@@ -1276,6 +1329,14 @@ const vignetteEl = document.querySelector('.vignette-overlay');
 // is transparent at the center, so the highlighted card is never darkened.
 function applyVignette() {
     if (!vignetteEl) return;
+    // Infinite & Elevation: the Shadow calibration CSS gradient is the ONE
+    // vignette layer — don't paint the calib gradient under it (two systems
+    // stacking on the same element reads as a doubled shadow).
+    if (currentMode === 'dynamic' || currentMode === 'elevated') {
+        vignetteEl.style.background = '';
+        vignetteEl.style.opacity = '';
+        return;
+    }
     if (currentMode === 'shuffle' || isCard2(currentMode)) {
         const sc = isCard2(currentMode) ? shuffle2Presets[card2Idx()].calib : shuffleCalib;
         const r = Math.min(0.95, 0.42 * sc.vignette);
@@ -1292,6 +1353,7 @@ function applyVignette() {
 }
 
 function applyCalibSideEffects() {
+    atRestPainted = false; // calib edits change card layout — repaint at rest
     applyVignette();
     if (calibTarget === shuffleCalib) {
         try { localStorage.setItem('jukebox-shuffle-calib', JSON.stringify(shuffleCalib)); } catch (e) {}
@@ -1486,7 +1548,7 @@ const shuffle2Presets = [
     {
         name: 'Elevated',
         square: true, // 1:1 card, less rounded (Elevated only)
-        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 1, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
+        calib: { "mainTiltX": 50, "mainTiltY": 0, "mainTiltZ": 0, "motionBlur": 0, "motionBlurAmt": 26.5, "zoom": 2, "camX": 0, "camY": 0, "tiltX": -37, "tiltY": 0, "tiltZ": 0, "lanes": 7, "laneGap": 156, "mainPad": 56, "mainCardGap": 28, "subCardGap": 20, "mainScale": 0.97, "subScale": 0.63, "lockScale": 1.03, "lockX": 6, "lockY": -190, "subSpeed": 0.65, "snap": 0.84, "vignette": 1.06, "vignetteSides": 2, "vignetteReach": 48 },
         // Song list top-left, aligned with the main card's top edge; no lyrics.
         // dy pulls it up to sit flush at the card top (offset from the 50° tilt).
         ui: { songs: { anchor: 'left-top', w: 260, dy: -28 } }
@@ -1498,7 +1560,7 @@ const shuffle2Presets = [
     },
     {
         name: 'Flipper',
-        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 75 },
+        calib: { "mainTiltX": -60, "mainTiltY": -2, "mainTiltZ": -1, "motionBlur": 0, "motionBlurAmt": 20, "zoom": -131, "camX": -30, "camY": -62, "tiltX": 45, "tiltY": 0, "tiltZ": 0, "lanes": 3, "laneGap": 280, "mainPad": 42, "mainCardGap": 182, "subCardGap": 20, "mainScale": 1.12, "subScale": 1.1, "lockScale": 1.21, "lockX": 2, "lockY": 120, "subSpeed": 0.25, "snap": 0.4, "vignette": 1, "vignetteSides": 0.6, "vignetteReach": 25, "laneBend": 45 },
         ui: {}
     }
 ];
@@ -1748,6 +1810,36 @@ document.querySelectorAll('.angle-btn[data-angle2]').forEach(btn => {
 let currentRotation = 0;
 let targetRotation = 0;
 
+// Settled-gate state: true once the post-arrival frame has painted (see
+// updateCarousel). Anything that changes card appearance outside of rotation
+// must clear it so the loop paints one fresh frame.
+let atRestPainted = false;
+// The card elements never change after boot — hoisted so the render loop
+// doesn't run a fresh querySelectorAll('.card') (72 nodes) every frame.
+const allCardEls = Array.from(document.querySelectorAll('.card'));
+
+// The single whole-screen shadow plane for Card-2 modes (see style.css):
+// lives inside the 3D carousel so true depth sorting puts it above every
+// sub card (z <= 20) and below the captured main plate (z = 150).
+const card2ShadowPlane = document.createElement('div');
+card2ShadowPlane.className = 'card2-shadow-plane';
+carousel.appendChild(card2ShadowPlane);
+
+// Swap the landed card's cover up to the 600px original, but only after the
+// HD file is fully decoded (preload → swap = one synchronized repaint of one
+// card, no flash). The grid stays at 300px.
+function upgradeActiveCover(idx) {
+    const card = allCardEls[idx];
+    const track = tracks[idx];
+    if (!card || !track || card._hd || !track.coverHD || track.coverHD === track.cover) return;
+    card._hd = true;
+    const img = card.querySelector('.card-content .cover-bg');
+    if (!img) return;
+    const pre = new Image();
+    pre.onload = () => { img.src = track.coverHD; };
+    pre.src = track.coverHD;
+}
+
 // Background color interpolation states (reverse engineered from 80% zoom visual weight)
 let currentBgColor = [18, 18, 18];
 let targetBgColor = [18, 18, 18];
@@ -1974,6 +2066,7 @@ tracks.forEach((track, index) => {
         card.style.setProperty('--amb-r', color[0]);
         card.style.setProperty('--amb-g', color[1]);
         card.style.setProperty('--amb-b', color[2]);
+        atRestPainted = false; // real palette arrived — repaint ambient bg at rest
         // If this album is currently on stage, upgrade the live accent/aurora palette too
         if (index === lastDockIndex) setAccentPalette(color, extractedSecondaryCache[track.cover] || null);
     }, track.color);
@@ -2045,6 +2138,7 @@ let _lastCoverBgKey = '';
 // per-frame updateAmbientBackground() never does a getComputedStyle() flush.
 let shadowBgDim = 0.25;
 
+let _lastAmbientBg = '';
 function updateAmbientBackground(card) {
     if (card && card.dataset.domR) {
         const dim = shadowBgDim; // calibratable bg darkness (cached — no per-frame style flush)
@@ -2052,6 +2146,10 @@ function updateAmbientBackground(card) {
         const bgG = Math.floor(parseInt(card.dataset.domG) * dim);
         const bgB = Math.floor(parseInt(card.dataset.domB) * dim);
         const bgStr = `rgb(${bgR}, ${bgG}, ${bgB})`;
+        // Same card, same dim → same color: skip the 4 DOM writes + meta update
+        // this would otherwise repeat every frame while a card is active.
+        if (bgStr === _lastAmbientBg) return;
+        _lastAmbientBg = bgStr;
         document.documentElement.style.backgroundColor = bgStr;
         document.body.style.backgroundColor = bgStr;
         document.documentElement.style.setProperty('--dynamic-bg', bgStr);
@@ -2277,10 +2375,31 @@ function updateCarousel() {
         if (sc.snap > 0) {
             const snapTarget = Math.round(targetRotation / rotationAngle) * rotationAngle;
             targetRotation = lerp(targetRotation, snapTarget, sc.snap * 0.18);
+            // Snap exactly once the magnet is sub-visual — an exponential lerp
+            // never *reaches* its target, so without this the loop keeps writing
+            // sub-pixel transform changes to every card long after motion looks
+            // finished (each one a re-raster on Safari).
+            if (Math.abs(targetRotation - snapTarget) < 0.002) targetRotation = snapTarget;
             lerpFactor = 0.08 + sc.snap * 0.14;
         }
     }
     currentRotation = lerp(currentRotation, targetRotation, lerpFactor);
+    if (Math.abs(currentRotation - targetRotation) < 0.002) currentRotation = targetRotation;
+
+    // Settled gate: paint ONE exact frame after arriving, then skip all per-card
+    // work (and the proxy layout reads) until something moves the target again.
+    // Invalidated by scroll/keys/clicks (they move targetRotation), mode switches,
+    // calibration edits, resize, and late-arriving cover palettes (atRestPainted).
+    const isSettled = currentRotation === targetRotation;
+    const skipCardWork = isSettled && atRestPainted;
+    atRestPainted = isSettled;
+    let povMoved = false;
+
+    // Covers that arrived mid-scroll were queued (their reveal re-rasters the
+    // card); flush them now that the scene is idle and frames are free.
+    if (isSettled && pendingCoverReveals.length) {
+        pendingCoverReveals.splice(0).forEach(revealCover);
+    }
 
     if (currentMode === 'coverflow') {
         // Calculate dynamic desaturation & darkening based on rotation scroll speed
@@ -2324,10 +2443,12 @@ function updateCarousel() {
         lastActiveCardIndex = activeIndex;
         updateActiveCardMarquees(activeIndex);
         updateNowPlaying(activeIndex);
+        upgradeActiveCover(activeIndex);
     }
 
-    const cards = document.querySelectorAll('.card');
+    const cards = allCardEls;
 
+    if (!skipCardWork) {
     if (currentMode === 'cylinder') {
         // Rotate the entire carousel container around the center of the ring
         carousel.style.transform = `translateZ(${-zTranslate}px) rotateY(${-currentRotation}deg)`;
@@ -2339,7 +2460,7 @@ function updateCarousel() {
                 distance = totalCards - distance;
             }
 
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
             card.style.visibility = 'visible';
 
             // Scaled all translateY/translateZ parameters to 80% to reverse engineer zoom proportion
@@ -2375,8 +2496,16 @@ function updateCarousel() {
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             } else {
                 card.classList.remove('active');
-                card.style.opacity = '0';
-                card.style.visibility = 'hidden';
+                // Soft exit: fade over one full slot (3→4) using the FLOAT
+                // distance, so fast scrolls glide cards out instead of the
+                // hard opacity pop that reads as strobing at speed.
+                // activeIndexFloat is unbounded (rotation accumulates) — wrap
+                // into ring space first or far scrolls break the distance.
+                let dF = Math.abs(index - activeIndexFloat) % totalCards;
+                if (dF > totalCards / 2) dF = totalCards - dF;
+                const edge = Math.max(0, Math.min(1, 4 - dF));
+                card.style.opacity = edge;
+                card.style.visibility = edge <= 0.01 ? 'hidden' : 'visible';
                 if (fog) fog.style.opacity = '1';
                 card.style.transform = `rotateY(${baseRotateY}deg) translateZ(${zTranslate}px) translateY(96px) rotateY(80deg) scale(1)`;
             }
@@ -2425,7 +2554,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
             let rotateY = 0;
             let apparentX = 0; // Desired on-screen X; converted to translateX once Z is known
             let translateX = 0;
@@ -2433,7 +2562,7 @@ function updateCarousel() {
             let translateY = 0;
             let scale = 1;
             let opacity = 1;
-            let filter = 'none';
+            let bright = 1; // folded into fog opacity — never a filter (repaint) write
             let fogOpacity = 0;
 
             card.style.visibility = 'visible';
@@ -2454,7 +2583,7 @@ function updateCarousel() {
                 translateY = lerp(-24, 24, t); // Scaled from -30, 30
                 scale = lerp(1.25, 1.0, t);
                 opacity = 1;
-                filter = `brightness(${lerp(1, 0.85, t)})`;
+                bright = lerp(1, 0.85, t);
                 fogOpacity = lerp(0, 0.2, t);
             } else if (absOffset <= 5) {
                 // Side cards tilted inwards (Fog of War: submerged in background color via fog-overlay)
@@ -2471,7 +2600,7 @@ function updateCarousel() {
                     opacity = 1;
                 }
                 
-                filter = `brightness(${0.85 - (absOffset - 1) * 0.12})`;
+                bright = 0.85 - (absOffset - 1) * 0.12;
                 fogOpacity = 0.2 + (absOffset - 1) * 0.18; // smooth submerge into background color
             } else {
                 // Beyond visual range, completely render away to prevent overlays
@@ -2481,7 +2610,7 @@ function updateCarousel() {
             }
 
             // Real-time proportional vinyl sliding animation linked directly to scroll progress
-            const vinylWrapper = card.querySelector('.vinyl-wrapper');
+            const vinylWrapper = card._vinyl || (card._vinyl = card.querySelector('.vinyl-wrapper'));
             if (vinylWrapper) {
                 let discX = 0;
                 if (absOffset < 1) {
@@ -2489,7 +2618,8 @@ function updateCarousel() {
                 } else {
                     discX = 0; // completely inside sleeve
                 }
-                vinylWrapper.style.transform = `translateX(${discX}px)`;
+                const vt = `translateX(${discX.toFixed(1)}px)`;
+                if (vinylWrapper._t !== vt) { vinylWrapper.style.transform = vt; vinylWrapper._t = vt; }
             }
 
             // Convert apparent (on-screen) X into the real translateX by dividing out the
@@ -2502,8 +2632,13 @@ function updateCarousel() {
 
             card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
             card.style.opacity = opacity;
-            card.style.filter = filter;
-            if (fog) fog.style.opacity = fogOpacity;
+            // No per-frame filter in Vinyl anymore: clear once (mode switches can
+            // leave a stale card2 saturate behind), then dim via fog compositing.
+            if (card._f !== '') { card.style.filter = ''; card._f = ''; }
+            if (fog) {
+                const fo = +(1 - bright * (1 - fogOpacity)).toFixed(3);
+                if (fog._o !== fo) { fog.style.opacity = fo; fog._o = fo; }
+            }
         });
 
         // Trigger dynamic color extraction and background updates on active coverflow item changes
@@ -2534,7 +2669,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
             card.style.visibility = 'visible';
 
             // Active coloring update
@@ -2675,11 +2810,13 @@ function updateCarousel() {
             let bentY = flowY;
             let bentZ = lane === midLane ? 20 : -80 - laneDist * 40;
             let bendRX = 0;
+            let arcA = 0; // |drum angle| — cards past the front arc fold behind the scene
             if (c.laneBend) {
                 // "Lane curve" 0..100 (higher = tighter). Convert to a drum radius:
                 // 75 reproduces the original Flip-Up arc (radius ~800).
                 const bendR = 60000 / c.laneBend;
                 const a = (flowY - (-60)) / bendR; // arc angle from the stack base
+                arcA = Math.abs(a);
                 bentY = -60 + Math.sin(a) * bendR;
                 bentZ += (Math.cos(a) - 1) * bendR;
                 bendRX = -a * 57.2958 * 0.8; // tangent tilt along the curve
@@ -2696,8 +2833,11 @@ function updateCarousel() {
             const scale = lerp(c.lockScale, laneScale, t);
             const bright = lerp(1, lane === midLane ? 0.72 : Math.max(0.34, 0.56 - (laneDist - 1) * 0.14), t);
 
-            const fog = card.querySelector('.fog-overlay');
-            if (Math.abs(y) > yLimit + 340) {
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
+            // Cull off-screen cards AND cards folded past the drum's front arc
+            // (~77°) — with a strong laneBend those wrap behind the scene and
+            // used to linger as invisible/black plates.
+            if (Math.abs(y) > yLimit + 340 || (arcA > 1.35 && !isActive)) {
                 if (card._vis !== 'hidden') { card.style.visibility = 'hidden'; card.style.opacity = 0; card._vis = 'hidden'; card._o = 0; }
                 return;
             }
@@ -2718,7 +2858,9 @@ function updateCarousel() {
             // still forces the GPU to re-rasterize the (600px) cover layer — that's
             // the Elevation re-render cost on lane changes and the wasted work every
             // idle frame. Only touch the DOM when a value actually moves.
-            const transform = `translateX(${x}px) translateY(${y}px) translateZ(${z}px)${bendStr}${tiltStr} scale(${scale})`;
+            // Quantize: 0.1px position / 0.001 scale steps are invisible but stop
+            // the GPU re-rastering the layer for sub-pixel scale changes.
+            const transform = `translateX(${x.toFixed(1)}px) translateY(${y.toFixed(1)}px) translateZ(${z.toFixed(1)}px)${bendStr}${tiltStr} scale(${scale.toFixed(3)})`;
             if (card._t !== transform) { card.style.transform = transform; card._t = transform; }
 
             const edgeFade = Math.abs(y) > yLimit ? Math.max(0, 1 - (Math.abs(y) - yLimit) / 340) : 1;
@@ -2732,16 +2874,23 @@ function updateCarousel() {
                 const blurPx = Math.min(c.motionBlurAmt, shuffleSpeed * 0.06);
                 if (blurPx > 0.3) blurStr = ` blur(${blurPx.toFixed(1)}px)`;
             }
-            const filter = `brightness(${bright}) saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
+            // Filter is now STATIC per state (saturate flips only on capture).
+            // A changing filter forces a full re-raster of the card layer —
+            // cover, text, box-shadow — every frame; with the raster queue
+            // backed up, cards visibly repaint at different times ("async
+            // strobe"). Brightness dimming is folded into the fog overlay's
+            // opacity below, which composites on the GPU with zero repaint.
+            const filter = `saturate(${isActive ? 1.15 : 0.9})${blurStr}`;
             if (card._f !== filter) { card.style.filter = filter; card._f = filter; }
 
             const zi = isActive ? 40 : Math.round((lane === midLane ? 25 : 12 - laneDist * 3) - absOffset);
             if (card._z !== zi) { card.style.zIndex = zi; card._z = zi; }
 
-            if (fog) {
-                const fo = isActive ? 0 : Math.min(0.45, 0.1 + t * 0.3);
-                if (fog._o !== fo) { fog.style.opacity = fo; fog._o = fo; }
-            }
+            // Dimming is now the single .card2-shadow-plane (one layer for the
+            // whole screen) instead of 72 per-card fog opacities — per-card
+            // fogs were 72 extra GPU layers for Chrome to evict one by one
+            // (the async dark-box flicker). Just make sure fog stays cleared.
+            if (fog && fog._o !== 0) { fog.style.opacity = 0; fog._o = 0; }
         });
 
     } else if (currentMode === 'helix') {
@@ -2760,7 +2909,7 @@ function updateCarousel() {
             while (offset < -totalCards / 2) offset += totalCards;
 
             const absOffset = Math.abs(offset);
-            const fog = card.querySelector('.fog-overlay');
+            const fog = card._fog || (card._fog = card.querySelector('.fog-overlay'));
 
             if (absOffset > 6.5) {
                 card.style.visibility = 'hidden';
@@ -2787,6 +2936,7 @@ function updateCarousel() {
             if (fog) fog.style.opacity = Math.min(0.6, absOffset * 0.11);
         });
     }
+    } // end !skipCardWork gate
 
     // Cursor parallax: skip entirely on touch (no pointer + saves a per-frame
     // style write); otherwise only write when the origin actually moved.
@@ -2796,14 +2946,16 @@ function updateCarousel() {
         povY = lerp(povY, 50 + mouseNY * 3.5, 0.06);
         if (Math.abs(povX - lastPovX) > 0.015 || Math.abs(povY - lastPovY) > 0.015) {
             lastPovX = povX; lastPovY = povY;
+            povMoved = true; // projection shifted — proxies must re-track even at rest
             const po = `${povX.toFixed(2)}% ${povY.toFixed(2)}%`;
             if (sceneEl) sceneEl.style.perspectiveOrigin = po;
             if (isCard2(currentMode) && s2OverlayEl) s2OverlayEl.style.perspectiveOrigin = po;
         }
     }
     // Blur proxies use getBoundingClientRect (forces layout) — throttle to every
-    // 4th frame; panels only drift slowly so it stays visually smooth.
-    if (isCard2(currentMode) && s2OverlayEl && !s2OverlayEl.classList.contains('s2-hidden') && (perfFrame & 3) === 0) {
+    // 4th frame, and skip entirely once settled (nothing moves, so the rects
+    // can't change) unless the parallax projection shifted this frame.
+    if ((!skipCardWork || povMoved) && isCard2(currentMode) && s2OverlayEl && !s2OverlayEl.classList.contains('s2-hidden') && (perfFrame & 3) === 0) {
         syncS2Proxies();
     }
 
@@ -3134,8 +3286,8 @@ if (supportsLensRefraction) {
         b.setProperty('--vig-midop', v.midop);
         b.setProperty('--vig-outer', v.outer);
         shadowBgDim = v.dim;
-        if (typeof cards !== 'undefined' && lastActiveCardIndex >= 0 && cards[lastActiveCardIndex]) {
-            updateAmbientBackground(cards[lastActiveCardIndex]);
+        if (lastActiveCardIndex >= 0 && allCardEls[lastActiveCardIndex]) {
+            updateAmbientBackground(allCardEls[lastActiveCardIndex]);
         }
     }
 
