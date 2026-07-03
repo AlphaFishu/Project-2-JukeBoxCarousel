@@ -2014,3 +2014,19 @@ body.body-coverflow .coverflow-bg-gradient {
 .gradient-layer {
     display: none; /* Hidden to let coverflow-bg-gradient background update directly */
 }
+
+/* --- perf-webkit: Safari/iOS stability profile (set by JS vendor sniff) ---
+   WebKit re-filters a live backdrop every frame the scene moves — the single
+   biggest Safari cost here. Same layout, static surfaces instead of live
+   glass; Chromium is untouched. */
+body.perf-webkit .mode-selector,
+body.perf-webkit .now-playing-dock,
+body.perf-webkit .credits-btn,
+body.perf-webkit .shadow-calib-toggle {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(20, 20, 27, 0.88) !important;
+}
+/* Big blurs are the other WebKit killer: calm the aurora, drop the grain. */
+body.perf-webkit .aurora-blob { filter: blur(24px); }
+body.perf-webkit .grain-overlay { display: none; }

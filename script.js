@@ -1821,6 +1821,12 @@ let atRestPainted = false;
 // doesn't run a fresh querySelectorAll('.card') (72 nodes) every frame.
 const allCardEls = Array.from(document.querySelectorAll('.card'));
 
+// WebKit (Safari + every iOS browser) composites this scene far slower than
+// Chromium — its killers are live backdrop blur over an animating scene and
+// big filter blurs. perf-webkit swaps those for static equivalents (see CSS).
+// ponytail: vendor sniff — all WebKit browsers report Apple as the vendor.
+if (/apple/i.test(navigator.vendor || '')) document.body.classList.add('perf-webkit');
+
 // The single whole-screen shadow for Card-2 modes (see style.css): a fixed
 // overlay with a feathered hole punched over the main plate. The plate is
 // screen-stable per mode, so the hole is measured once per settle after a
